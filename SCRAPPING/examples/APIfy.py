@@ -1,64 +1,41 @@
-## minimal working apiffy scrapper
-import apify_client
-import schedule
-import time
-import sqlite3
-import json
+# example from https://blog.apify.com/web-scraping-python/s
+import asyncio
+import csv
+from playwright.async_api import async_playwright
 
-# Initialize the Apify client
-apify_client_instance = apify_client.ApifyClient('apify_api_VbRrfnRWdV6ww6OmwN615wkCucolSP41Ws2M')
+async def main():
+    async with async_playwright() as p:
+        browser = await p.firefox.launch(headless=False)
+        page = await browser.new_page()
+        await page.goto("https://phones.mintmobile.com/")
 
-# Define the actor ID and the input for the actor
-actor_id = 'tri_angle/new-fast-airbnb-scraper'  # Replace with your actor ID
-run_input = {
-    "startUrls": [
-        {"url": "https://www.airbnb.com/s/Segovia--Spain"}
-    ],
-    # Add any other input parameters your actor requires
-}
+        # Create a list to hold the scraped data
+        data_list = []
 
-def run_actor():
-    # Run the actor
-    run = apify_client_instance.actor(actor_id).call(run_input=run_input)
+        # Wait for the products to load
+        await page.wait_for_selector('ul.products > li')
 
-    # Fetch the results from the default dataset
-    dataset_id = run['defaultDatasetId']
-    dataset_items = apify_client_instance.dataset(dataset_id).list_items().items
+        products = await page.query_selector_all('ul.products > li')
 
-    # Process and store the data
-    store_data(dataset_items)
+        for product in products: 
+            url_element = await product.query_selector('a')
+            name_element = await product.query_selector('h2')
+            price_element = await product.query_selector('span.price > span.amount')
 
-def store_data(data):
-    conn = sqlite3.connect('rentals.db')
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS rentals (
-            id INTEGER PRIMARY KEY,
-            platform TEXT,
-            location TEXT,
-            m2 REAL,
-            price REAL,
-            vendor TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    for item in data:
-        location = item.get('location', 'Segovia')
-        m2 = item.get('m2', 0)
-        price = item.get('price', 0)
-        vendor = item.get('vendor', 'Unknown')
-        c.execute('INSERT INTO rentals (platform, location, m2, price, vendor) VALUES (?, ?, ?, ?, ?)',
-                  ('Airbnb', location, m2, price, vendor))
-    conn.commit()
-    conn.close()
+            if url_element and name_element and price_element:
+                data = {
+                    "url": await url_element.get_attribute('href'),
+                    "name": await name_element.inner_text(),
+                    "price": await price_element.inner_text()
+                }
+                data_list.append(data)
 
-# Schedule the actor to run every 6 hours
-schedule.every(6).hours.do(run_actor)
+    await browser.close()
 
-# Initial run
-run_actor()
+    # Save the data to a CSV file
+    with open('products.csv', mode='w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=["url", "name", "price"])
+        writer.writeheader()
+        writer.writerows(data_list)
 
-# Keep the script running
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+asyncio.run(main())
