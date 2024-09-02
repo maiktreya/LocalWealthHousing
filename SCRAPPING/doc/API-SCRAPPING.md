@@ -20,3 +20,13 @@ Response Formats:
 API responses are typically in structured formats such as JSON (JavaScript Object Notation) or XML (eXtensible Markup Language), making them easier to parse and use compared to raw HTML.
 Example of API Scraping in Python:
 Here is a simple example using Python's requests library to scrape data from an API.
+
+### Test urls for AirBnB properties
+https://www.airbnb.com/rooms/1613142?adults=1&children=0&enable_m3_private_room=true&infants=0&pets=0&search_mode=regular_search&check_in=2024-09-01&check_out=2025-09-01&source_impression_id=p3_1723547561_P3LJr91JlFfJj4GN&previous_page_section_name=1000&federated_search_id=b068b3e6-d27c-41e4-9419-542daf278d98
+
+### Test urls for AirBnB properties
+https://www.airbnb.com/users/show/471227500
+
+# Other parameters to consider
+empresa
+comisión-servicio
