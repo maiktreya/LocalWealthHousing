@@ -6,10 +6,10 @@ import sqlite3
 import json
 
 # Initialize the Apify client
-apify_client_instance = apify_client.ApifyClient('your_apify_token')
+apify_client_instance = apify_client.ApifyClient('apify_api_VbRrfnRWdV6ww6OmwN615wkCucolSP41Ws2M')
 
 # Define the actor ID and the input for the actor
-actor_id = 'your_actor_id'  # Replace with your actor ID
+actor_id = 'tri_angle/new-fast-airbnb-scraper'  # Replace with your actor ID
 run_input = {
     "startUrls": [
         {"url": "https://www.airbnb.com/s/Segovia--Spain"}
