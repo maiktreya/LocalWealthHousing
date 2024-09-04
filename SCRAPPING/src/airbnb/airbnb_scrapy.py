@@ -15,7 +15,7 @@ class IdealistaSpider(scrapy.Spider):
     allowed_domains = ["idealista.com"]
 
     start_urls = [
-        "https://www.idealista.com/venta-viviendas/segovia-segovia/"
+        "https://www.airbnb.es/s/Segovia--Espa%C3%B1a"
     ]
 
     def parse(self, response):
