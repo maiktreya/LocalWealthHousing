@@ -12,7 +12,7 @@ import os
 
 class IdealistaSpider(scrapy.Spider):
     name = "idealista_spider"
-    allowed_domains = ["idealista.com"]
+    allowed_domains = ["airbnb.es"]
 
     start_urls = [
         "https://www.airbnb.es/s/Segovia--Espa%C3%B1a"
