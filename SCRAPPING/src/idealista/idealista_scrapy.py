@@ -125,43 +125,44 @@ def save_to_json(data: List[PropertyResult], filename: str) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+
 def save_to_csv(data: List[PropertyResult], filename: str) -> None:
-    """Save data to a CSV file"""
-    with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+    """Save data to a CSV file, flattening nested structures"""
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = [
-            "url",
-            "title",
-            "location",
-            "price",
-            "currency",
-            "description",
-            "updated",
-            "features",
-            "images",
-            "plans",
+            'url',
+            'title',
+            'location',
+            'price',
+            'currency',
+            'description',
+            'updated',
+            'features_flat',
+            'images_flat',
+            'plans_flat',
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
         writer.writeheader()
         for property in data:
-            writer.writerow(
-                {
-                    "url": property["url"],
-                    "title": property["title"],
-                    "location": property["location"],
-                    "price": property["price"],
-                    "currency": property["currency"],
-                    "description": property["description"],
-                    "updated": property["updated"],
-                    "features": json.dumps(property["features"], ensure_ascii=False),
-                    "images": json.dumps(property["images"], ensure_ascii=False),
-                    "plans": json.dumps(property["plans"], ensure_ascii=False),
-                }
-            )
+            features_flat = ', '.join([f'{k}: {v}' for k, v in property['features'].items() for v in v])
+            images_flat = ', '.join(property['images'].get('main', []))
+            plans_flat = ', '.join(property['plans'])
+            writer.writerow({
+                'url': property['url'],
+                'title': property['title'],
+                'location': property['location'],
+                'price': property['price'],
+                'currency': property['currency'],
+                'description': property['description'],
+                'updated': property['updated'],
+                'features_flat': features_flat,
+                'images_flat': images_flat,
+                'plans_flat': plans_flat,
+            })
 
 
 async def run():
-    area_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/"
+    area_url = "https://www.idealista.com/alquiler-viviendas/segovia-segovia/"
     property_urls = await extract_property_urls(area_url)
     data = await scrape_properties(property_urls)
 
