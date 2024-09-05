@@ -1,4 +1,3 @@
-
 import asyncio
 import json
 import re
@@ -89,12 +88,25 @@ def parse_property(response: httpx.Response) -> PropertyResult:
 
 
 async def extract_property_urls(area_url: str) -> List[str]:
-    """Extract property URLs from an area page"""
-    response = await session.get(area_url)
-    selector = Selector(text=response.text)
-    property_links = selector.css("article.item a.item-link::attr(href)").getall()
-    full_urls = [urljoin(area_url, link) for link in property_links]
-    return full_urls
+    """Extract property URLs from all paginated area pages"""
+    property_urls = []
+    while area_url:  # Continue as long as there's a next page
+        response = await session.get(area_url)
+        selector = Selector(text=response.text)
+
+        # Extract property links
+        property_links = selector.css("article.item a.item-link::attr(href)").getall()
+        full_urls = [urljoin(area_url, link) for link in property_links]
+        property_urls.extend(full_urls)
+
+        # Check if there's a next page by finding the next page link
+        next_page = selector.css("a.icon-arrow-right::attr(href)").get()
+        if next_page:
+            area_url = urljoin(area_url, next_page)  # Update the URL for the next page
+        else:
+            area_url = None  # No more pages, stop the loop
+
+    return property_urls
 
 
 async def scrape_properties(urls: List[str]) -> List[PropertyResult]:
@@ -123,7 +135,6 @@ def save_to_json(data: List[PropertyResult], filename: str) -> None:
     """Save data to a JSON file"""
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
 
 
 def save_to_csv(data: List[PropertyResult], filename: str) -> None:
