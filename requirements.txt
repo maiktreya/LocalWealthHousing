@@ -1,6 +1,7 @@
-scrapy 
-scrapy-rotating-proxies 
-scrapy-useragents 
-requests 
-requests-html 
+scrapy
+scrapy-rotating-proxies
+scrapy-useragents
+requests
+requests-html
+httpx
 lxml_html_clean
