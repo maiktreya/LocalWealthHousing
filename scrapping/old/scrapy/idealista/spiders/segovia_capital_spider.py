@@ -1,4 +1,4 @@
-from idealista.spiders.core import Core
+from idealista.spiders.coreDev import Core
 
 
 class MadridViviendaSpider(Core):
