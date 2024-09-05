@@ -19,18 +19,16 @@ BASE_HEADERS = {
 }
 session = httpx.AsyncClient(headers=BASE_HEADERS, follow_redirects=True, timeout=10.0)
 
+
 # Type hints for expected results so we can visualize our scraper easier:
-class PropertyResult(TypedDict):
+class PropertyResult(TypedDict, total=False):
     url: str
     title: str
     location: str
     price: int
     currency: str
-    description: str
     updated: str
-    features: Dict[str, List[str]]
-    images: Dict[str, List[str]]
-    plans: List[str]
+
 
 def parse_property(response: httpx.Response) -> PropertyResult:
     """Parse Idealista.com property page"""
@@ -38,27 +36,29 @@ def parse_property(response: httpx.Response) -> PropertyResult:
     css = lambda x: selector.css(x).get("").strip()
     css_all = lambda x: selector.css(x).getall()
 
-    data = {}
+    data: PropertyResult = {}
     # Meta data
     data["url"] = str(response.url)
 
     # Basic information
-    data['title'] = css("h1 .main-info__title-main::text")
-    data['location'] = css(".main-info__title-minor::text")
-    data['currency'] = css(".info-data-price::text")
+    data["title"] = css("h1 .main-info__title-main::text")
+    data["location"] = css(".main-info__title-minor::text")
+    data["currency"] = css(".info-data-price::text")
 
     # Convert the price string to an integer after removing non-numeric characters
     price_str = css(".info-data-price span::text")
     if price_str:
         price_str = price_str.replace(".", "").replace(",", "")
-        data['price'] = int(price_str)
+        data["price"] = int(price_str)
     else:
-        data['price'] = None  # Handle cases where the price might not be available
+        data["price"] = None  # Handle cases where the price might not be available
 
-    data['description'] = "\n".join(css_all("div.comment ::text")).strip()
-    data["updated"] = selector.xpath(
-        "//p[@class='stats-text'][contains(text(),'updated on')]/text()"
-    ).get("").split(" on ")[-1]
+    data["description"] = "\n".join(css_all("div.comment ::text")).strip()
+    data["updated"] = (
+        selector.xpath("//p[@class='stats-text'][contains(text(),'updated on')]/text()")
+        .get("")
+        .split(" on ")[-1]
+    )
 
     # Features
     data["features"] = {}
@@ -66,22 +66,11 @@ def parse_property(response: httpx.Response) -> PropertyResult:
         label = feature_block.xpath("text()").get()
         features = feature_block.xpath("following-sibling::div[1]//li")
         data["features"][label] = [
-            ''.join(feat.xpath(".//text()").getall()).strip()
-            for feat in features
+            "".join(feat.xpath(".//text()").getall()).strip() for feat in features
         ]
 
-    # Images
-    image_data = re.findall(r"fullScreenGalleryPics\s*:\s*(\[.+?\]),", response.text)[0]
-    images = json.loads(re.sub(r'(\w+?):([^/])', r'"\1":\2', image_data))
-    data['images'] = defaultdict(list)
-    data['plans'] = []
-    for image in images:
-        url = urljoin(str(response.url), image['imageUrl'])
-        if image['isPlan']:
-            data['plans'].append(url)
-        else:
-            data['images'][image['tag']].append(url)
     return data
+
 
 async def extract_property_urls(area_url: str) -> List[str]:
     """Extract property URLs from an area page"""
@@ -90,6 +79,17 @@ async def extract_property_urls(area_url: str) -> List[str]:
     property_links = selector.css("article.item a.item-link::attr(href)").getall()
     full_urls = [urljoin(area_url, link) for link in property_links]
     return full_urls
+
+
+async def get_next_page_url(current_url: str) -> str:
+    """Get the URL of the next page"""
+    response = await session.get(current_url)
+    selector = Selector(text=response.text)
+    next_page_link = selector.css("a.icon-arrow-right-after::attr(href)").get()
+    if next_page_link:
+        return urljoin(current_url, next_page_link)
+    return None
+
 
 async def scrape_properties(urls: List[str]) -> List[PropertyResult]:
     """Scrape Idealista.com properties"""
@@ -102,7 +102,9 @@ async def scrape_properties(urls: List[str]) -> List[PropertyResult]:
                 if response.status_code == 200:
                     properties.append(parse_property(response))
                 else:
-                    print(f"Failed to scrape property: {response.url} with status code {response.status_code}")
+                    print(
+                        f"Failed to scrape property: {response.url} with status code {response.status_code}"
+                    )
                 break  # If successful, exit the retry loop
             except (httpx.ReadTimeout, httpx.RequestError) as e:
                 print(f"Attempt {attempt + 1} failed for URL: {url}, Error: {str(e)}")
@@ -110,31 +112,57 @@ async def scrape_properties(urls: List[str]) -> List[PropertyResult]:
                     print(f"Failed to retrieve URL: {url} after 3 attempts")
     return properties
 
+
 def save_to_json(data: List[PropertyResult], filename: str) -> None:
     """Save data to a JSON file"""
-    with open(filename, 'w', encoding='utf-8') as f:
+    with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
 
 def save_to_csv(data: List[PropertyResult], filename: str) -> None:
     """Save data to a CSV file"""
-    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['url', 'title', 'location', 'price', 'currency', 'description', 'updated', 'features', 'images', 'plans']
+    with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+        fieldnames = [
+            "url",
+            "title",
+            "location",
+            "price",
+            "currency",
+            "description",
+            "updated",
+        ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for property in data:
-            writer.writerow({
-                'url': property['url'],
-                'title': property['title'],
-                'location': property['location'],
-                'price': property['price'],
-                'currency': property['currency']
-            })
+            writer.writerow(
+                {
+                    "url": property.get("url", ""),
+                    "title": property.get("title", ""),
+                    "location": property.get("location", ""),
+                    "price": property.get("price", ""),
+                    "currency": property.get("currency", ""),
+                }
+            )
+
 
 async def run():
-    area_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/"
-    property_urls = await extract_property_urls(area_url)
-    data = await scrape_properties(property_urls)
+    base_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/"
+    all_property_urls = []
+    current_url = base_url
+    page_count = 1
+    max_pages = 5  # Set a limit to avoid infinite loops
+
+    while current_url and page_count <= max_pages:
+        print(f"Scraping page {page_count}: {current_url}")
+        property_urls = await extract_property_urls(current_url)
+        all_property_urls.extend(property_urls)
+
+        current_url = await get_next_page_url(current_url)
+        page_count += 1
+
+    print(f"Total properties found: {len(all_property_urls)}")
+    data = await scrape_properties(all_property_urls)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     json_filename = f"idealista_properties_{timestamp}.json"
@@ -144,6 +172,7 @@ async def run():
     save_to_csv(data, csv_filename)
 
     print(f"Data saved to {json_filename} and {csv_filename}")
+
 
 if __name__ == "__main__":
     asyncio.run(run())
