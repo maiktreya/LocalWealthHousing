@@ -15,4 +15,8 @@ Scrapping a webpago (Static html) with pagination
 > scrapy genspider idealista idealista.com
 
 4. Run spider
-> scrapy craw idealistaTest
+> scrapy crawl idealista -t csv -o aa.csv
+
+
+For debugging run:
+scrapy parse --spider=idealista --loglevel=DEBUG -c parse_flats "URL"

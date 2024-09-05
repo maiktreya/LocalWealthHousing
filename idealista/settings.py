@@ -2,90 +2,61 @@
 
 # Scrapy settings for idealista project
 #
-# For simplicity, this file contains only settings considered important or
-# commonly used. You can find more settings consulting the documentation:
+# For simplicity, this file contains only the most important settings by
+# default. All the other settings are documented here:
 #
 #     http://doc.scrapy.org/en/latest/topics/settings.html
-#     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+#
+
+from .proxies import get_proxies
+
+
+###########################
+# Main configuration
+###########################
 
 BOT_NAME = 'idealista'
 
 SPIDER_MODULES = ['idealista.spiders']
 NEWSPIDER_MODULE = 'idealista.spiders'
 
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    'scrapy_useragents.downloadermiddlewares.useragents.UserAgentsMiddleware': 500,
+    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+    'rotating_proxies.middlewares.BanDetectionMiddleware': 620    
+}
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'idealista (+http://www.yourdomain.com)'
-USER_AGENT = "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36"
+DEFAULT_REQUEST_HEADERS = {
+    'authority': 'www.idealista.com',
+    'upgrade-insecure-requests': '1',
+    'sec-fetch-site': 'none',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-user': '?1',
+    'sec-fetch-dest':' document'
+}
 
-# Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+FEED_EXPORT_ENCODING='latin-1'
 
-# Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+DOWNLOAD_TIMEOUT = 10
 
-# Configure a delay for requests for the same website (default: 0)
-# See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
-# See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
-# The download delay setting will honor only one of:
-#CONCURRENT_REQUESTS_PER_DOMAIN = 16
-#CONCURRENT_REQUESTS_PER_IP = 16
 
-# Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+###########################
+# User agent configurarion
+###########################
 
-# Disable Telnet Console (enabled by default)
-#TELNETCONSOLE_ENABLED = False
+USER_AGENTS = [
+    ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36'),
+    ('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0')
+    
+    # Add more user agents which actually work nowadays
+]
 
-# Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
+#########################
+# Proxies configuration
+#########################
 
-# Enable or disable spider middlewares
-# See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'idealista.middlewares.IdealistaSpiderMiddleware': 543,
-#}
+RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 404, 408]
 
-# Enable or disable downloader middlewares
-# See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'idealista.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
-
-# Enable or disable extensions
-# See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
-
-# Configure item pipelines
-# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'idealista.pipelines.IdealistaPipeline': 300,
-#}
-
-# Enable and configure the AutoThrottle extension (disabled by default)
-# See http://doc.scrapy.org/en/latest/topics/autothrottle.html
-#AUTOTHROTTLE_ENABLED = True
-# The initial download delay
-#AUTOTHROTTLE_START_DELAY = 5
-# The maximum download delay to be set in case of high latencies
-#AUTOTHROTTLE_MAX_DELAY = 60
-# The average number of requests Scrapy should be sending in parallel to
-# each remote server
-#AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
-# Enable showing throttling stats for every response received:
-#AUTOTHROTTLE_DEBUG = False
-
-# Enable and configure HTTP caching (disabled by default)
-# See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-#HTTPCACHE_ENABLED = True
-#HTTPCACHE_EXPIRATION_SECS = 0
-#HTTPCACHE_DIR = 'httpcache'
-#HTTPCACHE_IGNORE_HTTP_CODES = []
-#HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+ROTATING_PROXY_PAGE_RETRY_TIMES = 99999999999 # TODO: is it possible to setup this parameter with no limit?
+ROTATING_PROXY_LIST = get_proxies()
