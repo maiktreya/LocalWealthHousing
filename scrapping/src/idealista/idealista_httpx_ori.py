@@ -26,11 +26,9 @@ class PropertyResult(TypedDict):
     location: str
     price: int
     currency: str
-    description: str
     updated: str
     features: Dict[str, List[str]]
-    images: Dict[str, List[str]]
-    plans: List[str]
+
 
 def parse_property(response: httpx.Response) -> PropertyResult:
     """Parse Idealista.com property page"""
@@ -70,18 +68,6 @@ def parse_property(response: httpx.Response) -> PropertyResult:
             for feat in features
         ]
 
-    # Images
-    image_data = re.findall(r"fullScreenGalleryPics\s*:\s*(\[.+?\]),", response.text)[0]
-    images = json.loads(re.sub(r'(\w+?):([^/])', r'"\1":\2', image_data))
-    data['images'] = defaultdict(list)
-    data['plans'] = []
-    for image in images:
-        url = urljoin(str(response.url), image['imageUrl'])
-        if image['isPlan']:
-            data['plans'].append(url)
-        else:
-            data['images'][image['tag']].append(url)
-    return data
 
 async def extract_property_urls(area_url: str) -> List[str]:
     """Extract property URLs from an area page"""
@@ -118,7 +104,7 @@ def save_to_json(data: List[PropertyResult], filename: str) -> None:
 def save_to_csv(data: List[PropertyResult], filename: str) -> None:
     """Save data to a CSV file"""
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['url', 'title', 'location', 'price', 'currency', 'description', 'updated', 'features', 'images', 'plans']
+        fieldnames = ['url', 'title', 'location', 'price', 'currency', 'updated', 'features']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
@@ -129,15 +115,12 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
                 'location': property['location'],
                 'price': property['price'],
                 'currency': property['currency'],
-                'description': property['description'],
                 'updated': property['updated'],
                 'features': json.dumps(property['features'], ensure_ascii=False),
-                'images': json.dumps(property['images'], ensure_ascii=False),
-                'plans': json.dumps(property['plans'], ensure_ascii=False),
             })
 
 async def run():
-    area_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/"
+    area_url = "https://www.idealista.com/alquiler/segovia-segovia/"
     property_urls = await extract_property_urls(area_url)
     data = await scrape_properties(property_urls)
 
