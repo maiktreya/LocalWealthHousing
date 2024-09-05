@@ -1,1 +1,1 @@
-from .proxies import get_proxies
+# from .proxies import get_proxies
