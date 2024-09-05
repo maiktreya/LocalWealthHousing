@@ -3,3 +3,4 @@ scrapy-rotating-proxies
 scrapy-useragents 
 requests 
 requests-html 
+lxml_html_clean
