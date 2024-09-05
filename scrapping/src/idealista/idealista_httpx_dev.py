@@ -1,3 +1,5 @@
+# an scrapper old school without sitty injections and old school algos @09-06-2024
+
 import asyncio
 import json
 import re
