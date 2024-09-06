@@ -1,3 +1,4 @@
 env
 .venv
 SCRAPPING/out
+SCRAPPING/backs.tar.xz
