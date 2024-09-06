@@ -24,6 +24,7 @@ BASE_HEADERS = {
     "accept-encoding": "gzip, deflate, br",
 }
 
+
 # Type hints for expected results so we can visualize our scraper easier:
 class PropertyResult(TypedDict, total=False):
     url: str
@@ -35,6 +36,7 @@ class PropertyResult(TypedDict, total=False):
     rooms: int
     size_sqm: int
     features: Dict[str, List[str]]
+
 
 def parse_property(response: httpx.Response) -> PropertyResult:
     """Parse Idealista.com property page"""
@@ -87,7 +89,10 @@ def parse_property(response: httpx.Response) -> PropertyResult:
 
     return data
 
-async def extract_property_urls(area_url: str, session: httpx.AsyncClient, delay: float) -> List[str]:
+
+async def extract_property_urls(
+    area_url: str, session: httpx.AsyncClient, delay: float
+) -> List[str]:
     """Extract property URLs from an area page with a delay"""
     try:
         response = await session.get(area_url)
@@ -100,7 +105,10 @@ async def extract_property_urls(area_url: str, session: httpx.AsyncClient, delay
         logging.error(f"Failed to retrieve area URL: {area_url}, Error: {str(e)}")
         return []
 
-async def get_next_page_url(current_url: str, session: httpx.AsyncClient, delay: float) -> str:
+
+async def get_next_page_url(
+    current_url: str, session: httpx.AsyncClient, delay: float
+) -> str:
     """Get the URL of the next page with a delay"""
     try:
         response = await session.get(current_url)
@@ -109,10 +117,15 @@ async def get_next_page_url(current_url: str, session: httpx.AsyncClient, delay:
         await asyncio.sleep(delay)  # Add delay after the request
         return urljoin(current_url, next_page_link) if next_page_link else None
     except (httpx.ReadTimeout, httpx.RequestError) as e:
-        logging.error(f"Failed to retrieve next page URL for: {current_url}, Error: {str(e)}")
+        logging.error(
+            f"Failed to retrieve next page URL for: {current_url}, Error: {str(e)}"
+        )
         return None
 
-async def scrape_properties(urls: List[str], session: httpx.AsyncClient, delay: float) -> List[PropertyResult]:
+
+async def scrape_properties(
+    urls: List[str], session: httpx.AsyncClient, delay: float
+) -> List[PropertyResult]:
     """Scrape Idealista.com properties with a delay"""
     properties = []
     for url in urls:
@@ -122,19 +135,25 @@ async def scrape_properties(urls: List[str], session: httpx.AsyncClient, delay: 
                 if response.status_code == 200:
                     properties.append(parse_property(response))
                 else:
-                    logging.error(f"Failed to scrape property: {response.url} with status code {response.status_code}")
+                    logging.error(
+                        f"Failed to scrape property: {response.url} with status code {response.status_code}"
+                    )
                 await asyncio.sleep(delay)  # Add delay after each request
                 break
             except (httpx.ReadTimeout, httpx.RequestError) as e:
-                logging.error(f"Attempt {attempt + 1} failed for URL: {url}, Error: {str(e)}")
+                logging.error(
+                    f"Attempt {attempt + 1} failed for URL: {url}, Error: {str(e)}"
+                )
                 if attempt == 2:
                     logging.error(f"Failed to retrieve URL: {url} after 3 attempts")
     return properties
+
 
 def save_to_json(data: List[PropertyResult], filename: str) -> None:
     """Save data to a JSON file"""
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
 
 def save_to_csv(data: List[PropertyResult], filename: str) -> None:
     """Save data to a CSV file"""
@@ -164,12 +183,15 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
                 }
             )
 
+
 async def run(base_url: str, delay: float):
     all_property_urls = []
     page_count = 1
     max_pages = 40
 
-    async with httpx.AsyncClient(headers=BASE_HEADERS, follow_redirects=True, timeout=10.0) as session:
+    async with httpx.AsyncClient(
+        headers=BASE_HEADERS, follow_redirects=True, timeout=10.0
+    ) as session:
         current_url = base_url
 
         while current_url and page_count <= max_pages:
@@ -196,19 +218,22 @@ async def run(base_url: str, delay: float):
 
         logging.info(f"Data saved to {json_filename} and {csv_filename}")
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Scrape property listings from Idealista")
+    parser = argparse.ArgumentParser(
+        description="Scrape property listings from Idealista"
+    )
     parser.add_argument(
         "--url",
         type=str,
         default="https://www.idealista.com/venta-viviendas/segovia-segovia/",
-        help="Base URL for scraping properties (default is Segovia)"
+        help="Base URL for scraping properties (default is Segovia)",
     )
     parser.add_argument(
         "--delay",
         type=float,
         default=2.0,
-        help="Delay between requests in seconds (default is 2.0 seconds)"
+        help="Delay between requests in seconds (default is 2.0 seconds)",
     )
 
     args = parser.parse_args()

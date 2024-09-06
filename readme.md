@@ -31,7 +31,8 @@ python your_script.py
 
 **Scrape another area (e.g., Madrid):**
 ```bash
-python scrapping/src/idealista/idealista_httpx_dev.py --url "https://www.idealista.com/alquiler-viviendas/segovia-segovia/" --delay 2 # avoid blocks spacing requests
+cd scrapping/src/idealista &&
+python idealista_httpx_dev.py --url "https://www.idealista.com/alquiler-viviendas/segovia-segovia/" --delay 2 # avoid blocks spacing requests
 order
 ```
 
