@@ -222,6 +222,8 @@ if __name__ == "__main__":
         type=str, 
         default="https://www.idealista.com/venta-viviendas/segovia-segovia/",
         # to scrap rental prices use this url structure -> https://www.idealista.com/alquiler/segovia-segovia/
+        # to scrap housing prices use this url structure -> https://www.idealista.com/venta-viviendas/segovia-segovia/
+
         help="Base URL for scraping properties (default is Segovia)"
     )
     
