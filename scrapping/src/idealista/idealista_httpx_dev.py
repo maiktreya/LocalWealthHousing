@@ -1,10 +1,11 @@
-# an scrapper old school without sitty injections and old school algos @09-06-2024
+# Easy unabstracted scrapper
+# User can set a custom url using python your_script.py --url "https://www.idealista.com/alquiler-viviendas/madrid/"
 
+import argparse
 import asyncio
 import json
 import re
 from typing import Dict, List
-from collections import defaultdict
 from urllib.parse import urljoin
 import httpx
 from parsel import Selector
@@ -24,7 +25,6 @@ BASE_HEADERS = {
     "accept-encoding": "gzip, deflate, br",
 }
 
-
 # Type hints for expected results so we can visualize our scraper easier:
 class PropertyResult(TypedDict, total=False):
     url: str
@@ -33,8 +33,9 @@ class PropertyResult(TypedDict, total=False):
     price: int
     currency: str
     updated: str
-    # features: Dict[str, List[str]]
-
+    rooms: int
+    size_sqm: int
+    features: Dict[str, List[str]]
 
 def parse_property(response: httpx.Response) -> PropertyResult:
     """Parse Idealista.com property page"""
@@ -66,24 +67,7 @@ def parse_property(response: httpx.Response) -> PropertyResult:
         .split(" on ")[-1]
     )
 
-    # Extract details like number of rooms and size from the "details" field
-    details = css(".info-features ::text")
-
-    # Using regex to extract number of rooms and size in square meters
-    rooms_match = re.search(r"(\d+)\s*rooms?", details)
-    size_match = re.search(r"(\d+)\s*m²", details)
-
-    if rooms_match:
-        data["rooms"] = int(rooms_match.group(1))
-    else:
-        data["rooms"] = None
-
-    if size_match:
-        data["size_sqm"] = int(size_match.group(1))
-    else:
-        data["size_sqm"] = None
-
-    # Features
+    # Features extraction
     data["features"] = {}
     for feature_block in selector.css(".details-property-h2"):
         label = feature_block.xpath("text()").get()
@@ -92,8 +76,25 @@ def parse_property(response: httpx.Response) -> PropertyResult:
             "".join(feat.xpath(".//text()").getall()).strip() for feat in features
         ]
 
-    return data
+    # Extract rooms and size from the "Características básicas" section
+    basic_features = data["features"].get("Características básicas", [])
 
+    # Look for rooms and size in basic features
+    data["rooms"] = None
+    data["size_sqm"] = None
+
+    for feature in basic_features:
+        if "habitaciones" in feature:
+            rooms_match = re.search(r"(\d+)\s*habitaciones?", feature)
+            if rooms_match:
+                data["rooms"] = int(rooms_match.group(1))
+
+        if "m²" in feature:
+            size_match = re.search(r"(\d+)\s*m²", feature)
+            if size_match:
+                data["size_sqm"] = int(size_match.group(1))
+
+    return data
 
 async def extract_property_urls(area_url: str, session: httpx.AsyncClient) -> List[str]:
     """Extract property URLs from an area page"""
@@ -106,7 +107,6 @@ async def extract_property_urls(area_url: str, session: httpx.AsyncClient) -> Li
     except (httpx.ReadTimeout, httpx.RequestError) as e:
         logging.error(f"Failed to retrieve area URL: {area_url}, Error: {str(e)}")
         return []
-
 
 async def get_next_page_url(current_url: str, session: httpx.AsyncClient) -> str:
     """Get the URL of the next page"""
@@ -122,7 +122,6 @@ async def get_next_page_url(current_url: str, session: httpx.AsyncClient) -> str
             f"Failed to retrieve next page URL for: {current_url}, Error: {str(e)}"
         )
         return None
-
 
 async def scrape_properties(
     urls: List[str], session: httpx.AsyncClient
@@ -148,12 +147,10 @@ async def scrape_properties(
                     logging.error(f"Failed to retrieve URL: {url} after 3 attempts")
     return properties
 
-
 def save_to_json(data: List[PropertyResult], filename: str) -> None:
     """Save data to a JSON file"""
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
 
 def save_to_csv(data: List[PropertyResult], filename: str) -> None:
     """Save data to a CSV file"""
@@ -183,12 +180,10 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
                 }
             )
 
-
-async def run():
-    base_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/" #https://www.idealista.com/alquiler/segovia-segovia/
+async def run(base_url: str):
     all_property_urls = []
     page_count = 1
-    max_pages = 5  # Set a limit to avoid infinite loops
+    max_pages = 10  # Set a limit to avoid infinite loops
 
     async with httpx.AsyncClient(
         headers=BASE_HEADERS, follow_redirects=True, timeout=10.0
@@ -220,6 +215,15 @@ async def run():
 
         logging.info(f"Data saved to {json_filename} and {csv_filename}")
 
-
 if __name__ == "__main__":
-    asyncio.run(run())
+    parser = argparse.ArgumentParser(description="Scrape property listings from Idealista")
+    parser.add_argument(
+        "--url", 
+        type=str, 
+        default="https://www.idealista.com/venta-viviendas/segovia-segovia/",
+        # to scrap rental prices use this url structure -> https://www.idealista.com/alquiler/segovia-segovia/
+        help="Base URL for scraping properties (default is Segovia)"
+    )
+    
+    args = parser.parse_args()
+    asyncio.run(run(args.url))
