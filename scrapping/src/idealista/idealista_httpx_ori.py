@@ -138,7 +138,7 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
 
 
 async def run():
-    area_url = "https://www.idealista.com/alquiler/segovia-segovia/"
+    area_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/" #https://www.idealista.com/alquiler/segovia-segovia/
     property_urls = await extract_property_urls(area_url)
     data = await scrape_properties(property_urls)
 

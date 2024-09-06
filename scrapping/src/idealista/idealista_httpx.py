@@ -146,7 +146,7 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
 
 
 async def run():
-    base_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/"
+    base_url = "https://www.idealista.com/venta-viviendas/segovia-segovia/" #https://www.idealista.com/alquiler/segovia-segovia/
     all_property_urls = []
     current_url = base_url
     page_count = 1
