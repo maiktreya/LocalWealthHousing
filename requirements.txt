@@ -5,3 +5,5 @@ requests
 requests-html
 httpx
 lxml_html_clean
+parsel 
+typing-extensions
