@@ -31,7 +31,8 @@ python your_script.py
 
 **Scrape another area (e.g., Madrid):**
 ```bash
-python your_script.py --url "https://www.idealista.com/alquiler-viviendas/madrid/"
+python your_script.py --url "https://www.idealista.com/alquiler-viviendas/madrid/" --delay 5 # avoid blocks spacing requests
+python your_script.py --delay 5 --url "https://www.idealista.com/alquiler-viviendas/madrid/" # it should work regardless the order
 ```
 
 The script will scrape up to two pages of listings, saving the output in both JSON and CSV formats in the `scrapping/out/` directory.

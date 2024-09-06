@@ -1,5 +1,4 @@
-# Easy unabstracted scrapper
-# User can set a custom url using python your_script.py --url "https://www.idealista.com/alquiler-viviendas/madrid/"
+# python "SCRAPPING\src\idealista\idealista_httpx.py" --url "https://www.idealista.com/venta-viviendas/segovia-segovia/" --delay 1
 
 import argparse
 import asyncio
@@ -44,21 +43,17 @@ def parse_property(response: httpx.Response) -> PropertyResult:
     css_all = lambda x: selector.css(x).getall()
 
     data: PropertyResult = {}
-    # Meta data
     data["url"] = str(response.url)
-
-    # Basic information
     data["title"] = css("h1 .main-info__title-main::text")
     data["location"] = css(".main-info__title-minor::text")
     data["currency"] = css(".info-data-price::text")
 
-    # Convert the price string to an integer after removing non-numeric characters
     price_str = css(".info-data-price span::text")
     if price_str:
         price_str = price_str.replace(".", "").replace(",", "")
         data["price"] = int(price_str)
     else:
-        data["price"] = None  # Handle cases where the price might not be available
+        data["price"] = None
 
     data["description"] = "\n".join(css_all("div.comment ::text")).strip()
     data["updated"] = (
@@ -67,7 +62,6 @@ def parse_property(response: httpx.Response) -> PropertyResult:
         .split(" on ")[-1]
     )
 
-    # Features extraction
     data["features"] = {}
     for feature_block in selector.css(".details-property-h2"):
         label = feature_block.xpath("text()").get()
@@ -76,10 +70,7 @@ def parse_property(response: httpx.Response) -> PropertyResult:
             "".join(feat.xpath(".//text()").getall()).strip() for feat in features
         ]
 
-    # Extract rooms and size from the "Características básicas" section
     basic_features = data["features"].get("Características básicas", [])
-
-    # Look for rooms and size in basic features
     data["rooms"] = None
     data["size_sqm"] = None
 
@@ -96,53 +87,46 @@ def parse_property(response: httpx.Response) -> PropertyResult:
 
     return data
 
-async def extract_property_urls(area_url: str, session: httpx.AsyncClient) -> List[str]:
-    """Extract property URLs from an area page"""
+async def extract_property_urls(area_url: str, session: httpx.AsyncClient, delay: float) -> List[str]:
+    """Extract property URLs from an area page with a delay"""
     try:
         response = await session.get(area_url)
         selector = Selector(text=response.text)
         property_links = selector.css("article.item a.item-link::attr(href)").getall()
         full_urls = [urljoin(area_url, link) for link in property_links]
+        await asyncio.sleep(delay)  # Add delay after the request
         return full_urls
     except (httpx.ReadTimeout, httpx.RequestError) as e:
         logging.error(f"Failed to retrieve area URL: {area_url}, Error: {str(e)}")
         return []
 
-async def get_next_page_url(current_url: str, session: httpx.AsyncClient) -> str:
-    """Get the URL of the next page"""
+async def get_next_page_url(current_url: str, session: httpx.AsyncClient, delay: float) -> str:
+    """Get the URL of the next page with a delay"""
     try:
         response = await session.get(current_url)
         selector = Selector(text=response.text)
         next_page_link = selector.css("a.icon-arrow-right-after::attr(href)").get()
-        if next_page_link:
-            return urljoin(current_url, next_page_link)
-        return None
+        await asyncio.sleep(delay)  # Add delay after the request
+        return urljoin(current_url, next_page_link) if next_page_link else None
     except (httpx.ReadTimeout, httpx.RequestError) as e:
-        logging.error(
-            f"Failed to retrieve next page URL for: {current_url}, Error: {str(e)}"
-        )
+        logging.error(f"Failed to retrieve next page URL for: {current_url}, Error: {str(e)}")
         return None
 
-async def scrape_properties(
-    urls: List[str], session: httpx.AsyncClient
-) -> List[PropertyResult]:
-    """Scrape Idealista.com properties"""
+async def scrape_properties(urls: List[str], session: httpx.AsyncClient, delay: float) -> List[PropertyResult]:
+    """Scrape Idealista.com properties with a delay"""
     properties = []
     for url in urls:
-        for attempt in range(3):  # Retry up to 3 times
+        for attempt in range(3):
             try:
                 response = await session.get(url)
                 if response.status_code == 200:
                     properties.append(parse_property(response))
                 else:
-                    logging.error(
-                        f"Failed to scrape property: {response.url} with status code {response.status_code}"
-                    )
-                break  # If successful, exit the retry loop
+                    logging.error(f"Failed to scrape property: {response.url} with status code {response.status_code}")
+                await asyncio.sleep(delay)  # Add delay after each request
+                break
             except (httpx.ReadTimeout, httpx.RequestError) as e:
-                logging.error(
-                    f"Attempt {attempt + 1} failed for URL: {url}, Error: {str(e)}"
-                )
+                logging.error(f"Attempt {attempt + 1} failed for URL: {url}, Error: {str(e)}")
                 if attempt == 2:
                     logging.error(f"Failed to retrieve URL: {url} after 3 attempts")
     return properties
@@ -180,31 +164,28 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
                 }
             )
 
-async def run(base_url: str):
+async def run(base_url: str, delay: float):
     all_property_urls = []
     page_count = 1
-    max_pages = 10  # Set a limit to avoid infinite loops
+    max_pages = 20
 
-    async with httpx.AsyncClient(
-        headers=BASE_HEADERS, follow_redirects=True, timeout=10.0
-    ) as session:
+    async with httpx.AsyncClient(headers=BASE_HEADERS, follow_redirects=True, timeout=10.0) as session:
         current_url = base_url
 
         while current_url and page_count <= max_pages:
             logging.info(f"Scraping page {page_count}: {current_url}")
-            property_urls = await extract_property_urls(current_url, session)
+            property_urls = await extract_property_urls(current_url, session, delay)
             all_property_urls.extend(property_urls)
 
-            # Stop if no new property URLs were found (indicates possible end of listings)
             if not property_urls:
                 logging.info("No more property URLs found, stopping pagination.")
                 break
 
-            current_url = await get_next_page_url(current_url, session)
+            current_url = await get_next_page_url(current_url, session, delay)
             page_count += 1
 
         logging.info(f"Total properties found: {len(all_property_urls)}")
-        data = await scrape_properties(all_property_urls, session)
+        data = await scrape_properties(all_property_urls, session, delay)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         json_filename = f"scrapping/out/idealista_properties_{timestamp}.json"
@@ -221,11 +202,14 @@ if __name__ == "__main__":
         "--url", 
         type=str, 
         default="https://www.idealista.com/venta-viviendas/segovia-segovia/",
-        # to scrap rental prices use this url structure -> https://www.idealista.com/alquiler/segovia-segovia/
-        # to scrap housing prices use this url structure -> https://www.idealista.com/venta-viviendas/segovia-segovia/
-
         help="Base URL for scraping properties (default is Segovia)"
+    )
+    parser.add_argument(
+        "--delay", 
+        type=float, 
+        default=2.0, 
+        help="Delay between requests in seconds (default is 2.0 seconds)"
     )
     
     args = parser.parse_args()
-    asyncio.run(run(args.url))
+    asyncio.run(run(args.url, args.delay))
