@@ -32,8 +32,7 @@ python your_script.py
 **Scrape another area (e.g., Madrid):**
 ```bash
 cd scrapping/src/idealista &&
-python idealista_httpx_dev.py --url "https://www.idealista.com/alquiler-viviendas/segovia-segovia/" --delay 2 # avoid blocks spacing requests
-order
+python idealista_httpx_dev.py --url "https://www.idealista.com/alquiler-viviendas/segovia-segovia/" --delay 2
 ```
 
 The script will scrape up to two pages of listings, saving the output in both JSON and CSV formats in the `scrapping/out/` directory.
