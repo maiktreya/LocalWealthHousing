@@ -167,7 +167,7 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
 async def run(base_url: str, delay: float):
     all_property_urls = []
     page_count = 1
-    max_pages = 20
+    max_pages = 40
 
     async with httpx.AsyncClient(headers=BASE_HEADERS, follow_redirects=True, timeout=10.0) as session:
         current_url = base_url
@@ -199,17 +199,17 @@ async def run(base_url: str, delay: float):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scrape property listings from Idealista")
     parser.add_argument(
-        "--url", 
-        type=str, 
+        "--url",
+        type=str,
         default="https://www.idealista.com/venta-viviendas/segovia-segovia/",
         help="Base URL for scraping properties (default is Segovia)"
     )
     parser.add_argument(
-        "--delay", 
-        type=float, 
-        default=2.0, 
+        "--delay",
+        type=float,
+        default=2.0,
         help="Delay between requests in seconds (default is 2.0 seconds)"
     )
-    
+
     args = parser.parse_args()
     asyncio.run(run(args.url, args.delay))
