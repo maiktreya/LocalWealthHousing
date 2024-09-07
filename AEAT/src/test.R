@@ -1,0 +1,9 @@
+# rscript resampling segovia
+library("magrittr")
+library("data.table")
+library("survey")
+iden21 <- fread("AEAT/data/ief2021/iden.gz")
+
+# Example auxiliary data for "CityX"
+city_population <- 100000  # Replace with actual population value
+city_income <- 30000  # Average income for the city
