@@ -1,5 +1,6 @@
 env
-out/
 .venv
+.lintr
 SCRAPPING/out
 SCRAPPING/backs.tar.xz
+scrapping/out/
