@@ -23,20 +23,16 @@ USER_AGENTS = [
     # More user agents can be added here
 ]
 
-
-# Function to get a random user agent
-def get_random_user_agent():
-    return random.choice(USER_AGENTS)
-
-
 # Establish persistent HTTPX session with browser-like headers to avoid blocking
 BASE_HEADERS = {
-    "user-agent": get_random_user_agent(),
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
     "accept-language": "en-US;en;q=0.9",
     "accept-encoding": "gzip, deflate, br",
 }
 
+# Function to get a random user agent
+def get_random_user_agent():
+    return random.choice(USER_AGENTS)
 
 # Type hints for expected results
 class PropertyResult(TypedDict, total=False):
@@ -49,7 +45,6 @@ class PropertyResult(TypedDict, total=False):
     rooms: int
     size_sqm: int
     features: Dict[str, List[str]]
-
 
 def parse_property(response: httpx.Response) -> PropertyResult:
     selector = Selector(text=response.text)
@@ -101,21 +96,17 @@ def parse_property(response: httpx.Response) -> PropertyResult:
 
     return data
 
-
 async def extract_property_urls(
     area_url: str, session: httpx.AsyncClient, delay: float
 ) -> List[str]:
     headers = BASE_HEADERS.copy()
-    headers["user-agent"] = (
-        get_random_user_agent()
-    )  # Rotate user-agent for each request
+    headers["user-agent"] = get_random_user_agent()  # Rotate user-agent for each request
     response = await session.get(area_url, headers=headers)
     selector = Selector(text=response.text)
     property_links = selector.css("article.item a.item-link::attr(href)").getall()
     full_urls = [urljoin(area_url, link) for link in property_links]
     await asyncio.sleep(delay)
     return full_urls
-
 
 async def get_next_page_url(
     current_url: str, session: httpx.AsyncClient, delay: float
@@ -126,7 +117,6 @@ async def get_next_page_url(
     await asyncio.sleep(delay)
     return urljoin(current_url, next_page_link) if next_page_link else None
 
-
 async def scrape_properties(
     urls: List[str], session: httpx.AsyncClient, delay: float
 ) -> List[PropertyResult]:
@@ -135,9 +125,7 @@ async def scrape_properties(
         for attempt in range(3):
             try:
                 headers = BASE_HEADERS.copy()
-                headers["user-agent"] = (
-                    get_random_user_agent()
-                )  # Rotate user-agent for each request
+                headers["user-agent"] = get_random_user_agent()  # Rotate user-agent for each request
                 response = await session.get(url, headers=headers)
                 if response.status_code == 200:
                     properties.append(parse_property(response))
@@ -155,11 +143,9 @@ async def scrape_properties(
                     logging.error(f"Failed to retrieve URL: {url} after 3 attempts")
     return properties
 
-
 def save_to_json(data: List[PropertyResult], filename: str) -> None:
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
 
 def save_to_csv(data: List[PropertyResult], filename: str) -> None:
     with open(filename, "w", newline="", encoding="utf-8") as csvfile:
@@ -186,7 +172,6 @@ def save_to_csv(data: List[PropertyResult], filename: str) -> None:
                     "size_sqm": property.get("size_sqm", ""),
                 }
             )
-
 
 async def run(base_url: str, delay: float):
     all_property_urls = []
@@ -221,7 +206,6 @@ async def run(base_url: str, delay: float):
         save_to_csv(data, csv_filename)
 
         logging.info(f"Data saved to {json_filename} and {csv_filename}")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
