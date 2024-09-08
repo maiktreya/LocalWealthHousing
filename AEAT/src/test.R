@@ -2,14 +2,20 @@
 library("magrittr")
 library("data.table")
 library("survey")
-iden21 <- fread("AEAT/data/ief2021/iden.gz")
-par150 <- fread("AEAT/data/ief2021/par150.gz")
-pat <- fread("AEAT/data/ief2021/pat.gz")
-renta <- fread("AEAT/data/ief2021/renta.gz")
-tipodec <- fread("AEAT/data/ief2021/tipodec.gz")
+rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
-# codificacion 07 40 194 || segovia || CCAA / Provincia / Municipio
+dt <- fread("AEAT/data/IEF-2021-new.gz")
 
-# Example auxiliary data for "CityX"
-city_population <- 100000  # Replace with actual population value
-city_income <- 30000  # Average income for the city
+print(colnames(dt))
+
+segovia <- dt[CCAA == "7" & PROV == "40" & MUNI == "194"]
+san_cristobal <- dt[CCAA == "7" & PROV == "40" & MUNI == "906"]
+palazuelos <- dt[CCAA == "7" & PROV == "40" & MUNI == "155"]
+la_lastrilla <- dt[CCAA == "7" & PROV == "40" & MUNI == "112"]
+villaverde <- dt[CCAA == "7" & PROV == "40" & MUNI == "130"]
+
+print(nrow(segovia))
+print(nrow(san_cristobal))
+print(nrow(palazuelos))
+print(nrow(la_lastrilla))
+print(nrow(villaverde))
