@@ -53,6 +53,35 @@ MIT License
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 ```
 
+
+You can create a cron job on Ubuntu to run your Python scraper daily at 2:00 AM with the following steps:
+
+1. **Open the crontab file for editing:**
+
+   Open the terminal and type:
+
+   ```bash
+   crontab -e
+   ```
+
+2. **Add the cron job:**
+
+   In the editor that opens, add the following line:
+
+   ```bash
+   0 2 * * * source /home/other/dev/github/LocalWealthHousing/env/bin/activate && /home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/idealista/idealista_httpx.ori.py --url "https://www.idealista.com/venta-viviendas/segovia-segovia/" --delay 5 >> /home/other/dev/github/LocalWealthHousing/logs/scraper.log 2>&1
+   ```
+
+   - `0 2 * * *` sets the cron job to run daily at 2:00 AM.
+   - `/usr/bin/python3` is the path to the Python 3 interpreter. If you're using a virtual environment, make sure to update this path.
+   - `>> /home/other/dev/github/LocalWealthHousing/logs/scraper.log 2>&1` ensures that output and any errors are logged.
+
+3. **Save and exit:**
+
+   After adding the line, save the file and exit the editor. Your cron job will now run daily at 2:00 AM.
+
+Make sure your script is executable and that all required permissions are correctly set.
+
 ---
 
 ### 📢 Shout-out
