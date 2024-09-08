@@ -8,6 +8,7 @@ pat <- fread("AEAT/data/ief2021/pat.gz")
 renta <- fread("AEAT/data/ief2021/renta.gz")
 tipodec <- fread("AEAT/data/ief2021/tipodec.gz")
 
+# codificacion 07 40 194 || segovia || CCAA / Provincia / Municipio
 
 # Example auxiliary data for "CityX"
 city_population <- 100000  # Replace with actual population value

@@ -4,6 +4,6 @@ Las caracteristicas de esta muestra de aproximadamente el 5% del censo poblacion
 
 
 * IDENTIFICADORES
-* Idenper
-* Idenhog
-* Idenmun
+    * Idenper
+    * Idenhog
+    * Idenmun
