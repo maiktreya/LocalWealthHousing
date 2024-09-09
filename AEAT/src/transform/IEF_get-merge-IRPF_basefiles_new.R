@@ -5,6 +5,9 @@ library(data.table)
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 sel_year <- 2021
+
+tam_muestra < - 1217717
+poblacion_muestra <- 21698223
 ################################
 
 # IDENTIFICADORES Y PESOS fichero 1_IDEN.txt
