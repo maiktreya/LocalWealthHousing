@@ -34,15 +34,15 @@ dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDc
     ]
     setnames(dt, "reference", as.character(ref_unit))
 
+# identificar municipios a analizar
+dt[CCAA == "7" & PROV == "40" & MUNI == "194", segovia := 1]
+dt[CCAA == "7" & PROV == "40" & MUNI == "906", san_cristobal := 1]
+dt[CCAA == "7" & PROV == "40" & MUNI == "155", palazuelos := 1]
+dt[CCAA == "7" & PROV == "40" & MUNI == "112", la_lastrilla := 1]
 
-print(colnames(dt))
 
-segovia <- dt[CCAA == "7" & PROV == "40" & MUNI == "194"]
-san_cristobal <- dt[CCAA == "7" & PROV == "40" & MUNI == "906"]
-palazuelos <- dt[CCAA == "7" & PROV == "40" & MUNI == "155"]
-la_lastrilla <- dt[CCAA == "7" & PROV == "40" & MUNI == "112"]
-
-print(nrow(segovia))
-print(nrow(san_cristobal))
-print(nrow(palazuelos))
-print(nrow(la_lastrilla))
+# generar clase de ciudadanos (inquilinos)
+dt[, CASERO := 0][PAR150 > 0, CASERO := 1][, CASERO := factor(CASERO)]
+dt[, PROPIETARIO_SIN := 0][PATINMO > 0 & CASERO == 0, PROPIETARIO_SIN := 1][, PROPIETARIO_SIN := factor(PROPIETARIO_SIN)]
+dt[, INQUILINO := 1][PROPIETARIO_SIN == 1, INQUILINO := 0][CASERO == 1, INQUILINO := 0][, INQUILINO := factor(INQUILINO)]
+dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ]
