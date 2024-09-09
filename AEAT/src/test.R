@@ -5,8 +5,7 @@ library("survey")
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 ref_survey <- "IEF" # either IEF or EFF
-sel_year <- 2020 # 2020 for EFF & 2021 for IEF
-ref_unit <- "IDENHOG" # Use either IDENPER for personal or IDENHOG for household levels
+ref_unit <- "IDENPER" # Use either IDENPER for personal or IDENHOG for household levels
 selected_columns <- c("RENTAD", "RENTA_ALQ", "PATINMO")
 
 # Import choosen dataframe (cambiar string inicial según ruta de los datos)
@@ -46,3 +45,5 @@ dt[, CASERO := 0][PAR150 > 0, CASERO := 1][, CASERO := factor(CASERO)]
 dt[, PROPIETARIO_SIN := 0][PATINMO > 0 & CASERO == 0, PROPIETARIO_SIN := 1][, PROPIETARIO_SIN := factor(PROPIETARIO_SIN)]
 dt[, INQUILINO := 1][PROPIETARIO_SIN == 1, INQUILINO := 0][CASERO == 1, INQUILINO := 0][, INQUILINO := factor(INQUILINO)]
 dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ]
+
+
