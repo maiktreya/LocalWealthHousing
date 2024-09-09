@@ -4,17 +4,17 @@
 source /home/other/dev/github/LocalWealthHousing/env/bin/activate
 
 # Run Airbnb scrapers
-echo "Running Airbnb Short-Term Scraper..."
-/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_apify_short.py && \
-echo "Airbnb Short-Term Scraper finished. Running Medium-Term Scraper..."
-
-echo "Running Airbnb Medium-Term Scraper..."
-/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_apify_medium.py && \
-echo "Airbnb Medium-Term Scraper finished. Running Long-Term Scraper..."
-
-echo "Running Airbnb Long-Term Scraper..."
-/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_apify_long.py
-echo "Airbnb Long-Term Scraper finished."
+#echo "Running Airbnb Short-Term Scraper..."
+#/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_apify_short.py && \
+#echo "Airbnb Short-Term Scraper finished. Running Medium-Term Scraper..."
+#
+#echo "Running Airbnb Medium-Term Scraper..."
+#/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_apify_medium.py && \
+#echo "Airbnb Medium-Term Scraper finished. Running Long-Term Scraper..."
+#
+#echo "Running Airbnb Long-Term Scraper..."
+#/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_apify_long.py
+#echo "Airbnb Long-Term Scraper finished."
 
 # Now run Idealista scrapers
 echo "Running Idealista Segovia Sale Scraper..."

@@ -1,121 +1,73 @@
-# Reference chatgpt conversation:
-# before starting run: scrapy startproject rental_scraper
-#
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import pandas as pd
 
-import scrapy
-import json
-import re
-from collections import defaultdict
-from urllib.parse import urljoin
-from datetime import datetime
-import os
+l = []
+o = {}
 
-class IdealistaSpider(scrapy.Spider):
-    name = "idealista_spider"
-    allowed_domains = ["airbnb.es"]
+# ChromeDriver path for Ubuntu
+PATH = '/usr/bin/chromedriver'
 
-    start_urls = ['https://www.idealista.com/alquiler-viviendas/segovia-segovia/']
+service = Service(executable_path=PATH)
+options = webdriver.ChromeOptions()
 
+# Optional: Run Chrome in headless mode
+options.add_argument("--headless")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 
-    def parse(self, response):
-        """Extract property URLs from the area page"""
-        property_links = response.css("article.item a.item-link::attr(href)").getall()
-        for link in property_links:
-            full_url = urljoin(response.url, link)
-            yield scrapy.Request(full_url, callback=self.parse_property)
+driver = webdriver.Chrome(service=service, options=options)
 
-    def parse_property(self, response):
-        """Parse Idealista.com property page"""
-        selector = response
+# URL of the first page
+driver.get("https://www.airbnb.es/s/Segovia--Spain/homes?refinement_paths%5B%5D=%2Fhomes&place_id=ChIJr5ElYupOQQ0RsMvzWgeHBQM&checkin=2024-09-13&checkout=2024-09-15&adults=1")
+time.sleep(2)
 
-        data = {}
-        # Meta data
-        data["url"] = response.url
+def extract_data():
+    """Function to extract data from the current page"""
+    html_content = driver.page_source
+    soup = BeautifulSoup(html_content, 'html.parser')
+    allData = soup.find_all("div", {"itemprop": "itemListElement"})
 
-        # Basic information
-        data["title"] = selector.css("h1 .main-info__title-main::text").get().strip()
-        data["location"] = selector.css(".main-info__title-minor::text").get().strip()
-        data["currency"] = selector.css(".info-data-price::text").get().strip()
+    for i in range(len(allData)):
+        try:
+            o["property-title"] = allData[i].find('div', {'data-testid': 'listing-card-title'}).text.strip()
+        except:
+            o["property-title"] = None
 
-        # Convert the price string to an integer after removing non-numeric characters
-        price_str = selector.css(".info-data-price span::text").get()
-        if price_str:
-            price_str = price_str.replace(".", "").replace(",", "")
-            data["price"] = int(price_str)
-        else:
-            data["price"] = None  # Handle cases where the price might not be available
+        try:
+            o["price_with_tax"] = allData[i].find('div', {'class': '_i5duul'}).find('div', {"class": "_10d7v0r"}).text.strip().split(" total")[0]
+        except:
+            o["price_with_tax"] = None
 
-        data["description"] = "\n".join(selector.css("div.comment ::text").getall()).strip()
-        data["updated"] = selector.xpath("//p[@class='stats-text'][contains(text(),'updated on')]/text()").re_first(r'updated on (.+)')
+        l.append(o.copy())
 
-        # Features
-        data["features"] = {}
-        for feature_block in selector.css(".details-property-h2"):
-            label = feature_block.xpath("text()").get()
-            features = feature_block.xpath("following-sibling::div[1]//li")
-            data["features"][label] = [
-                "".join(feat.xpath(".//text()").getall()).strip() for feat in features
-            ]
+# Pagination loop with a page limit
+page_limit = 3  # Set your page limit here
+current_page = 1  # Start from page 1
 
-        # Images
-        image_data = re.findall(r"fullScreenGalleryPics\s*:\s*(\[.+?\]),", response.text)
-        if image_data:
-            images = json.loads(re.sub(r"(\w+?):([^/])", r'"\1":\2', image_data[0]))
-            data["images"] = defaultdict(list)
-            data["plans"] = []
-            for image in images:
-                url = urljoin(response.url, image["imageUrl"])
-                if image["isPlan"]:
-                    data["plans"].append(url)
-                else:
-                    data["images"][image["tag"]].append(url)
+while current_page <= page_limit:
+    extract_data()  # Extract data from the current page
 
-        yield data
+    try:
+        # Wait until the "Next" button is available and clickable, then click it
+        next_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//a[@aria-label='Next']"))
+        )
+        next_button.click()
+        time.sleep(2)  # Give some time for the next page to load
+        current_page += 1  # Increment the page counter
+    except Exception as e:
+        print(f"Stopping due to exception or no more pages available on page {current_page}: {e}")
+        break
 
-    def close(self, reason):
-        """Save the collected data to JSON and CSV files at the end of the spider run."""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        json_filename = f"idealista_properties_{timestamp}.json"
-        csv_filename = f"idealista_properties_{timestamp}.csv"
+driver.quit()
 
-        output_dir = "SCRAPPING/out"
-        os.makedirs(output_dir, exist_ok=True)
-
-        json_filepath = os.path.join(output_dir, json_filename)
-        csv_filepath = os.path.join(output_dir, csv_filename)
-
-        with open(json_filepath, 'w', encoding='utf-8') as f:
-            json.dump(self.crawler.stats.get_value('item_scraped_count'), f, ensure_ascii=False, indent=2)
-
-        with open(csv_filepath, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = [
-                "url",
-                "title",
-                "location",
-                "price",
-                "currency",
-                "description",
-                "updated",
-                "features",
-                "images",
-                "plans",
-            ]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for item in self.crawler.stats.get_value('item_scraped_count'):
-                writer.writerow(
-                    {
-                        "url": item["url"],
-                        "title": item["title"],
-                        "location": item["location"],
-                        "price": item["price"],
-                        "currency": item["currency"],
-                        "description": item["description"],
-                        "updated": item["updated"],
-                        "features": json.dumps(item["features"], ensure_ascii=False),
-                        "images": json.dumps(item["images"], ensure_ascii=False),
-                        "plans": json.dumps(item["plans"], ensure_ascii=False),
-                    }
-                )
-
-        self.log(f"Data saved to {json_filepath} and {csv_filepath}")
+# Save data to CSV
+df = pd.DataFrame(l)
+df.to_csv('airbnb.csv', index=False, encoding='utf-8')
+print(l)
