@@ -6,7 +6,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 ref_survey <- "IEF" # either IEF or EFF
 ref_unit <- "IDENPER" # Use either IDENPER for personal or IDENHOG for household levels
-selected_columns <- c("RENTAD", "RENTA_ALQ", "PATINMO")
+selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import choosen dataframe (cambiar string inicial según ruta de los datos)
 dt <- fread("LocalWealthHousing/AEAT/data/IEF-2021-new.gz")
@@ -19,6 +19,7 @@ dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
 dt <- dt[TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL),
     .(
+        RENTAB = sum(RENTAB),
         RENTAD = sum(RENTAD),
         TRAMO = mean(TRAMO),
         RENTA_ALQ = sum(RENTA_ALQ),
@@ -52,3 +53,6 @@ dt_sv <- svydesign(
     data = dt,
     weights = dt$FACTORCAL
 ) # muestra con coeficientes de elevación
+
+meanRB_sg <- 27741
+
