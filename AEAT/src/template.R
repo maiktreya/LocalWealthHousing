@@ -74,7 +74,13 @@ survey_design <- svydesign(
     weights = dt$FACTORCAL
 ) # Initial survey design with elevation factors
 
-# Raking the weights to match both age and gender distributions
+# Get the unique age groups from the sample data
+unique_age_groups <- unique(dt$age_group)
+
+# Subset the population margin to include only age groups present in the sample
+age_distribution <- age_distribution[age_group %in% unique_age_groups]
+
+# Now proceed with the raking process
 raked_design <- rake(
   design = survey_design,
   sample.margins = list(~age_group, ~gender),
