@@ -16,7 +16,7 @@ fr <- fread("AEAT/data/ief2021/pob-segovia.csv") # from INE population distribut
 sex <- fr[1, .(age, segoT, segoH, segoM)]
 fr <- fr[-1, .(age, segoT, segoH, segoM)]
 
-fr[, age_group := cut(as.numeric(age), breaks = seq(0, 100, by = 20), right = FALSE)]
+fr[, age_group := cut(as.numeric(age), breaks = seq(0, 100, by = 15), right = FALSE)]
 
 # Summarize the population by age group
 age_distribution <- fr[, .(Freq = sum(segoT) / sum(sex$segoT)), by = age_group]
@@ -62,7 +62,7 @@ setnames(dt, "reference", as.character(ref_unit))
 dt[, gender := ifelse(SEXO == 1, "male", "female")]
 
 # Create age groups to match the age distribution
-dt[, age_group := cut(age, breaks = seq(0, 100, by = 20), right = FALSE)]
+dt[, age_group := cut(age, breaks = seq(0, 100, by = 15), right = FALSE)]
 
 # Remove rows with missing age groups (or impute missing values if needed)
 dt <- dt[!is.na(age_group)]
