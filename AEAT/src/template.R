@@ -136,6 +136,6 @@ final_survey_design <- svydesign(
 ) # Initial survey design with elevation factors
 svymean(~RENTAB, final_survey_design) %>% print()
 
-sum(dt_grouped$FACTORCAL) %>% print()
+sum(final_survey_design$variables[,"FACTORCAL" ]) %>% print()
 sum(raked_weights)  %>% print()
 sum(rescaled_weights) %>% print()
