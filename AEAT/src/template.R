@@ -9,8 +9,8 @@ ref_unit <- "IDENPER" # Use either IDENPER for personal or IDENHOG for household
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import chosen dataframe (change string according to the data file path)
-dt <- fread("LocalWealthHousing/AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
-fr <- fread("LocalWealthHousing/AEAT/data/ief2021/pob-segovia.csv") # from INE population distribution
+dt <- fread("AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
+fr <- fread("AEAT/data/ief2021/pob-segovia.csv") # from INE population distribution
 
 # Process the population data (assuming the first row contains overall totals)
 sex <- fr[1, .(age, segoT, segoH, segoM)]
@@ -134,4 +134,4 @@ final_survey_design <- svydesign(
     data = dt_grouped,
     weights = dt_grouped$FACTORCAL
 ) # Initial survey design with elevation factors
-svymean(~RENTAB, final_survey_design)
+svymean(~RENTAB, final_survey_design) %>% print()
