@@ -35,7 +35,7 @@ dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
 dt <- dt[TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL),
     .(
-        SEXO = mean(SEXO),  # 1 = Male, 2 = Female
+        gender = mean(SEXO),  # 1 = Male, 2 = Female
         age = 2022 - mean(ANONAC),  # Calculate age
         RENTAB = sum(RENTAB),
         RENTAD = sum(RENTAD),
@@ -59,6 +59,9 @@ dt[, gender := ifelse(SEXO == 1, "male", "female")]
 
 # Create age groups to match the age distribution
 dt[, age_group := cut(age, breaks = seq(0, 100, by = 10), right = FALSE)]
+
+# Remove rows with missing age groups (or impute missing values if needed)
+dt <- dt[!is.na(age_group)]
 
 # Check the structure of the age and gender variables
 table(dt$age_group)
