@@ -106,8 +106,8 @@ raked_design <- update(raked_design, weights = rescaled_weights)
 print(rescaled_weights)
 
 # Example analysis: Weighted mean of income after raking and rescaling
-weighted_mean_income <- svymean(~RENTAB, raked_design)
-preweighted_mean_income <- svymean(~RENTAB, survey_design)
+weighted_mean_income <- svymean(~RENTAD, raked_design)
+preweighted_mean_income <- svymean(~RENTAD, survey_design)
 
 # Output the results
 print(weighted_mean_income)
@@ -134,7 +134,7 @@ final_survey_design <- svydesign(
     data = dt_grouped,
     weights = dt_grouped$FACTORCAL
 ) # Initial survey design with elevation factors
-svymean(~RENTAB, final_survey_design) %>% print()
+svymean(~RENTAD, final_survey_design) %>% print()
 
 sum(final_survey_design$variables[,"FACTORCAL" ]) %>% print()
 sum(raked_weights)  %>% print()
