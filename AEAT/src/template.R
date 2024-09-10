@@ -16,15 +16,18 @@ fr <- fread("LocalWealthHousing/AEAT/data/ief2021/pob-segovia.csv") # from INE p
 sex <- fr[1, .(age, segoT, segoH, segoM)]
 fr <- fr[-1, .(age, segoT, segoH, segoM)]
 
-# Create the age and gender distributions based on the population data
-age_distribution <- data.table(
-  age_group = c("[0,10)", "[10,20)", "[20,30)", "[30,40)", "[40,50)", "[50,60)", "[60,70)", "[70,80)", "[80,90)", "[90,100)"),
-  Freq = fr$segoT / sum(sex$segoT)  # Adjusted to match population proportions
-)
+fr[, age_group := cut(as.numeric(age), breaks = seq(0, 100,
+    by = 10
+), right = FALSE)]
+
+# Summarize the population by age group
+age_distribution <- fr[, .(Freq = sum(segoT) / sum(sex$segoT)),
+    by = age_group
+]
 
 gender_distribution <- data.table(
-  gender = c("male", "female"),
-  Freq = c(sex$segoH / sex$segoT, sex$segoM / sex$segoT)
+    gender = c("male", "female"),
+    Freq = c(sex$segoH / sex$segoT, sex$segoM / sex$segoT)
 )
 
 # Replace NA values with 0 in selected columns
@@ -35,8 +38,8 @@ dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
 dt <- dt[TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL),
     .(
-        SEXO = mean(SEXO),  # 1 = Male, 2 = Female
-        age = 2022 - mean(ANONAC),  # Calculate age
+        SEXO = mean(SEXO), # 1 = Male, 2 = Female
+        age = 2022 - mean(ANONAC), # Calculate age
         RENTAB = sum(RENTAB),
         RENTAD = sum(RENTAD),
         TRAMO = mean(TRAMO),
@@ -82,9 +85,9 @@ age_distribution <- age_distribution[age_group %in% unique_age_groups]
 
 # Now proceed with the raking process
 raked_design <- rake(
-  design = survey_design,
-  sample.margins = list(~age_group, ~gender),
-  population.margins = list(age_distribution, gender_distribution)
+    design = survey_design,
+    sample.margins = list(~age_group, ~gender),
+    population.margins = list(age_distribution, gender_distribution)
 )
 
 # Check the new raked weights
