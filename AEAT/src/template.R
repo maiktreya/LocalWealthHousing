@@ -93,4 +93,6 @@ print(raked_weights)
 
 # Example analysis: Weighted mean of income after raking
 weighted_mean_income <- svymean(~RENTAD, raked_design)
+preweighted_mean_income <- svymean(~RENTAD, survey_design)
 print(weighted_mean_income)
+print(preweighted_mean_income)
