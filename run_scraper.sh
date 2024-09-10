@@ -3,18 +3,19 @@
 # Activate virtual environment
 source /home/other/dev/github/LocalWealthHousing/env/bin/activate
 
-Run Airbnb scrapers
+# Run Airbnb scrapers
 echo "Running Airbnb Short-Term Scraper..."
-/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_scraper.py --url "https://www.airbnb.es/s/Segovia--Espa%C3%B1a--Segovia--Espa%C3%B1a/homes?refinement_paths%5B%5D=%2Fhomes&property_type_id%5B%5D=1&place_id=ChIJpTALIQA_QQ0RwPB3-yycavA&checkin=2024-09-20&checkout=2024-09-22&adults=1&tab_id=home_tab&query=Segovia%2C%20Espa%C3%B1a%2C%20Segovia%2C%20Espa%C3%B1a&flexible_trip_lengths%5B%5D=one_week&monthly_start_date=2024-10-01&monthly_length=3&monthly_end_date=2025-01-01&search_mode=regular_search&price_filter_input_type=0&price_filter_num_nights=2&channel=EXPLORE&search_type=filter_change&date_picker_type=calendar&source=structured_search_input_header" && \
+/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_scraper.py --url "https://www.airbnb.es/s/Segovia--Espa%C3%B1a--Segovia--Espa%C3%B1a/homes?refinement_paths%5B%5D=%2Fhomes&property_type_id%5B%5D=1&place_id=ChIJpTALIQA_QQ0RwPB3-yycavA&checkin=2024-09-20&checkout=2024-09-22&adults=1&tab_id=home_tab" &&
 echo "Airbnb Short-Term Scraper finished. Running Medium-Term Scraper..."
+
+echo "Running Airbnb Medium-Term Scraper..."
+/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_scraper.py --url "https://www.airbnb.es/s/Segovia--Espa%C3%B1a--Segovia--Espa%C3%B1a/homes?refinement_paths%5B%5D=%2Fhomes&property_type_id%5B%5D=1&place_id=ChIJpTALIQA_QQ0RwPB3-yycavA&checkin=2024-09-20&checkout=2024-09-22&adults=1&tab_id=home_tab" &&
+&& \
+echo "Airbnb Medium-Term Scraper finished. Running Long-Term Scraper..."
 #
-#echo "Running Airbnb Medium-Term Scraper..."
-#/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_scraper.py && \
-#echo "Airbnb Medium-Term Scraper finished. Running Long-Term Scraper..."
-#
-#echo "Running Airbnb Long-Term Scraper..."
-#/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb.scraper.py
-#echo "Airbnb Long-Term Scraper finished."
+echo "Running Airbnb Long-Term Scraper..."
+/home/other/dev/github/LocalWealthHousing/env/bin/python /home/other/dev/github/LocalWealthHousing/scrapping/src/airbnb/airbnb_scraper.py --url "https://www.airbnb.es/s/Segovia--Espa%C3%B1a--Segovia--Espa%C3%B1a/homes?refinement_paths%5B%5D=%2Fhomes&property_type_id%5B%5D=1&place_id=ChIJpTALIQA_QQ0RwPB3-yycavA&checkin=2024-09-20&checkout=2024-09-22&adults=1&tab_id=home_tab" &&
+&& \echo "Airbnb Long-Term Scraper finished."
 
 # Now run Idealista scrapers
 echo "Running Idealista Segovia Sale Scraper..."
