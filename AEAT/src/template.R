@@ -129,5 +129,10 @@ dt_grouped <- dt_post[, .(
     household_weight = sum(weights, na.rm = TRUE)  # Summing weights for the household
 ), by = IDENHOG]
 
-# Print the grouped data
-print(dt_grouped)
+# Create the survey grouped object with the initial weights
+final_survey_design <- svydesign(
+    ids = ~1,
+    data = dt_grouped,
+    weights = dt_grouped$FACTORCAL
+) # Initial survey design with elevation factors
+svymean(~RENTAB, final_survey_design)
