@@ -96,7 +96,7 @@ raked_design <- rake(
 
 # Rescale the raked weights to match Segovia's total population
 total_population_segovia <- sum(sex$segoT)
-raked_weights <- weights(raked_design)
+raked_weights <- raked_design$variables[,"FACTORCAL"]
 rescaled_weights <- raked_weights * (total_population_segovia / sum(raked_weights))
 
 # Update the survey design with the rescaled weights
@@ -135,3 +135,7 @@ final_survey_design <- svydesign(
     weights = dt_grouped$FACTORCAL
 ) # Initial survey design with elevation factors
 svymean(~RENTAB, final_survey_design) %>% print()
+
+sum(dt_grouped$FACTORCAL) %>% print()
+sum(raked_weights)  %>% print()
+sum(rescaled_weights) %>% print()
