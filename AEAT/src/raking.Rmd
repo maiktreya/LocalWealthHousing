@@ -1,0 +1,80 @@
+---
+title: "Raking Weights Example for Segovia"
+output: html_document
+---
+
+## Introduction
+
+This document outlines the steps to implement raking in R using the **age** and **gender** distributions for the population of Segovia. Raking adjusts the sample weights to match known population margins, allowing for more representative estimates in the analysis.
+
+## Step 1: Prepare Sample Data
+
+First, let's prepare a simulated dataset that contains `age`, `gender`, and `initial weights`.
+
+```{r}
+# Load required libraries
+library(survey)
+
+# Example sample dataset
+sample_data <- data.frame(
+  id = 1:10,
+  age = c(0, 1, 2, 3, 4, 50, 60, 70, 80, 90),  # Matching age groups in the population data
+  gender = c("Male", "Female", "Female", "Male", "Male", "Female", "Male", "Female", "Male", "Female"),
+  weights = rep(1, 10)  # Initial weights
+)
+
+# Create a survey design object with initial weights
+survey_design <- svydesign(ids = ~1, weights = ~weights, data = sample_data)
+```
+
+Step 2: Define Population Margins
+Next, we define the population margins for age and gender based on the population data for Segovia. Here are some example distributions for age and gender:
+
+{r}
+Copy code
+# Age distribution from the population data (only using a few groups for this example)
+age_distribution <- data.frame(
+  age = c(0, 1, 2, 3, 4, 50, 60, 70, 80, 90),
+  Freq = c(0.006791, 0.006515, 0.007027, 0.006673, 0.007834, 0.004, 0.005, 0.003, 0.002, 0.001)  # Example proportions
+)
+
+# Gender distribution from the population data
+gender_distribution <- data.frame(
+  gender = c("Male", "Female"),
+  Freq = c(0.4670, 0.5330)  # Proportions of males and females
+)
+Step 3: Apply Raking
+Now, we use the rake() function from the survey package to adjust the weights in our sample to reflect the population margins.
+
+{r}
+Copy code
+# Raking the weights to match both age and gender distributions
+raked_design <- rake(
+  design = survey_design,
+  sample.margins = list(~age, ~gender),
+  population.margins = list(age_distribution, gender_distribution)
+)
+
+# Check the new raked weights
+raked_weights <- weights(raked_design)
+raked_weights
+Step 4: Analysis with Raked Weights
+Once the weights are adjusted, we can proceed with the analysis. For instance, here we calculate the weighted mean of age in our sample:
+
+{r}
+Copy code
+# Example: Calculate the weighted mean of age after raking
+weighted_mean_age <- svymean(~age, raked_design)
+weighted_mean_age
+Conclusion
+By raking the sample weights, we can ensure that our sample better reflects the population structure of Segovia. This is particularly useful when making inferences from survey data to a larger population.
+
+vbnet
+Copy code
+
+### Key Changes:
+1. Added YAML header for metadata (title and output format).
+2. Wrapped code chunks with Rmd code delimiters (` ```{r} ... ``` `) so that they will be executed when you render the document.
+3. Structured the text into meaningful sections to make the document easy to read when rendered.
+
+You can save this content into a `.Rmd` file and render it into an HTML, PDF, or Word document. Let me

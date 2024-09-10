@@ -10,7 +10,7 @@ selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import choosen dataframe (cambiar string inicial según ruta de los datos)
 dt <- fread("LocalWealthHousing/AEAT/data/IEF-2021-new.gz")
-dt <- fread("LocalWealthHousing/AEAT/data/ief2021/pob-segovia.csv")
+fr <- fread("LocalWealthHousing/AEAT/data/ief2021/pob-segovia.csv")
 # Use lapply with .SDcols to specify columns and replace NA with 0
 dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = selected_columns]
 
