@@ -35,7 +35,7 @@ dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
 dt <- dt[TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL),
     .(
-        gender = mean(SEXO),  # 1 = Male, 2 = Female
+        SEXO = mean(SEXO),  # 1 = Male, 2 = Female
         age = 2022 - mean(ANONAC),  # Calculate age
         RENTAB = sum(RENTAB),
         RENTAD = sum(RENTAD),
