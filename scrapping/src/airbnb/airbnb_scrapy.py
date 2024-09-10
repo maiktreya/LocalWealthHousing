@@ -1,73 +1,132 @@
+import argparse
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import time
 import pandas as pd
+import logging
+import os
 
-l = []
-o = {}
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# ChromeDriver path for Ubuntu
-PATH = '/usr/bin/chromedriver'
+# Function to parse command-line arguments
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Airbnb Scraper")
+    parser.add_argument("--url", type=str, required=True, help="URL to scrape Airbnb listings from")
+    parser.add_argument("--output", type=str, default="airbnb.csv", help="Output CSV file name (default: airbnb.csv)")
+    return parser.parse_args()
 
-service = Service(executable_path=PATH)
-options = webdriver.ChromeOptions()
+# Function to wait for element
+def wait_for_element(driver, by, value, timeout=10):
+    return WebDriverWait(driver, timeout).until(EC.presence_of_element_located((by, value)))
 
-# Optional: Run Chrome in headless mode
-options.add_argument("--headless")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
-
-driver = webdriver.Chrome(service=service, options=options)
-
-# URL of the first page
-driver.get("https://www.airbnb.es/s/Segovia--Spain/homes?refinement_paths%5B%5D=%2Fhomes&place_id=ChIJr5ElYupOQQ0RsMvzWgeHBQM&checkin=2024-09-13&checkout=2024-09-15&adults=1")
-time.sleep(2)
-
-def extract_data():
-    """Function to extract data from the current page"""
+# Function to extract data
+def extract_data(driver):
+    listings_data = []
     html_content = driver.page_source
     soup = BeautifulSoup(html_content, 'html.parser')
-    allData = soup.find_all("div", {"itemprop": "itemListElement"})
+    all_listings = soup.find_all("div", {"data-testid": "card-container"})
 
-    for i in range(len(allData)):
-        try:
-            o["property-title"] = allData[i].find('div', {'data-testid': 'listing-card-title'}).text.strip()
-        except:
-            o["property-title"] = None
+    for item in all_listings:
+        listing = {}
 
         try:
-            o["price_with_tax"] = allData[i].find('div', {'class': '_i5duul'}).find('div', {"class": "_10d7v0r"}).text.strip().split(" total")[0]
-        except:
-            o["price_with_tax"] = None
+            listing["property_title"] = item.find('div', {'data-testid': 'listing-card-title'}).text.strip()
+        except AttributeError:
+            listing["property_title"] = None
 
-        l.append(o.copy())
+        try:
+            listing["price_with_tax"] = item.find('div', {'class': '_i5duul'}).find('div', {"class": "_10d7v0r"}).text.strip().split(" total")[0]
+        except AttributeError:
+            listing["price_with_tax"] = None
 
-# Pagination loop with a page limit
-page_limit = 3  # Set your page limit here
-current_page = 1  # Start from page 1
+        try:
+            property_type = item.find('span', string=lambda text: text and any(word in text.lower() for word in ['apartamento', 'casa', 'habitación']))
+            listing["property_type"] = property_type.text.strip() if property_type else None
+        except AttributeError:
+            listing["property_type"] = None
 
-while current_page <= page_limit:
-    extract_data()  # Extract data from the current page
+        try:
+            beds_rooms = item.find('span', string=lambda text: text and any(word in text.lower() for word in ['dormitorio', 'cama', 'baño']))
+            listing["beds_rooms"] = beds_rooms.text.strip() if beds_rooms else None
+        except AttributeError:
+            listing["beds_rooms"] = None
+
+        listings_data.append(listing)
+    
+    return listings_data
+
+# Function to handle popups
+def handle_popups(driver):
+    try:
+        close_button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[@aria-label='Close']"))
+        )
+        close_button.click()
+        logger.info("Popup closed")
+    except TimeoutException:
+        logger.info("No popup found or couldn't close popup")
+
+# Main scraper function
+def scrape_airbnb(url, output_file):
+    # ChromeDriver path for Ubuntu
+    CHROMEDRIVER_PATH = '/usr/bin/chromedriver'
+    service = Service(executable_path=CHROMEDRIVER_PATH)
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+
+    driver = webdriver.Chrome(service=service, options=options)
+
+    listings_data = []
+    page_limit = 20
+    current_page = 1
 
     try:
-        # Wait until the "Next" button is available and clickable, then click it
-        next_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//a[@aria-label='Next']"))
-        )
-        next_button.click()
-        time.sleep(2)  # Give some time for the next page to load
-        current_page += 1  # Increment the page counter
+        driver.get(url)
+        wait_for_element(driver, By.CSS_SELECTOR, "[data-testid='card-container']")
+
+        while current_page <= page_limit:
+            logger.info(f"Scraping page {current_page}")
+            handle_popups(driver)
+            listings_data.extend(extract_data(driver))
+
+            try:
+                next_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "a[aria-label='Siguiente']"))
+                )
+                next_button.click()
+                logger.info("Clicked 'Next' button")
+                wait_for_element(driver, By.CSS_SELECTOR, "[data-testid='card-container']")
+                current_page += 1
+            except TimeoutException:
+                logger.info("No 'Next' button found or not clickable. Ending scraping.")
+                break
+            except Exception as e:
+                logger.error(f"Error while navigating to next page: {str(e)}")
+                break
     except Exception as e:
-        print(f"Stopping due to exception or no more pages available on page {current_page}: {e}")
-        break
+        logger.error(f"An error occurred: {str(e)}")
+    finally:
+        driver.quit()
 
-driver.quit()
+    # Save data to CSV
+    try:
+        df = pd.DataFrame(listings_data)
+        df.to_csv(output_file, index=False, encoding='utf-8')
+        logger.info(f"Scraped {len(listings_data)} listings. Data saved to {output_file}")
+    except Exception as e:
+        logger.error(f"Error saving to CSV: {str(e)}")
 
-# Save data to CSV
-df = pd.DataFrame(l)
-df.to_csv('airbnb.csv', index=False, encoding='utf-8')
-print(l)
+# Entry point for the script
+if __name__ == "__main__":
+    args = parse_arguments()
+    scrape_airbnb(args.url, args.output)
