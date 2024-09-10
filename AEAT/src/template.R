@@ -122,11 +122,10 @@ dt_post <- raked_design$variables %>% data.table()
 
 # Example: Summing income-related variables and calculating the mean age for each household
 dt_grouped <- dt_post[, .(
-    total_RENTAD = sum(RENTAD, na.rm = TRUE),  # Summing income RENTAD for the household
-    total_RENTAB = sum(RENTAB, na.rm = TRUE),  # Summing income RENTAB for the household
-    total_PATINMO = sum(PATINMO, na.rm = TRUE),  # Summing property assets for the household
-    avg_age = mean(age, na.rm = TRUE),  # Averaging age for the household members
-    household_weight = sum(weights, na.rm = TRUE)  # Summing weights for the household
+    RENTAD = sum(RENTAD, na.rm = TRUE),  # Summing income RENTAD for the household
+    RENTAB = sum(RENTAB, na.rm = TRUE),  # Summing income RENTAB for the household
+    PATINMO = sum(PATINMO, na.rm = TRUE),  # Summing property assets for the household
+    FACTORCAL = sum(weights, na.rm = TRUE)  # Summing weights for the household
 ), by = IDENHOG]
 
 # Create the survey grouped object with the initial weights
