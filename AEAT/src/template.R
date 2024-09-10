@@ -125,7 +125,7 @@ dt_grouped <- dt_post[, .(
     RENTAD = sum(RENTAD, na.rm = TRUE),  # Summing income RENTAD for the household
     RENTAB = sum(RENTAB, na.rm = TRUE),  # Summing income RENTAB for the household
     PATINMO = sum(PATINMO, na.rm = TRUE),  # Summing property assets for the household
-    FACTORCAL = sum(weights, na.rm = TRUE)  # Summing weights for the household
+    FACTORCAL = sum(FACTORCAL, na.rm = TRUE)  # Summing weights for the household
 ), by = IDENHOG]
 
 # Create the survey grouped object with the initial weights
