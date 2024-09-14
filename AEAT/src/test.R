@@ -137,7 +137,8 @@ final_survey_design <- svydesign(
 svymean(~RENTAD, final_survey_design) %>% print()
 
 sum(final_survey_design$variables[,"FACTORCAL" ]) %>% print()
-sum(raked_weights)  %>% print()
+sum(.
+)  %>% print()
 sum(rescaled_weights) %>% print()
 
 #
