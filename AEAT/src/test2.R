@@ -26,10 +26,14 @@ raked_design <- rake(
 total_population_segovia <- sum(sex$segoT)
 raked_weights <- raked_design$variables[, "FACTORCAL"]
 rescaled_weights <- raked_weights * (total_population_segovia / sum(raked_weights))
+raked_design$variables[, "FACTORCAL"] <- rescaled_weights
 
-raked_design <- update(raked_design, weights = rescaled_weights)
+raked_design2 <- update(raked_design, weights = raked_design$variables[, "FACTORCAL"])
 
 svymean(~RENTAD, raked_design) %>% print()
 svymean(~RENTAD, survey_design) %>% print()
+svymean(~RENTAD, raked_design2) %>% print()
+
 svymean(~RENTAB, raked_design) %>% print()
 svymean(~RENTAB, survey_design) %>% print()
+svymean(~RENTAB, raked_design2) %>% print()
