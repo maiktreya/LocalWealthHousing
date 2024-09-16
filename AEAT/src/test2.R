@@ -1,4 +1,3 @@
-
 source("LocalWealthHousing/AEAT/src/template.R")
 dt_sg <- dt_sg[!is.na(FACTORCAL)]
 
@@ -21,7 +20,7 @@ raked_design <- rake(
     design = survey_design,
     sample.margins = list(~age_group, ~gender),
     population.margins = list(age_distribution2, gender_distribution),
-    control = list(maxit =10, epsilon = 1, verbose=FALSE)
+    control = list(maxit = 10, epsilon = 1, verbose = FALSE)
 )
 
 # Rescale the raked weights to match Segovia's total population

@@ -16,7 +16,7 @@ fr <- fread("LocalWealthHousing/AEAT/data/ief2021/pob-segovia.csv") # from INE p
 sex <- fr[1, .(age, segoT, segoH, segoM)]
 fr <- fr[-1, .(age, segoT, segoH, segoM)]
 
-fr[, age_group := cut(as.numeric(age), breaks = seq(0, 110, by = 15), right = FALSE)]
+fr[, age_group := cut(as.numeric(age), breaks = seq(0, 110, by = 30), right = FALSE)]
 
 # Summarize the population by age group
 age_distribution <- fr[, .(Freq = sum(segoT) / sum(sex$segoT)), by = age_group]
@@ -35,7 +35,7 @@ dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 # Identify towns to analyze
 dt[CCAA == "7" & PROV == "40" & MUNI == "194", segovia := 1]
 
-dt1 <- dt[TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL),
+dt2 <- dt[!is.na(FACTORCAL),
     .(
         IDENHOG = mean(IDENHOG),
         segovia = mean(segovia),
@@ -56,17 +56,17 @@ dt1 <- dt[TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL),
 ]
 
 # Rename the reference column to match 'ref_unit'
-setnames(dt1, "reference", as.character(ref_unit))
+setnames(dt2, "reference", as.character(ref_unit))
 
 # Ensure gender is categorical and matches the population margin
-dt[, gender := ifelse(SEXO == 1, "male", "female")]
+dt2[, gender := ifelse(SEXO == 1, "male", "female")]
 
 # Create age groups to match the age distribution
-dt[, age_group := cut(2022 - ANONAC, breaks = seq(0, 110, by = 15), right = FALSE)]
+dt2[, age_group := cut(2022 - ANONAC, breaks = seq(0, 110, by = 30), right = FALSE)]
 
 # Remove rows with missing age groups (or impute missing values if needed)
-dt <- dt[!is.na(age_group)]
+dt2 <- dt[!is.na(age_group)]
 
 # Restrict the survey to the city of interest
-dt_sg <- subset(dt, segovia == 1)
+dt_sg <- subset(dt2, segovia == 1)
 
