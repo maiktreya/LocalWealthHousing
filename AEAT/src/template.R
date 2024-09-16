@@ -9,14 +9,14 @@ ref_unit <- "IDENPER" # Use either IDENPER for personal or IDENHOG for household
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import chosen dataframe (change string according to the data file path)
-dt <- fread("AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
-fr <- fread("AEAT/data/ief2021/pob-segovia.csv") # from INE population distribution
+dt <- fread("LocalWealthHousing/AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
+fr <- fread("LocalWealthHousing/AEAT/data/ief2021/pob-segovia.csv") # from INE population distribution
 
 # Process the population data (assuming the first row contains overall totals)
 sex <- fr[1, .(age, segoT, segoH, segoM)]
 fr <- fr[-1, .(age, segoT, segoH, segoM)]
 
-fr[, age_group := cut(as.numeric(age), breaks = seq(0, 100, by = 15), right = FALSE)]
+fr[, age_group := cut(as.numeric(age), breaks = seq(0, 110, by = 12), right = FALSE)]
 
 # Summarize the population by age group
 age_distribution <- fr[, .(Freq = sum(segoT) / sum(sex$segoT)), by = age_group]
@@ -62,44 +62,41 @@ setnames(dt, "reference", as.character(ref_unit))
 dt[, gender := ifelse(SEXO == 1, "male", "female")]
 
 # Create age groups to match the age distribution
-dt[, age_group := cut(age, breaks = seq(0, 100, by = 15), right = FALSE)]
+dt[, age_group := cut(age, breaks = seq(0, 110, by = 12), right = FALSE)]
 
 # Remove rows with missing age groups (or impute missing values if needed)
 dt <- dt[!is.na(age_group)]
 
-# Check the structure of the age and gender variables
-table(dt$age_group)
-table(dt$gender)
+# Restrict the survey to the city of interest
+dt_sg <- subset(dt, segovia == 1)
 
 # Create the survey design object with the initial weights
 survey_design <- svydesign(
     ids = ~1,
-    data = dt,
-    weights = dt$FACTORCAL
+    data = dt_sg,
+    weights = dt_sg$FACTORCAL
 ) # Initial survey design with elevation factors
 
-# Restrict the survey to the city of interest
-survey_design_segovia <- subset(survey_design, segovia == 1)
-
 # Get the unique age groups from the sample data
-unique_age_groups <- unique(dt[segovia == 1, age_group])
+unique_age_groups <- unique(dt_sg$age_group)
 
 # Subset the population margin to include only age groups present in the sample
-age_distribution <- age_distribution[age_group %in% unique_age_groups]
+age_distribution2 <- age_distribution[age_group %in% unique_age_groups]
+
 
 # Proceed with the raking process
 raked_design <- rake(
-    design = survey_design_segovia,
+    design = survey_design,
     sample.margins = list(~age_group, ~gender),
-    population.margins = list(age_distribution, gender_distribution)
+    population.margins = list(age_distribution2, gender_distribution),
+    control = list(maxit =10, epsilon = 1, verbose=FALSE)
 )
 
 # Rescale the raked weights to match Segovia's total population
 total_population_segovia <- sum(sex$segoT)
-raked_weights <- raked_design$variables[,"FACTORCAL"]
+raked_weights <- raked_design$variables[, "FACTORCAL"]
 rescaled_weights <- raked_weights * (total_population_segovia / sum(raked_weights))
 
-# Update the survey design with the rescaled weights
 raked_design <- update(raked_design, weights = rescaled_weights)
 
-# Check the rescaled weights
+svymean(~RENTAD, raked_design2) %>% print()
