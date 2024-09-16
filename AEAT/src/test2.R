@@ -9,3 +9,7 @@ survey_design <- svydesign(
 
 svymean(~RENTAD, survey_design) %>% print()
 svymean(~RENTAB, survey_design) %>% print()
+
+
+hist_rentaB <- svyhist(~RENTAB, survey_design)
+cdf_rentaB <- svycdf(~RENTAB, survey_design)
