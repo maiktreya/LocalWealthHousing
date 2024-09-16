@@ -1,5 +1,16 @@
 
 ## Datos básicos municipales IRPF
+	Renta neta media por persona	Renta neta media por hogar	Media de la renta por unidad de consumo	Mediana de la renta por unidad de consumo	Renta bruta media por persona	Renta bruta media por hogar
+2021	2021	2021	2021	2021	2021
+40194 
+Segovia	 14.102	Renta Neta Media por persona
+         34.272	Renta Neta Media por hogar
+         20.625	Media de la renta por unidad de consumo
+         18.550	Mediana de la renta por unidad de consumo
+         16.967	Renta bruta media por persona
+         41.235 Renta bruta media por hogar
+
+
 
 Obtenidos para 2021 de los datos suministrados por AEAT en: https://sede.agenciatributaria.gob.es/Sede/datosabiertos/catalogo/hacienda/Estadistica_de_los_declarantes_del_IRPF_por_municipios.shtml
 - San Cristobal
