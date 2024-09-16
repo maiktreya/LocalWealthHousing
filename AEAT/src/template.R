@@ -62,7 +62,7 @@ setnames(dt2, "reference", as.character(ref_unit))
 dt2[, gender := ifelse(SEXO == 1, "male", "female")]
 
 # Create age groups to match the age distribution
-dt2[, age_group := cut(2022 - ANONAC, breaks = seq(0, 110, by = 30), right = FALSE)]
+dt2[, age_group := cut(age, breaks = seq(0, 110, by = 30), right = FALSE)]
 
 # Remove rows with missing age groups (or impute missing values if needed)
 dt2 <- dt[!is.na(age_group)]
