@@ -10,6 +10,21 @@ selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import chosen dataframe (change string according to the data file path)
 dt <- fread("LocalWealthHousing/AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
+fr <- fread("LocalWealthHousing/AEAT/data/ief2021/pob-segovia.csv") # from INE population distribution
+
+# Process the population data (assuming the first row contains overall totals)
+sex <- fr[1, .(age, segoT, segoH, segoM)]
+fr <- fr[-1, .(age, segoT, segoH, segoM)]
+
+fr[, age_group := cut(as.numeric(age), breaks = seq(0, 110, by = 25), right = FALSE)]
+
+# Summarize the population by age group
+age_distribution <- fr[, .(Freq = sum(segoT) / sum(sex$segoT)), by = age_group]
+
+gender_distribution <- data.table(
+    gender = c("male", "female"),
+    Freq = c(sex$segoH / sex$segoT, sex$segoM / sex$segoT)
+)
 
 # Replace NA values with 0 in selected columns
 dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = selected_columns]
@@ -42,6 +57,15 @@ dt2 <- dt[!is.na(FACTORCAL),
 
 # Rename the reference column to match 'ref_unit'
 setnames(dt2, "reference", as.character(ref_unit))
+
+# Ensure gender is categorical and matches the population margin
+dt2[, gender := ifelse(SEXO == 1, "male", "female")]
+
+# Create age groups to match the age distribution
+dt2[, age_group := cut(age, breaks = seq(0, 110, by = 25), right = FALSE)]
+
+# Remove rows with missing age groups (or impute missing values if needed)
+dt2 <- dt2[!is.na(age_group)]
 
 # Restrict the survey to the city of interest
 dt_sg <- subset(dt2, segovia == 1)
