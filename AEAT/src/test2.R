@@ -1,5 +1,6 @@
 
 source("LocalWealthHousing/AEAT/src/template.R")
+dt_sg <- dt_sg[!is.na(FACTORCAL)]
 
 # Create the survey design object with the initial weights
 survey_design <- svydesign(
@@ -31,6 +32,6 @@ rescaled_weights <- raked_weights * (total_population_segovia / sum(raked_weight
 raked_design <- update(raked_design, weights = rescaled_weights)
 
 svymean(~RENTAD, raked_design) %>% print()
-svytotal(~RENTAD, raked_design) %>% print()
+svymean(~RENTAD, survey_design) %>% print()
 svymean(~RENTAB, raked_design) %>% print()
-svytotal(~RENTAB, raked_design) %>% print()
+svymean(~RENTAB, survey_design) %>% print()
