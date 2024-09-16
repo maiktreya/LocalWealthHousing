@@ -99,4 +99,4 @@ rescaled_weights <- raked_weights * (total_population_segovia / sum(raked_weight
 
 raked_design <- update(raked_design, weights = rescaled_weights)
 
-svymean(~RENTAD, raked_design2) %>% print()
+svymean(~RENTAD, raked_design) %>% print()
