@@ -65,7 +65,7 @@ dt2[, gender := ifelse(SEXO == 1, "male", "female")]
 dt2[, age_group := cut(age, breaks = seq(0, 110, by = 30), right = FALSE)]
 
 # Remove rows with missing age groups (or impute missing values if needed)
-dt2 <- dt[!is.na(age_group)]
+dt2 <- dt2[!is.na(age_group)]
 
 # Restrict the survey to the city of interest
 dt_sg <- subset(dt2, segovia == 1)

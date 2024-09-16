@@ -1,5 +1,4 @@
 source("LocalWealthHousing/AEAT/src/template.R")
-dt_sg <- dt_sg[!is.na(FACTORCAL)]
 
 # Create the survey design object with the initial weights
 survey_design <- svydesign(
