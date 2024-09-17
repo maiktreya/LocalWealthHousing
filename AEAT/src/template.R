@@ -9,7 +9,7 @@ ref_unit <- "IDENHOG" # Use either IDENPER for personal or IDENHOG for household
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import chosen dataframe (change string according to the data file path)
-dt <- fread("AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
+dt <- fread("LocalWealthHousing/AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
 
 # Replace NA values with 0 in selected columns
 dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = selected_columns]
@@ -49,5 +49,3 @@ dt2 <- dt[!is.na(FACTORCAL),
 # Rename the reference column to match 'ref_unit'
 setnames(dt2, "reference", as.character(ref_unit))
 
-# Restrict the survey to the city of interest
-dt_sg <- subset(dt2, segovia == 1)
