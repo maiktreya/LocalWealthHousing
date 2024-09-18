@@ -13,5 +13,4 @@ survey_design <- svydesign(
 # performe representativness test on key variables with known distributional values
 test_rep1 <- svyttest(I(RENTAD - 34272) ~ 0, subset(survey_design, segovia == 1)) %>% print()
 test_rep2 <- svyttest(I(RENTAB - 41235) ~ 0, subset(survey_design, segovia == 1)) %>% print()
-test_rep3 <- svyttest(I(RENTAD - 34272), subset(survey_design, segovia == 1)) %>% print()
-test_rep4 <- svyttest(I(RENTAB - 41235), subset(survey_design, segovia == 1)) %>% print()
+confint
