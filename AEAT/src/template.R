@@ -19,6 +19,7 @@ dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDc
 dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
 # Identify towns to analyze
+dt[, MUESTRA := 0] # add a column for the subsample identifier
 dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
 dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
 dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
