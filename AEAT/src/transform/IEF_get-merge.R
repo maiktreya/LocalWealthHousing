@@ -1,4 +1,5 @@
-# Fichero principal 2021
+# Piping AEAT anual realease files into a single efficient data.table matrix stored as gz file
+
 library(magrittr)
 library(readr)
 library(data.table)
