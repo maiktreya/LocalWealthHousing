@@ -13,18 +13,8 @@ survey_design <- svydesign(
 # Subsample for a reference municipio
 subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ > 0)
 
-svymean(~RENTISTA, survey_design) %>% print()
-svymean(~RENTAB, subsample) %>% print()
-
-hist_rentaB <- svyhist(
-    ~RENTA_ALQ,
-    design = subsample,
-    breaks = 30,
-    probability = TRUE
-)
-
 # obtain quantiles for a given variable
-quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.5, 0.90, 0.95, 0.99)) %>% print()
+quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.90, 0.95, 0.99))
 quant <- data.table(quantiles$RENTA_ALQ[, 1], seq_along(quantiles$RENTA_ALQ[, 1]) - 1)
 colnames(quant) <- c("cuantil", "index")
 
@@ -37,9 +27,12 @@ for (i in seq_along(quant$index)) {
     prop <- (svytotal(~RENTA_ALQ, subset(subsample, RENTA_ALQ > tier)) / total_general) %>% round(3)
     proportions[[i]] <- data.table(quantil = quantil, tier = tier, prop = prop[1])
 }
-proportions <- rbindlist(proportions)
 
-print(proportions)
+# print some exploratory results
+proportions <- rbindlist(proportions) %>% print()
+svymean(~RENTISTA, survey_design) %>% print()
+svymean(~RENTAB, subsample) %>% print()
+histrentaB <- svyhist(~RENTA_ALQ, design = subsample,  breaks = 30)
 
 # export the output
 fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros", sel_year, ".csv"))
