@@ -11,15 +11,10 @@ survey_design <- svydesign(
 )
 
 # Subsample for a reference municipio
-subsample <- subset(survey_design, MUESTRA == 1)
+subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ > 0)
 
-svymean(~RENTAD, subsample) %>% print()
+# calculate a few statistics
 svymean(~RENTAB, subsample) %>% print()
-svymean(~RENTISTA, subsample) %>% print()
-svymean(~RENTA_ALQ, subsample) %>% print()
-quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = seq(0, 1, 0.1)) %>% print()
-upper <- quantiles$RENTA_ALQ[nrow(quantiles$RENTA_ALQ)]
-lower <- quantiles$RENTA_ALQ[1]
 
 hist_rentaB <- svyhist(
     ~RENTA_ALQ,
@@ -27,9 +22,19 @@ hist_rentaB <- svyhist(
     breaks = 30,
     probability = TRUE
 )
-cdf_rentaB <- svycdf(~RENTAB, subset(subsample, RENTAB < upper))
 
-hist_rentaB <- svymean(~RENTA_ALQ, subsample)
-cdf_rentaB <- svycdf(~RENTA_ALQ, subsample)
+# obtain quantiles for a given variable
+quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = seq(0.1, 0.9, 0.1)) %>% print()
 quant <- data.table(quantiles$RENTA_ALQ[, 1], seq_along(quantiles$RENTA_ALQ[, 1]) - 1)
 colnames(quant) <- c("cuantil", "index")
+
+# obtain inequality proportions
+total_general <- svytotal(~RENTA_ALQ, subsample)["RENTA_ALQ"]
+proportions <- list()
+for (i in seq_along(quant$index) - 1) {
+    ind <- quant[index == i]$cuantil
+    prop <- svytotal(~RENTA_ALQ, subset(subsample, RENTA_ALQ > ind)) / total_general
+    proportioasfans[[i + 1]] <- data.table(ind = ind, prop = prop)
+}
+proportions <- rbindlist(proportions)
+print(proportions)
