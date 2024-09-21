@@ -1,9 +1,7 @@
 # Obtain t-statisctics for representative mean forAEAT subsample
-
+library(survey)
+rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 source("AEAT/src/template.R")
-
-dt[, rentista := 0][RENTA_ALQ > 0, rentista := 1]
-dt[RENTA_ALQ < 0, RENTA_ALQ := 0]
 
 # Create the survey design object with the initial weights
 survey_design <- svydesign(

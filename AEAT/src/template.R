@@ -1,8 +1,8 @@
 # Rscript for Resampling Segovia
 library("magrittr")
 library("data.table")
-library("survey")
-rm(list = ls()) # Clean environment to avoid RAM bottlenecks
+rm(list = ls()) # clean enviroment to avoid ram bottlenecks
+
 
 # Use either IDENPER for personal or IDENHOG for household level
 sel_year <- 2021
@@ -47,3 +47,7 @@ dt <- dt[!is.na(FACTORCAL),
 
 # Rename the reference column to match 'ref_unit'
 setnames(dt, "reference", as.character(ref_unit))
+
+# Define any new categorical variable before setting the survey object
+dt[, RENTISTA := 0][RENTA_ALQ > 0, RENTISTA := 1]
+dt[RENTA_ALQ < 0, RENTA_ALQ := 0]
