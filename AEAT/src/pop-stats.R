@@ -33,7 +33,7 @@ total_general <- svytotal(~RENTA_ALQ, subsample)["RENTA_ALQ"]
 proportions <- list()
 for (i in seq_along(quant$index) - 1) {
     tier <- quant[index == i]$cuantil
-    quantil <- quant[index == i]$index
+    quantil <- row.names(quantiles$RENTA_ALQ)[i]
     prop <- svytotal(~RENTA_ALQ, subset(subsample, RENTA_ALQ > tier)) / total_general
     proportions[[i + 1]] <- data.table(quantil = quantil, tier = tier, prop = prop)
 }
