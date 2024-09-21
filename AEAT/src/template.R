@@ -19,21 +19,18 @@ dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDc
 dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
 # Identify towns to analyze
-dt[CCAA == "7" & PROV == "40" & MUNI == "194", segovia := 1]
-dt[CCAA == "7" & PROV == "40" & MUNI == "112", lastrilla := 1]
-dt[CCAA == "7" & PROV == "40" & MUNI == "906", sancris := 1]
-dt[CCAA == "7" & PROV == "40" & MUNI == "155", palazuelos := 1]
+dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
+dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
+dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
+dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
 
-dt2 <- dt[!is.na(FACTORCAL),
+dt <- dt[!is.na(FACTORCAL),
     .(
         IDENHOG = mean(IDENHOG),
         IDENPER = mean(IDENPER),
-        segovia = mean(segovia),
-        lastrilla = mean(lastrilla),
-        sancris = mean(sancris),
-        palazuelos = mean(palazuelos),
+        MUESTRA = mean(MUESTRA),
         SEXO = mean(SEXO), # 1 = Male, 2 = Female
-        age = 2022 - mean(ANONAC), # Calculate age
+        AGE = 2022 - mean(ANONAC), # Calculate age
         RENTAB = sum(RENTAB),
         RENTAD = sum(RENTAD),
         TRAMO = mean(TRAMO),
@@ -49,4 +46,4 @@ dt2 <- dt[!is.na(FACTORCAL),
 ]
 
 # Rename the reference column to match 'ref_unit'
-setnames(dt2, "reference", as.character(ref_unit))
+setnames(dt, "reference", as.character(ref_unit))

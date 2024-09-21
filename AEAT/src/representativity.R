@@ -1,13 +1,13 @@
 source("AEAT/src/template.R")
 
-dt2[, rentista := 0][RENTA_ALQ > 0, rentista := 1]
-dt2[RENTA_ALQ < 0, RENTA_ALQ := 0]
+dt[, rentista := 0][RENTA_ALQ > 0, rentista := 1]
+dt[RENTA_ALQ < 0, RENTA_ALQ := 0]
 
 # Create the survey design object with the initial weights
 survey_design <- svydesign(
     ids = ~1,
-    data = dt2,
-    weights = dt2$FACTORCAL
+    data = dt,
+    weights = dt$FACTORCAL
 )
 
 # performe representativness test on key variables with known distributional values
