@@ -1,4 +1,4 @@
-source("LocalWealthHousing/AEAT/src/template.R")
+source("AEAT/src/template.R")
 
 dt2[, rentista := 0][RENTA_ALQ > 0, rentista := 1]
 dt2[RENTA_ALQ < 0, RENTA_ALQ := 0]
