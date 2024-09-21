@@ -24,7 +24,7 @@ hist_rentaB <- svyhist(
 )
 
 # obtain quantiles for a given variable
-quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = seq(0.1, 0.9, 0.1)) %>% print()
+quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = seq(0.5, 0.99, 0.05)) %>% print()
 quant <- data.table(quantiles$RENTA_ALQ[, 1], seq_along(quantiles$RENTA_ALQ[, 1]) - 1)
 colnames(quant) <- c("cuantil", "index")
 
@@ -32,9 +32,9 @@ colnames(quant) <- c("cuantil", "index")
 total_general <- svytotal(~RENTA_ALQ, subsample)["RENTA_ALQ"]
 proportions <- list()
 for (i in seq_along(quant$index) - 1) {
-    ind <- quant[index == i]$cuantil
+    tier <- quant[index == i]$cuantil
     prop <- svytotal(~RENTA_ALQ, subset(subsample, RENTA_ALQ > ind)) / total_general
-    proportioasfans[[i + 1]] <- data.table(ind = ind, prop = prop)
+    proportions[[i + 1]] <- data.table(quantil = i, tier = tier, prop = prop)
 }
 proportions <- rbindlist(proportions)
 print(proportions)
