@@ -34,8 +34,8 @@ proportions <- list()
 for (i in seq_along(quant$index) - 1) {
     tier <- quant[index == i]$cuantil
     quantil <- row.names(quantiles$RENTA_ALQ)[i]
-    prop <- svytotal(~RENTA_ALQ, subset(subsample, RENTA_ALQ > tier)) / total_general
-    proportions[[i + 1]] <- data.table(quantil = quantil, tier = tier, prop = prop)
+    prop <- (svytotal(~RENTA_ALQ, subset(subsample, RENTA_ALQ > tier)) / total_general) %>% round(3)
+    proportions[[i + 1]] <- data.table(quantil = quantil, tier = tier, prop = prop[1])
 }
 proportions <- rbindlist(proportions)
 print(proportions)
