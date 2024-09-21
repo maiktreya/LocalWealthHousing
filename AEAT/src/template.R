@@ -28,7 +28,6 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
 dt <- dt[!is.na(FACTORCAL),
     .(
         IDENHOG = mean(IDENHOG),
-        MUESTRA = mean(MUESTRA),
         SEXO = mean(SEXO), # 1 = Male, 2 = Female
         AGE = 2022 - mean(ANONAC), # Calculate age
         RENTAB = sum(RENTAB),
@@ -40,7 +39,8 @@ dt <- dt[!is.na(FACTORCAL),
         FACTORCAL = mean(FACTORCAL),
         CCAA = mean(CCAA),
         PROV = mean(PROV),
-        MUNI = mean(MUNI)
+        MUNI = mean(MUNI),
+        MUESTRA = mean(MUESTRA)
     ),
     by = .(reference = get(ref_unit))
 ]
