@@ -1,7 +1,7 @@
-# Obtain population statistics for IAT subsample
+# Obtain population statistics for AEAT subsample
 source("AEAT/src/template.R")
 
-dt[, rentista := 0][RENTA_ALQ > 0, rentista := 1]
+dt[, RENTISTA := 0][RENTA_ALQ > 0, RENTISTA := 1]
 dt[RENTA_ALQ < 0, RENTA_ALQ := 0]
 
 # Create the survey design object with the initial weights
@@ -14,9 +14,9 @@ survey_design <- svydesign(
 # Subsample for a reference municipio
 subsample <- subset(survey_design, MUESTRA == 1)
 
-svymean(~RENTAD, save.image(ubsample)) %>% print()
-svymean(~RENTAB, save.image(ubsample)) %>% print()
-svymean(~rentista, save.image(ubsample)) %>% print()
+svymean(~RENTAD, subsample) %>% print()
+svymean(~RENTAB, subsample) %>% print()
+svymean(~RENTISTA, subsample) %>% print()
 svymean(~RENTA_ALQ, subsample) %>% print()
 quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = seq(0, 1, 0.1)) %>% print()
 upper <- quantiles$RENTA_ALQ[nrow(quantiles$RENTA_ALQ)]
@@ -30,7 +30,7 @@ hist_rentaB <- svyhist(
 )
 cdf_rentaB <- svycdf(~RENTAB, subset(subsample, RENTAB < upper))
 
-hist_rentaB <- svymean(~RENTA_ALQ, save.image(ubsample))
-cdf_rentaB <- svycdf(~RENTA_ALQ, save.image(ubsample))
+hist_rentaB <- svymean(~RENTA_ALQ, subsample)
+cdf_rentaB <- svycdf(~RENTA_ALQ, subsample)
 quant <- data.table(quantiles$RENTA_ALQ[, 1], seq_along(quantiles$RENTA_ALQ[, 1]) - 1)
 colnames(quant) <- c("cuantil", "index")
