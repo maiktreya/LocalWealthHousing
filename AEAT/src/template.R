@@ -29,7 +29,7 @@ dt <- dt[!is.na(FACTORCAL),
     .(
         IDENHOG = mean(IDENHOG),
         SEXO = mean(SEXO), # 1 = Male, 2 = Female
-        AGE = 2022 - mean(ANONAC), # Calculate age
+        AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
         RENTAB = sum(RENTAB),
         RENTAD = sum(RENTAD),
         TRAMO = mean(TRAMO),
