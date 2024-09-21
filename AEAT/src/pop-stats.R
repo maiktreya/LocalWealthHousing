@@ -13,7 +13,7 @@ survey_design <- svydesign(
 # Subsample for a reference municipio
 subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ > 0)
 
-# calculate a few statistics
+svymean(~RENTISTA, survey_design) %>% print()
 svymean(~RENTAB, subsample) %>% print()
 
 hist_rentaB <- svyhist(
@@ -24,18 +24,22 @@ hist_rentaB <- svyhist(
 )
 
 # obtain quantiles for a given variable
-quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = seq(0.5, 0.99, 0.05)) %>% print()
+quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.5, 0.90, 0.95, 0.99)) %>% print()
 quant <- data.table(quantiles$RENTA_ALQ[, 1], seq_along(quantiles$RENTA_ALQ[, 1]) - 1)
 colnames(quant) <- c("cuantil", "index")
 
 # obtain inequality proportions
 total_general <- svytotal(~RENTA_ALQ, subsample)["RENTA_ALQ"]
 proportions <- list()
-for (i in seq_along(quant$index) - 1) {
-    tier <- quant[index == i]$cuantil
+for (i in seq_along(quant$index)) {
+    tier <- quant[index == i - 1]$cuantil
     quantil <- row.names(quantiles$RENTA_ALQ)[i]
     prop <- (svytotal(~RENTA_ALQ, subset(subsample, RENTA_ALQ > tier)) / total_general) %>% round(3)
-    proportions[[i + 1]] <- data.table(quantil = quantil, tier = tier, prop = prop[1])
+    proportions[[i]] <- data.table(quantil = quantil, tier = tier, prop = prop[1])
 }
 proportions <- rbindlist(proportions)
+
 print(proportions)
+
+# export the output
+fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros", sel_year, ".csv"))
