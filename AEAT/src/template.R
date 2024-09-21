@@ -46,9 +46,9 @@ dt <- dt[!is.na(FACTORCAL),
 ]
 
 # Rename the reference column to match 'ref_unit'
-ifelse(ref_unit == "IDENPER",
-    setnames(dt, "reference", as.character(ref_unit)),
-    dt[, -c("reference")]
+ifelse(ref_unit == "IDENHOG",
+    dt <- dt[, -c("reference")],
+    setnames(dt, "reference", as.character(ref_unit))
 )
 
 # Define any new categorical variable before setting the survey object
