@@ -26,6 +26,7 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "155", palazuelos := 1]
 dt2 <- dt[!is.na(FACTORCAL),
     .(
         IDENHOG = mean(IDENHOG),
+        IDENPER = mean(IDENHOG),
         segovia = mean(segovia),
         lastrilla = mean(lastrilla),
         sancris = mean(sancris),
