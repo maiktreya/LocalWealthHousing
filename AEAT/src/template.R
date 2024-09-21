@@ -4,12 +4,13 @@ library("data.table")
 library("survey")
 rm(list = ls()) # Clean environment to avoid RAM bottlenecks
 
-ref_survey <- "IEF" # Either IEF or EFF
-ref_unit <- "IDENHOG" # Use either IDENPER for personal or IDENHOG for household levels
+# Use either IDENPER for personal or IDENHOG for household level
+sel_year <- 2016
+ref_unit <- "IDENPER"
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import chosen dataframe (change string according to the data file path)
-dt <- fread("AEAT/data/IEF-2021-new.gz") # from IEAT IRPF sample
+dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
 
 # Replace NA values with 0 in selected columns
 dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = selected_columns]
@@ -26,7 +27,7 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "155", palazuelos := 1]
 dt2 <- dt[!is.na(FACTORCAL),
     .(
         IDENHOG = mean(IDENHOG),
-        IDENPER = mean(IDENHOG),
+        IDENPER = mean(IDENPER),
         segovia = mean(segovia),
         lastrilla = mean(lastrilla),
         sancris = mean(sancris),
