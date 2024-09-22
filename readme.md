@@ -19,7 +19,7 @@ En pocas palabras, este proyecto busca facilitar una metodología para realizar 
 La posibilidad de trabajar con esta muestra bajando a la escala más micro hasta el nivel municipal es pionera en los estudios de patrimonio, renta y desigualdad de los hogares.
 
 Hasta la publicación de este tipo de muestras, la información obtenida a través de encuestas convencionales estaba limitada de manera muy importante por su coste de recolección, limitando en gran medida el tamaño de la muestra, que pocas veces supera en el caso de España los 15000 encuestados en total para estudios de riqueza, haciendo imposible hacer inferencia a cualquier escala inferior a la autonómica.
-df
+
 ---
 
 ## 🔒 Licencia
