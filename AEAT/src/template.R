@@ -6,7 +6,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 # Use either IDENPER for personal or IDENHOG for household level
 sel_year <- 2016
 ref_unit <- "IDENPER"
-selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
+selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150")
 
 # Import chosen dataframe (change string according to the data file path)
 dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
@@ -52,4 +52,8 @@ ifelse(ref_unit == "IDENHOG",
 )
 
 # Define any new categorical variable before setting the survey object
-dt[, RENTISTA := 0][RENTA_ALQ > 0, RENTISTA := 1]
+dt[RENTA_ALQ > 0, TENENCIA := "RENTISTA"]
+dt[PATINMO > 0 & TENENCIA != "RENTISTA", TENENCIA := "PROPIETARIO"]
+dt[!(TENENCIA %in% c("RENTISTA", "PROPIETARIO")), TENENCIA := "INQUILINA"]
+dt[, TENENCIA := factor(TENENCIA)]
+dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ]
