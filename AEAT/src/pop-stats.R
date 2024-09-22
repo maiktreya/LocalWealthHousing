@@ -46,7 +46,6 @@ fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "
 
 # print some exploratoty results
 prop_rentis <- svymean(~TENENCIA, survey_design) %>% print()
-renta_media <- svymean(~CASERO2, subsample) %>% print()
 histrentaB <- svyhist(~RENTA_ALQ, design = subsample, breaks = 30)
 risk_pop <- svymean(~RISK, subsample, FUN = svymean) %>% print()
 renta_alq_gini <- gini.wtd(dt$RENTA_ALQ, dt$FACTORCAL) %>% print()
