@@ -10,6 +10,7 @@ risks <- fread("AEAT/data/risk.csv")
 net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
 risk_pov_tier <- risks[year == sel_year, get(net_var)]
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
+dt[, CASERO2 := 0][RENTA_ALQ > 1200, CASERO2 := 1]
 
 # Create the survey design object with the initial weights
 survey_design <- svydesign(
@@ -44,7 +45,7 @@ fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "
 
 # print some exploratoty results
 prop_rentis <- svymean(~TENENCIA, survey_design) %>% print()
-renta_media <- svymean(~RENTAB, subsample) %>% print()
+renta_media <- svymean(~CASERO2, subsample) %>% print()
 histrentaB <- svyhist(~RENTA_ALQ, design = subsample, breaks = 30)
 risk_pop <- svymean(~RISK, subsample, FUN = svymean) %>% print()
 renta_alq_gini <- gini.wtd(dt$RENTA_ALQ, dt$FACTORCAL) %>% print()
