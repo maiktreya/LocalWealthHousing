@@ -5,12 +5,16 @@ library("magrittr")
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 source("AEAT/src/etl_pipe.R")
 
+
 # import population distributional values
 
+seleccion <- "segovia"
+Nmunicipios <- c("segovia", "lastrilla", "sancris", "palazuelos")
+municipios <- cbind(mun = Nmunicipios, ind = c(1:4)) %>% data.table()
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 get_col <- colnames(pop_stats)[colnames(pop_stats) %like% tolower(ref_unit)]
-RNpop <- pop_stats[muni == "segovia" & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
-RBpop <- pop_stats[muni == "segovia" & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+RNpop <- pop_stats[muni == seleccion & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
+RBpop <- pop_stats[muni == seleccion & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 
 # Create the survey design object with the initial weights
 
@@ -19,7 +23,7 @@ survey_design <- svydesign(
     data = dt,
     weights = dt$FACTORCAL
 )
-subsample <- subset(survey_design, MUESTRA == 1)
+subsample <- subset(survey_design, MUESTRA == municipios[mun==seleccion]$ind)
 
 # performe representativness test on key variables with known distributional values
 
