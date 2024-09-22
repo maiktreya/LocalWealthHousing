@@ -17,7 +17,7 @@ dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF samp
 
 dt[, (sel_cols) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = sel_cols]
 
-# Main data transformation: Filter rows and summarize
+# Coerce conflicting values of var TRAMO to numeric
 
 dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
