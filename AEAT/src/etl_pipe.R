@@ -1,5 +1,4 @@
 # Rscript for Resampling Segovia
-library("magrittr")
 library("data.table")
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
