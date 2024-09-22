@@ -14,5 +14,5 @@ subsample <- subset(survey_design, MUESTRA == 1)
 # performe representativness test on key variables with known distributional values
 test_rep1 <- svyttest(I(RENTAD - 34272) ~ 0, subsample) %>% print()
 test_rep2 <- svyttest(I(RENTAB - 41235) ~ 0, subsample) %>% print()
-confint(test_rep1, level = 0.95) %>% print()
-confint(test_rep2, level = 0.95) %>% print()
+test_conf1 <- confint(test_rep1, level = 0.95) %>% print()
+test_conf2 <- confint(test_rep2, level = 0.95) %>% print()
