@@ -52,10 +52,8 @@ ifelse(ref_unit == "IDENHOG",
 )
 
 # Define any new categorical variable before setting the survey object
-dt[RENTA_ALQ > 0, TENENCIA := "RENTISTA"]
-dt[PATINMO > 0 & TENENCIA != "RENTISTA", TENENCIA := "PROPIETARIO"]
-dt[!(TENENCIA %in% c("RENTISTA", "PROPIETARIO")), TENENCIA := "INQUILINA"]
+dt[, TENENCIA := "INQUILINA"]
+dt[RENTA_ALQ > 0, TENENCIA := "CASERO"]
+dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
 dt[, TENENCIA := factor(TENENCIA)]
 dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ]
-
-unique(dt$TENENCIA) %>% print()
