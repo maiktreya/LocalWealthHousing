@@ -1,5 +1,7 @@
 # Obtain population statistics for AEAT subsample
+
 library(survey)
+library(magrittr)
 library(dineq)
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 source("AEAT/src/etl_pipe.R")

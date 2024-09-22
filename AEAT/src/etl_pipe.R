@@ -1,4 +1,5 @@
 # Rscript for Resampling Segovia
+
 library("data.table")
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
