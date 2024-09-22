@@ -51,3 +51,9 @@ risk_pop <- svymean(~RISK, subsample, FUN = svymean) %>% print()
 renta_alq_gini <- gini.wtd(dt$RENTA_ALQ, dt$FACTORCAL) %>% print()
 renta_alq_deco <- gini_decomp(dt$RENTAB, dt$TENENCIA)
 renta_por_clase <- svyby(~RENTAD, ~TENENCIA, survey_design, svymean) %>% print()
+
+svytotal(~NPROP_ALQ, subsample) %>% prop.table() %>% print()
+
+svyquantile(~NPROP_ALQ, subsample, quantiles = seq(0.1, 1, 0.1)) %>% prop.table() %>% print()
+
+svytable(~NPROP_ALQ, subsample) %>%   prop.table() %>% View()
