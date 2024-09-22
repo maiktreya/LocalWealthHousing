@@ -58,8 +58,8 @@ if (sel_year == 2021) {
     end_dt150 <- c(11, 22, 981)
 }
 if (sel_year == 2016) {
-    start_dt150 <- c(1, 12, 627)
-    end_dt150 <- c(11, 22, 638)
+    start_dt150 <- c(1, 12, 1491)
+    end_dt150 <- c(11, 22, 1502)
 }
 col_dt150 <- fwf_positions(start = start_dt150, end = end_dt150) # Use fwf_positions to define column positions
 dt150 <- read_fwf(paste0("AEAT/data/original/8_IRPF", sel_year, "_RRII.txt"), col_positions = col_dt150) %>% data.table()
