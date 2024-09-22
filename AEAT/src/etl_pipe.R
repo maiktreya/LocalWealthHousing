@@ -1,4 +1,4 @@
-# Rscript for Resampling Segovia
+# Rscript for transforming base AEAT sample files from their tax record sample
 
 library("data.table")
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks

@@ -1,19 +1,21 @@
-# Obtain t-statisctics for representative mean forAEAT subsample
+# Obtain t-statisctics for representative mean for AEAT subsample
 
 library(survey)
 library("magrittr")
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
+
+# import microdata & population distributional values
+
 source("AEAT/src/etl_pipe.R")
-
-# import population distributional values
-
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 municipios <- cbind(mun = c("segovia", "lastrilla", "sancris", "palazuelos"), ind = c(1:4)) %>% data.table()
-seleccion <- "segovia"
 
+# define city subsample and variables to analyze
+
+city <- "segovia"
 get_col <- colnames(pop_stats)[colnames(pop_stats) %like% tolower(ref_unit)]
-RNpop <- pop_stats[muni == seleccion & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
-RBpop <- pop_stats[muni == seleccion & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
+RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 
 # Create the survey design object with the initial weights
 
@@ -22,7 +24,7 @@ survey_design <- svydesign(
     data = dt,
     weights = dt$FACTORCAL
 )
-subsample <- subset(survey_design, MUESTRA == municipios[mun == seleccion]$ind)
+subsample <- subset(survey_design, MUESTRA == municipios[mun == city]$ind)
 
 # performe representativness test on key variables with known distributional values
 
