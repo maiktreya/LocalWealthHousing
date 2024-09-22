@@ -6,7 +6,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 # Use either IDENPER for personal or IDENHOG for household level
 
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150")
 
 # Import chosen dataframe (change string according to the data file path)
