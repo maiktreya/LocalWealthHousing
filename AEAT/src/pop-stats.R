@@ -3,15 +3,12 @@ library(survey)
 library(dineq)
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 source("AEAT/src/template.R")
+pop_stats <- fread("AEAT/data/pop-stats.csv")
+risks <- fread("AEAT/data/risk.csv")
 
 # hardcoded varss
-# svyquantile(~RENTAD, survey_design, quantiles = c(.5))[1]$RENTAD[,"quantile"]*.6 # nolint
-if (sel_year == 2016) {
-    ifelse(ref_unit == "IDENHOG", risk_pov_tier <- 14610, risk_pov_tier <- 4833)
-}
-if (sel_year == 2021) {
-    ifelse(ref_unit == "IDENHOG", risk_pov_tier <- 16097, risk_pov_tier <- 6032)
-}
+net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
+risk_pov_tier <- risks[year == sel_year, get(net_var)]
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 
 # Create the survey design object with the initial weights
@@ -22,7 +19,7 @@ survey_design <- svydesign(
 )
 
 # Subsample for a reference municipio
-subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ > 0)
+subsample <- subset(survey_design, MUESTRA == 1)
 
 # obtain quantiles for a given variable
 quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.90, 0.95, 0.99))
