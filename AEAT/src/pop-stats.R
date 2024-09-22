@@ -2,8 +2,7 @@
 library(survey)
 library(dineq)
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
-source("AEAT/src/template.R")
-pop_stats <- fread("AEAT/data/pop-stats.csv")
+source("AEAT/src/etl_pipe.R")
 risks <- fread("AEAT/data/risk.csv")
 
 # hardcoded varss
