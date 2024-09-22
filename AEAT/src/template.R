@@ -3,10 +3,9 @@ library("magrittr")
 library("data.table")
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
-
 # Use either IDENPER for personal or IDENHOG for household level
 sel_year <- 2016
-ref_unit <- "IDENHOG"
+ref_unit <- "IDENPER"
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import chosen dataframe (change string according to the data file path)
