@@ -6,13 +6,13 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 # Use either IDENPER for personal or IDENHOG for household level
 sel_year <- 2021
 ref_unit <- "IDENPER"
-selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150")
+sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150")
 
 # Import chosen dataframe (change string according to the data file path)
 dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
 
 # Replace NA values with 0 in selected columns
-dt[, (selected_columns) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = selected_columns]
+dt[, (sel_cols) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = sel_cols]
 
 # Main data transformation: Filter rows and summarize
 dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
