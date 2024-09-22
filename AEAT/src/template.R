@@ -6,7 +6,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 # Use either IDENPER for personal or IDENHOG for household level
 sel_year <- 2016
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
 # Import chosen dataframe (change string according to the data file path)
@@ -27,7 +27,7 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
 
 dt <- dt[!is.na(FACTORCAL),
     .(
-        MIEMBROS = length(unique(IDENPER)),
+        MIEMBROS = uniqueN(IDENPER),
         IDENHOG = mean(IDENHOG),
         SEXO = mean(SEXO), # 1 = Male, 2 = Female
         AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
