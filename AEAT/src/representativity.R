@@ -23,7 +23,7 @@ survey_design <- svydesign(
     data = dt,
     weights = dt$FACTORCAL
 )
-subsample <- subset(survey_design, MUESTRA == municipios[mun==seleccion]$ind)
+subsample <- subset(survey_design, MUESTRA == municipios[mun == seleccion]$ind)
 
 # performe representativness test on key variables with known distributional values
 
