@@ -5,7 +5,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 # Use either IDENPER for personal or IDENHOG for household level
 sel_year <- 2016
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150")
 
 # Import chosen dataframe (change string according to the data file path)
@@ -53,7 +53,7 @@ ifelse(ref_unit == "IDENHOG",
 
 # Define any new categorical variable before setting the survey object
 dt[, TENENCIA := "INQUILINA"]
-dt[RENTA_ALQ > 0, TENENCIA := "CASERO"]
+dt[PAR150 > 0, TENENCIA := "CASERO"]
 dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
 dt[, TENENCIA := factor(TENENCIA)]
 dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ]

@@ -43,9 +43,10 @@ proportions <- rbindlist(proportions) %>% print()
 fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "-", sel_year, ".csv"))
 
 # print some exploratoty results
-prop_rentis <- svymean(~RENTISTA, survey_design) %>% print()
+prop_rentis <- svymean(~TENENCIA, survey_design) %>% print()
 renta_media <- svymean(~RENTAB, subsample) %>% print()
 histrentaB <- svyhist(~RENTA_ALQ, design = subsample, breaks = 30)
 risk_pop <- svymean(~RISK, subsample, FUN = svymean) %>% print()
 renta_alq_gini <- gini.wtd(dt$RENTA_ALQ, dt$FACTORCAL) %>% print()
-renta_alq_deco <- gini_decomp(dt$RENTAB, dt$RENTISTA)
+renta_alq_deco <- gini_decomp(dt$RENTAB, dt$TENENCIA)
+renta_por_clase <- svyby(~RENTAD, ~TENENCIA, survey_design, svymean) %>% print()
