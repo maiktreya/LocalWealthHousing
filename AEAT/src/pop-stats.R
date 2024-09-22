@@ -54,6 +54,6 @@ renta_por_clase <- svyby(~RENTAD, ~TENENCIA, survey_design, svymean) %>% print()
 
 svytotal(~NPROP_ALQ, subsample) %>% prop.table() %>% print()
 
-svyquantile(~NPROP_ALQ, subsample, quantiles = seq(0.1, 1, 0.1)) %>% prop.table() %>% print()
+svyquantile(~NPROP_ALQ, subsample, quantiles = seq(0.1, 1, 0.1))%>% print()
 
 svytable(~NPROP_ALQ, subsample) %>%   prop.table() %>% View()
