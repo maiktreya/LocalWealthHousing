@@ -11,10 +11,10 @@ net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
 risk_pov_tier <- risks[year == sel_year, get(net_var)]
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 
-serie <- seq_along(dt[,get(ref_unit)])
+serie <- seq_along(dt[, get(ref_unit)])
 
-for(i in unique(dt[,get(ref_unit)])){
-dt[,N := 1][length(unique(IDENPER))]
+for (i in unique(dt[, get(ref_unit)])) {
+    dt[, N := 1][length(unique(IDENPER))]
 }
 # Create the survey design object with the initial weights
 survey_design <- svydesign(
