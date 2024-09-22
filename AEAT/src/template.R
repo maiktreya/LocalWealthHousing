@@ -5,7 +5,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 
 # Use either IDENPER for personal or IDENHOG for household level
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENHOG"
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 

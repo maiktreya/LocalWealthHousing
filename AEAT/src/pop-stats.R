@@ -1,7 +1,13 @@
 # Obtain population statistics for AEAT subsample
 library(survey)
+library(dineq)
 rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 source("AEAT/src/template.R")
+
+# hardcoded varss
+# svyquantile(~RENTAD, survey_design, quantiles = c(.5))[1]$RENTAD[,"quantile"]*.6 # nolint
+ifelse(ref_unit == "IDENHOG", risk_pov_tier <- 16097, risk_pov_tier <- 6032)
+dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 
 # Create the survey design object with the initial weights
 survey_design <- svydesign(
@@ -11,7 +17,7 @@ survey_design <- svydesign(
 )
 
 # Subsample for a reference municipio
-subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ > 0)
+subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ >= 0)
 
 # obtain quantiles for a given variable
 quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.90, 0.95, 0.99))
@@ -28,11 +34,16 @@ for (i in seq_along(quant$index)) {
     proportions[[i]] <- data.table(quantil = quantil, tier = tier, prop = prop[1])
 }
 
-# print some exploratory results
+# transform the list into a table
 proportions <- rbindlist(proportions) %>% print()
-svymean(~RENTISTA, survey_design) %>% print()
-svymean(~RENTAB, subsample) %>% print()
-histrentaB <- svyhist(~RENTA_ALQ, design = subsample,  breaks = 30)
 
 # export the output
 fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros", sel_year, ".csv"))
+
+# print some exploratoty results
+prop_rentis <- svymean(~RENTISTA, survey_design) %>% print()
+renta_media <- svymean(~RENTAB, subsample) %>% print()
+histrentaB <- svyhist(~RENTA_ALQ, design = subsample, breaks = 30)
+risk_pop <- svymean(~RISK, subsample, FUN = svymean) %>% print()
+renta_alq_gini <- gini.wtd(dt$RENTA_ALQ, dt$FACTORCAL) %>% print()
+renta_alq_deco <- gini_decomp(dt$RENTAB, dt$RENTISTA)
