@@ -27,6 +27,7 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
 
 dt <- dt[!is.na(FACTORCAL),
     .(
+        MIEMBROS = mean(IDENHOG) / sum(IDENHOG),
         IDENHOG = mean(IDENHOG),
         SEXO = mean(SEXO), # 1 = Male, 2 = Female
         AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
