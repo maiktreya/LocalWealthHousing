@@ -5,7 +5,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 
 # Use either IDENPER for personal or IDENHOG for household level
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENHOG"
 selected_columns <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO")
 
@@ -53,4 +53,3 @@ ifelse(ref_unit == "IDENHOG",
 
 # Define any new categorical variable before setting the survey object
 dt[, RENTISTA := 0][RENTA_ALQ > 0, RENTISTA := 1]
-dt[RENTA_ALQ < 0, RENTA_ALQ := 0]
