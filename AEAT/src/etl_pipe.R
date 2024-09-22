@@ -7,7 +7,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 sel_year <- 2016
 ref_unit <- "IDENHOG"
-sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150")
+sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150", "REFCAT")
 
 # Import chosen dataframe (change string according to the data file path)
 
