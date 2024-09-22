@@ -5,7 +5,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 # Use either IDENPER for personal or IDENHOG for household level
 
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150")
 
@@ -28,12 +28,13 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
 dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
 dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
 dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
-
+if (sel_year == 2021) dt$NPROP_ALQ <- 0
 # tidy dt for the given reference unit through in-place vectorized operations
 
 dt <- dt[!is.na(FACTORCAL),
     .(
         MIEMBROS = uniqueN(IDENPER),
+        NPROP_ALQ = uniqueN(REFCAT),
         IDENHOG = mean(IDENHOG),
         SEXO = mean(SEXO), # 1 = Male, 2 = Female
         AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
