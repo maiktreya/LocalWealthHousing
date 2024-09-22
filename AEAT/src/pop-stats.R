@@ -6,7 +6,12 @@ source("AEAT/src/template.R")
 
 # hardcoded varss
 # svyquantile(~RENTAD, survey_design, quantiles = c(.5))[1]$RENTAD[,"quantile"]*.6 # nolint
-ifelse(ref_unit == "IDENHOG", risk_pov_tier <- 16097, risk_pov_tier <- 6032)
+if (sel_year == 2016) {
+    ifelse(ref_unit == "IDENHOG", risk_pov_tier <- 14610, risk_pov_tier <- 4833)
+}
+if (sel_year == 2021) {
+    ifelse(ref_unit == "IDENHOG", risk_pov_tier <- 16097, risk_pov_tier <- 6032)
+}
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 
 # Create the survey design object with the initial weights
@@ -17,7 +22,7 @@ survey_design <- svydesign(
 )
 
 # Subsample for a reference municipio
-subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ >= 0)
+subsample <- subset(survey_design, MUESTRA == 1 & RENTA_ALQ > 0)
 
 # obtain quantiles for a given variable
 quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.90, 0.95, 0.99))
@@ -38,7 +43,7 @@ for (i in seq_along(quant$index)) {
 proportions <- rbindlist(proportions) %>% print()
 
 # export the output
-fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros", sel_year, ".csv"))
+fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "-", sel_year, ".csv"))
 
 # print some exploratoty results
 prop_rentis <- svymean(~RENTISTA, survey_design) %>% print()
