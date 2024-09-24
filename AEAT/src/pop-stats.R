@@ -9,9 +9,10 @@ library(dineq)
 source("AEAT/src/etl_pipe.R")
 
 # import needed data objects
-selected <-  "IDENHOG"
+selected <- "IDENHOG"
+sel_year <- 2016
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = 2016, ref_unit = selected)
+dt <- get_wave(sel_year = sel_year, ref_unit = selected)
 
 # hardcoded vars
 
