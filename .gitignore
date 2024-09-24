@@ -1,4 +1,5 @@
 env
 .venv
 .lintr
-AEAT/data2
+AEAT/data/*.gz
+AEAT/data/*.zip
