@@ -29,7 +29,7 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
 dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
 dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
 dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo iungresos del alquiler de vivienda
-if (sel_year == 2021) dt$NPROP_ALQ <- 0
+
 # tidy dt for the given reference unit through in-place vectorized operations
 
 dt <- dt[!is.na(FACTORCAL),
