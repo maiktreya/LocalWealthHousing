@@ -10,7 +10,6 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 sel_year <- 2021
 dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new-old.gz")) # from IEAT IRPF sample
 
-
 # IDENTIFICADORES Y PESOS fichero 1_IDEN.txt
 
 start_iden <- c(1, 12, 23, 25, 27, 35, 36, 132) # Starting positions references
@@ -18,7 +17,6 @@ end_iden <- c(11, 22, 24, 26, 29, 35, 55, 141) # Ending positions references
 col_iden <- fwf_positions(start = start_iden, end = end_iden) # Use fwf_positions to define column positions
 iden <- read_fwf(paste0("AEAT/data/original/1_IDEN", sel_year, ".txt"), col_positions = col_iden) %>% data.table()
 colnames(iden) <- c("IDENPER", "IDENHOG", "CCAA", "PROV", "MUNI", "TRAMO", "FACTORCAL", "SECCION")
-
 
 # PAR150 REDUCCIÓN ALQUILER VIVIENDA solo comprobado para 2021!
 
@@ -41,13 +39,7 @@ if (sel_year == 2016) {
 
 dt <- merge(dt, iden, by = c("IDENPER", "IDENHOG"))
 
-
-print(nrow(dt))
 # export the results
 
 fwrite(dt, paste0("AEAT/data/IEF-", sel_year, "-part.gz")) # exportar objeto preparado
 fwrite(dt150, paste0("AEAT/data/IEF-", sel_year, "-150.gz")) # exportar objeto preparado
-
-
-
-dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample

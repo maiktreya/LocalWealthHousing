@@ -3,9 +3,12 @@
 library(survey)
 library(magrittr)
 library(dineq)
-rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 source("AEAT/src/etl_pipe.R")
+rm(list = ls()) # clean enviroment to avoid ram bottlenecks
+
+# import needed data objects
 risks <- fread("AEAT/data/risk.csv")
+dt <- get_wave(sel_year = 2016, ref_unit = "IDENHOG")
 
 # hardcoded varss
 net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]

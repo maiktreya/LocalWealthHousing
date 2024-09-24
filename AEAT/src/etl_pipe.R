@@ -1,71 +1,75 @@
 # Rscript for transforming base AEAT sample files from their tax record sample
 
-library("data.table")
-rm(list = ls()) # clean enviroment to avoid ram bottlenecks
-
 # Use either IDENPER for personal or IDENHOG for household level
 
-sel_year <- 2016
-ref_unit <- "IDENHOG"
-sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")
+get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG") {
+    # Load required libraries
+    library(data.table)
 
-# Import chosen dataframe (change string according to the data file path)
+    sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")
 
-dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
+    # Import chosen dataframe (change string according to the data file path)
 
-# Replace NA values with 0 in selected columns
+    dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
 
-dt[, (sel_cols) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = sel_cols]
+    # Replace NA values with 0 in selected columns
 
-# Coerce conflicting values of var TRAMO to numeric
+    dt[, (sel_cols) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = sel_cols]
 
-dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
+    # Coerce conflicting values of var TRAMO to numeric
 
-# Identify towns to analyze
+    dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
-dt[, MUESTRA := 0] # add a column for the subsample identifier
-dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
-dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
-dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
-dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
-dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo iungresos del alquiler de vivienda
+    # Identify towns to analyze
 
-# tidy dt for the given reference unit through in-place vectorized operations
+    dt[, MUESTRA := 0] # add a column for the subsample identifier
+    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
+    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
+    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
+    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
+    dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
 
-dt <- dt[!is.na(FACTORCAL),
-    .(
-        MIEMBROS = uniqueN(IDENPER),
-        NPROP_ALQ = uniqueN(REFCAT),
-        IDENHOG = mean(IDENHOG),
-        SEXO = mean(SEXO), # 1 = Male, 2 = Female
-        AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
-        RENTAB = sum(RENTAB),
-        RENTAD = sum(RENTAD),
-        TRAMO = mean(TRAMO),
-        RENTA_ALQ = sum(RENTA_ALQ),
-        RENTA_ALQ2 = sum(RENTA_ALQ2),
-        PAR150 = sum(PAR150i),
-        PATINMO = sum(PATINMO),
-        FACTORCAL = mean(FACTORCAL),
-        CCAA = mean(CCAA),
-        PROV = mean(PROV),
-        MUNI = mean(MUNI),
-        MUESTRA = mean(MUESTRA)
-    ),
-    by = .(reference = get(ref_unit))
-]
+    # tidy dt for the given reference unit through in-place vectorized operations
 
-# Rename the reference column to match 'ref_unit'
+    dt <- dt[!is.na(FACTORCAL),
+        .(
+            MIEMBROS = uniqueN(IDENPER),
+            NPROP_ALQ = uniqueN(REFCAT),
+            IDENHOG = mean(IDENHOG),
+            SEXO = mean(SEXO), # 1 = Male, 2 = Female
+            AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
+            RENTAB = sum(RENTAB),
+            RENTAD = sum(RENTAD),
+            TRAMO = mean(TRAMO),
+            RENTA_ALQ = sum(RENTA_ALQ),
+            RENTA_ALQ2 = sum(RENTA_ALQ2),
+            PAR150 = sum(PAR150i),
+            PATINMO = sum(PATINMO),
+            FACTORCAL = mean(FACTORCAL),
+            CCAA = mean(CCAA),
+            PROV = mean(PROV),
+            MUNI = mean(MUNI),
+            MUESTRA = mean(MUESTRA)
+        ),
+        by = .(reference = get(ref_unit))
+    ]
 
-ifelse(ref_unit == "IDENHOG",
-    dt <- dt[, -c("reference")],
-    setnames(dt, "reference", as.character(ref_unit))
-)
+    # Rename the reference column to match 'ref_unit'
 
-# Define any new categorical variable before setting the survey object
+    if (ref_unit == "IDENHOG") {
+        dt <- dt[, -c("reference")]
+    } else {
+        setnames(dt, "reference", as.character(ref_unit))
+    }
 
-dt[, TENENCIA := "INQUILINA"]
-dt[PAR150 > 0, TENENCIA := "CASERO"]
-dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
-dt[, TENENCIA := factor(TENENCIA)]
-dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
+    # Define any new categorical variable before setting the survey object
+
+    dt[, TENENCIA := "INQUILINA"]
+    dt[PAR150 > 0, TENENCIA := "CASERO"]
+    dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
+    dt[, TENENCIA := factor(TENENCIA)]
+    dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
+
+    # Return the final dt object
+    return(dt)
+}
