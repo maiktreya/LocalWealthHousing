@@ -1,6 +1,6 @@
 # Obtain population statistics for AEAT subsample
 
- # clean enviroment to avoid ram bottlenecks and import dependencies
+# clean enviroment to avoid ram bottlenecks and import dependencies
 
 rm(list = ls())
 library(survey)
