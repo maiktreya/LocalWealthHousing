@@ -45,11 +45,11 @@ if (sel_year == 2021) {
     colnames(dt_dec) <- c("IDENPER", "IDENHOG", "TIPODEC")
 }
 if (sel_year == 2016) {
-    start_dt_dec <- c(1, 12, 23, 27, 29, 1491)
-    end_dt_dec <- c(11, 22, 25, 27, 32, 1502)
+    start_dt_dec <- c(1, 12, 23, 27, 29) # par150 (1491, 1502)
+    end_dt_dec <- c(11, 22, 25, 27, 32)
     col_dt_dec <- fwf_positions(start = start_dt_dec, end = end_dt_dec) # Use fwf_positions to define column positions
     dt_dec <- read_fwf(paste0("AEAT/data/original/4_IRPF", sel_year, ".txt"), col_positions = col_dt_dec) %>% data.table()
-    colnames(dt_dec) <- c("IDENPER", "IDENHOG", "TIPODEC", "SEXO", "ANONAC", "PAR150")
+    colnames(dt_dec) <- c("IDENPER", "IDENHOG", "TIPODEC", "SEXO", "ANONAC")
 }
 
 # PAR150 REDUCCIÓN ALQUILER VIVIENDA solo comprobado para 2021!
@@ -61,11 +61,11 @@ if (sel_year == 2021) {
     colnames(dt150) <- c("IDENPER", "IDENHOG", "PAR150")
 }
 if (sel_year == 2016) {
-    start_dt150 <- c(1, 12, 23)
-    end_dt150 <- c(11, 22, 33)
-    col_dt150 <- fwf_positions(start = start_dt150, end = end_dt150) # Use fwf_positions to define column positions
-    dt150 <- read_fwf(paste0("AEAT/data/original/8_IRPF", sel_year, "_RRII.txt"), col_positions = col_dt150) %>% data.table()
-    colnames(dt150) <- c("IDENPER", "IDENHOG", "REFCAT")
+    start_p150 <- c(1, 12, 23, 71, 203)
+    end_p150 <- c(11, 22, 33, 82, 214)
+    col_p150 <- fwf_positions(start = start_p150, end = end_p150) # Use fwf_positions to define column positions
+    dt150 <- read_fwf(paste0("AEAT/data/original/8_IRPF", sel_year, "_RRII.txt"), col_positions = col_p150) %>% data.table()
+    colnames(dt150) <- c("IDENPER", "IDENHOG", "REFCAT", "INCALQ", "PAR150i")
 }
 # Merge both datasets based on IDs
 dt <- merge(iden, test_total, by = c("IDENPER", "IDENHOG"))

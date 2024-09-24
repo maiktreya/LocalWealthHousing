@@ -7,7 +7,7 @@ rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 sel_year <- 2016
 ref_unit <- "IDENHOG"
-sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "PAR150", "REFCAT")
+sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")
 
 # Import chosen dataframe (change string according to the data file path)
 
@@ -28,6 +28,7 @@ dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
 dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
 dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
 dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
+dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo iungresos del alquiler de vivienda
 if (sel_year == 2021) dt$NPROP_ALQ <- 0
 # tidy dt for the given reference unit through in-place vectorized operations
 
@@ -42,7 +43,8 @@ dt <- dt[!is.na(FACTORCAL),
         RENTAD = sum(RENTAD),
         TRAMO = mean(TRAMO),
         RENTA_ALQ = sum(RENTA_ALQ),
-        PAR150 = sum(PAR150),
+        RENTA_ALQ2 = sum(RENTA_ALQ2),
+        PAR150 = sum(PAR150i),
         PATINMO = sum(PATINMO),
         FACTORCAL = mean(FACTORCAL),
         CCAA = mean(CCAA),
@@ -66,4 +68,4 @@ dt[, TENENCIA := "INQUILINA"]
 dt[PAR150 > 0, TENENCIA := "CASERO"]
 dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
 dt[, TENENCIA := factor(TENENCIA)]
-dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ]
+dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
