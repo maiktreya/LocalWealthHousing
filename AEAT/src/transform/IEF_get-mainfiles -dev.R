@@ -40,7 +40,6 @@ if (sel_year == 2016) {
 # Merge both datasets based on IDs
 
 dt <- merge(dt, iden, by = c("IDENPER", "IDENHOG"))
-dt <- merge(dt, dt150, by = c("IDENPER", "IDENHOG"))
 
 
 print(nrow(dt))
@@ -48,3 +47,7 @@ print(nrow(dt))
 
 fwrite(dt, paste0("AEAT/data/IEF-", sel_year, "-part.gz")) # exportar objeto preparado
 fwrite(dt150, paste0("AEAT/data/IEF-", sel_year, "-150.gz")) # exportar objeto preparado
+
+
+
+dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
