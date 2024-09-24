@@ -55,7 +55,7 @@ proportions <- rbindlist(proportions) %>% print()
 
 # export the output
 
-fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "-", sel_year, ".csv"))
+# refwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "-", sel_year, ".csv"))
 
 # print some exploratoty results
 
