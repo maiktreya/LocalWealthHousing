@@ -40,5 +40,5 @@ if (sel_year == 2016) {
 # export the results
 
 
-fwrite(iden, paste0("AEAT/data/IEF-", sel_year, "-part.gz")) # exportar objeto preparado
+fwrite(iden, paste0("AEAT/data/IEF-", sel_year, "-iden.gz")) # exportar objeto preparado
 fwrite(dt150, paste0("AEAT/data/IEF-", sel_year, "-150.gz")) # exportar objeto preparado
