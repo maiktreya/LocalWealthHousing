@@ -72,6 +72,3 @@ if (sel_year == 2016) {
 dt <- merge(iden, test_total, by = c("IDENPER", "IDENHOG"))
 dt <- merge(dt, pat, by = c("IDENPER", "IDENHOG"))
 dt <- merge(dt, dt_dec, by = c("IDENPER", "IDENHOG"))
-dt <- merge(dt, dt150, by = c("IDENPER", "IDENHOG"))
-
-fwrite(dt, paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # exportar objeto preparado

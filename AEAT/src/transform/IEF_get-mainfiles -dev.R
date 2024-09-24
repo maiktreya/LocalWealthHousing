@@ -46,4 +46,5 @@ dt <- merge(dt, dt150, by = c("IDENPER", "IDENHOG"))
 print(nrow(dt))
 # export the results
 
-fwrite(dt, paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # exportar objeto preparado
+fwrite(dt, paste0("AEAT/data/IEF-", sel_year, "-part.gz")) # exportar objeto preparado
+fwrite(dt150, paste0("AEAT/data/IEF-", sel_year, "-150.gz")) # exportar objeto preparado

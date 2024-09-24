@@ -2,3 +2,4 @@ env
 .venv
 .lintr
 AEAT/data/original/
+AEAT/data/IEF-2021-new.gz
