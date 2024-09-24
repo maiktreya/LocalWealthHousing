@@ -10,7 +10,6 @@ library(data.table)
 # main data and hardcoded vars
 
 sel_year <- 2021
-dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new-old.gz")) # from IEAT IRPF sample
 
 # IDENTIFICADORES Y PESOS fichero 1_IDEN.txt
 
@@ -37,11 +36,9 @@ if (sel_year == 2016) {
     colnames(dt150) <- c("IDENPER", "IDENHOG", "REFCAT", "INCALQ", "PAR150i")
 }
 
-# Merge both datasets based on IDs
-
-dt <- merge(dt, iden, by = c("IDENPER", "IDENHOG"))
 
 # export the results
 
-fwrite(dt, paste0("AEAT/data/IEF-", sel_year, "-part.gz")) # exportar objeto preparado
+
+fwrite(iden, paste0("AEAT/data/IEF-", sel_year, "-part.gz")) # exportar objeto preparado
 fwrite(dt150, paste0("AEAT/data/IEF-", sel_year, "-150.gz")) # exportar objeto preparado
