@@ -21,4 +21,12 @@ start_dt_dec <- c(1, 12, 23, 27, 29, 1491, 1011)
 end_dt_dec <- c(11, 22, 25, 27, 32, 1502, 1022)
 col_dt_dec <- fwf_positions(start = start_dt_dec, end = end_dt_dec) # Use fwf_positions to define column positions
 dt_dec <- read_fwf(paste0("AEAT/data/original/4_IRPF", sel_year, ".txt"), col_positions = col_dt_dec) %>% data.table()
-colnames(dt_dec) <- c("IDENPER", "IDENHOG", "TIPODEC", "SEXO", "ANONAC", "PAR150")
+colnames(dt_dec) <- c("IDENPER", "IDENHOG", "TIPODEC", "SEXO", "ANONAC", "PAR150", "INCALQ")
+
+# RENDIMIENTOS INMOBILIARIOS 2016 (par60-ingresos, par71-reduccioneq-par150)
+
+start_dt150 <- c(1, 12, 23, 71, 203)
+end_dt150 <- c(11, 22, 33, 82, 214)
+col_dt150 <- fwf_positions(start = start_dt150, end = end_dt150) # Use fwf_positions to define column positions
+dt150 <- read_fwf(paste0("AEAT/data/original/8_IRPF", sel_year, "_RRII.txt"), col_positions = col_dt150) %>% data.table()
+colnames(dt150) <- c("IDENPER", "IDENHOG", "REFCAT", "INCALQ", "PAR150i")
