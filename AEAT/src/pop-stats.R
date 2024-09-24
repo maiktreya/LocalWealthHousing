@@ -1,22 +1,27 @@
 # Obtain population statistics for AEAT subsample
 
-rm(list = ls()) # clean enviroment to avoid ram bottlenecks
+ # clean enviroment to avoid ram bottlenecks and import dependencies
+
+rm(list = ls())
 library(survey)
 library(magrittr)
 library(dineq)
 source("AEAT/src/etl_pipe.R")
 
 # import needed data objects
+
 risks <- fread("AEAT/data/risk.csv")
 dt <- get_wave(sel_year = 2016, ref_unit = "IDENHOG")
 
-# hardcoded varss
+# hardcoded vars
+
 net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
 risk_pov_tier <- risks[year == sel_year, get(net_var)]
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 dt[, CASERO2 := 0][RENTA_ALQ > 1200, CASERO2 := 1]
 
 # Create the survey design object with the initial weights
+
 survey_design <- svydesign(
     ids = ~1,
     data = dt,
@@ -24,14 +29,17 @@ survey_design <- svydesign(
 )
 
 # Subsample for a reference municipio
+
 subsample <- subset(survey_design, MUESTRA == 1)
 
 # obtain quantiles for a given variable
+
 quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.90, 0.95, 0.99))
 quant <- data.table(quantiles$RENTA_ALQ[, 1], seq_along(quantiles$RENTA_ALQ[, 1]) - 1)
 colnames(quant) <- c("cuantil", "index")
 
 # obtain inequality proportions
+
 total_general <- svytotal(~RENTA_ALQ, subsample)["RENTA_ALQ"]
 proportions <- list()
 for (i in seq_along(quant$index)) {
@@ -42,12 +50,15 @@ for (i in seq_along(quant$index)) {
 }
 
 # transform the list into a table
+
 proportions <- rbindlist(proportions) %>% print()
 
 # export the output
+
 fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "-", sel_year, ".csv"))
 
 # print some exploratoty results
+
 prop_rentis <- svymean(~TENENCIA, survey_design) %>% print()
 histrentaB <- svyhist(~RENTA_ALQ, design = subsample, breaks = 30)
 risk_pop <- svymean(~RISK, subsample, FUN = svymean) %>% print()

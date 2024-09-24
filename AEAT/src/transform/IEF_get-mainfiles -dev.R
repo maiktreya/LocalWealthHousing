@@ -1,9 +1,11 @@
 # Piping AEAT anual realease files into a single efficient data.table matrix stored as gz file
 
+# clean enviroment to avoid ram bottlenecks and import dependencies
+
+rm(list = ls())
 library(magrittr)
 library(readr)
 library(data.table)
-rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 # main data and hardcoded vars
 
