@@ -6,6 +6,7 @@ rm(list = ls())
 library(survey)
 library(magrittr)
 library(dineq)
+library(data.table)
 source("AEAT/src/etl_pipe.R")
 
 # import needed data objects

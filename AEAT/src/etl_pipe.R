@@ -6,7 +6,7 @@ get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG") {
 
     # Load required libraries
 
-    library(data.table)
+    library(data.table, quietly = TRUE)
 
     sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")
 
