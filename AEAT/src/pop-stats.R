@@ -9,13 +9,13 @@ library(dineq)
 source("AEAT/src/etl_pipe.R")
 
 # import needed data objects
-
+selected <-  "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = 2016, ref_unit = "IDENHOG")
+dt <- get_wave(sel_year = 2016, ref_unit = selected)
 
 # hardcoded vars
 
-net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
+net_var <- colnames(risks)[colnames(risks) %like% tolower(selected)]
 risk_pov_tier <- risks[year == sel_year, get(net_var)]
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 dt[, CASERO2 := 0][RENTA_ALQ > 1200, CASERO2 := 1]
@@ -52,10 +52,6 @@ for (i in seq_along(quant$index)) {
 # transform the list into a table
 
 proportions <- rbindlist(proportions) %>% print()
-
-# export the output
-
-# refwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "-", sel_year, ".csv"))
 
 # print some exploratoty results
 
