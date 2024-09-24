@@ -1,10 +1,10 @@
 # Obtain population statistics for AEAT subsample
 
+rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 library(survey)
 library(magrittr)
 library(dineq)
 source("AEAT/src/etl_pipe.R")
-rm(list = ls()) # clean enviroment to avoid ram bottlenecks
 
 # import needed data objects
 risks <- fread("AEAT/data/risk.csv")
