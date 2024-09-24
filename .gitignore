@@ -1,4 +1,4 @@
 env
 .venv
 .lintr
-AEAT/data/
+AEAT/data
