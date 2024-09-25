@@ -1,16 +1,21 @@
 # Obtain population statistics for AEAT subsample
 
-# clean enviroment to avoid ram bottlenecks and import dependencies
+# clean enviroment to avoid ram botltenecks and import dependencies
 
 rm(list = ls())
+library(data.table)
 library(survey)
 library(magrittr)
 library(dineq)
-source("AEAT/src/etl_pipe.R")
+source("LocalWealthHousing/AEAT/src/etl_pipe.R")
 
 # import needed data objects
-risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = 2016, ref_unit = "IDENHOG")
+represet <- "!is.na(FACTORCAL)" # población
+represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
+sel_year <- 2016
+ref_unit <- "IDENHOG"
+risks <- fread("LocalWealthHousing/AEAT/data/risk.csv")
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 # hardcoded varssç
 
