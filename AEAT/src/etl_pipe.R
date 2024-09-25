@@ -70,6 +70,11 @@ get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG", represet = "!is.na(F
     dt[PAR150 > 0, TENENCIA := "CASERO"]
     dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
     dt[, TENENCIA := factor(TENENCIA)]
+
+    dt[, CASERO := 0][PAR150 > 0, CASERO := 1][, CASERO := factor(CASERO)]
+    dt[, PROPIETARIO_SIN := 0][PATINMO > 0 & CASERO == 0, PROPIETARIO_SIN := 1][, PROPIETARIO_SIN := factor(PROPIETARIO_SIN)]
+    dt[, INQUILINO := 1][PROPIETARIO_SIN == 1, INQUILINO := 0][CASERO == 1, INQUILINO := 0][, INQUILINO := factor(INQUILINO)]
+
     dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
     # Return the final dt object

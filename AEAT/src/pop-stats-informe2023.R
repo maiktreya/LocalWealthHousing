@@ -7,7 +7,7 @@ library(data.table)
 library(survey)
 library(magrittr)
 library(dineq)
-source("AEAT/src/etl_pipe2023.R")
+source("AEAT/src/etl_pipe.R")
 
 # import needed data objects
 
@@ -90,4 +90,4 @@ list(final_table, renta_table, reg_tenencia) %>% print()
 # export AEAT/out
 fwrite(final_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
 fwrite(renta_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-renta.csv"))
-fwrite(reg_tenencia, paste0("AEAT/out/", sel_year, "-", ref_unit, "reg_tenenciaa.csv"))
+fwrite(reg_tenencia, paste0("AEAT/out/", sel_year, "-", ref_unit, "reg_tenencia.csv"))
