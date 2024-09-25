@@ -18,6 +18,7 @@ dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
+dt_sv <- subset(dt_sv, MUESTRA == 1) # subset for a given city
 quantiles <- seq(.25, .75, .25) # cortes
 quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
 table_names <- c(
@@ -28,23 +29,17 @@ table_names <- c(
 )
 
 # TABLA 1: Use svytable and prop.table to get proportions of TENENCIA across income quantiles
-tenencia25 <- svytable(~TENENCIA, subset(dt_sv, RENTAD < quantiles_renta[, "0.25"]))
-tenencia25to50 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.25"] & RENTAD < quantiles_renta[, "0.5"]))
-tenencia50to75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.5"] & RENTAD < quantiles_renta[, "0.75"]))
-tenencia75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.75"]))
-
-# Calculate proportions using prop.table() for each income group
-prop_tenencia25 <- prop.table(tenencia25)
-prop_tenencia25to50 <- prop.table(tenencia25to50)
-prop_tenencia50to75 <- prop.table(tenencia50to75)
-prop_tenencia75 <- prop.table(tenencia75)
+tenencia25 <- svytable(~TENENCIA, subset(dt_sv, RENTAD < quantiles_renta[, "0.25"])) %>% prop.table()
+tenencia25to50 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.25"] & RENTAD < quantiles_renta[, "0.5"])) %>% prop.table()
+tenencia50to75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.5"] & RENTAD < quantiles_renta[, "0.75"])) %>% prop.table()
+tenencia75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.75"])) %>% prop.table()
 
 # Combine the proportions into one data.table
 final_table <- rbind(
-  data.table(niveles = table_names[1], as.data.table(prop_tenencia25)),
-  data.table(niveles = table_names[2], as.data.table(prop_tenencia25to50)),
-  data.table(niveles = table_names[3], as.data.table(prop_tenencia50to75)),
-  data.table(niveles = table_names[4], as.data.table(prop_tenencia75))
+    data.table(niveles = table_names[1], tenencia25),
+    data.table(niveles = table_names[2], tenencia25to50),
+    data.table(niveles = table_names[3], tenencia50to75),
+    data.table(niveles = table_names[4], tenencia75)
 )
 
 # Rename columns to make them more understandable
