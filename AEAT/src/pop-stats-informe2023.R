@@ -83,10 +83,10 @@ reg_tenencia <- reg_tenencia %>%
     dplyr::mutate(Percentage = (Frequency / sum(Frequency)) * 100)
 
 
-# Check output
+# Check AEAT/output
 list(final_table, renta_table, reg_tenencia) %>% print()
 
-# export out
-fwrite(final_table, paste0("out/", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
-fwrite(renta_table, paste0("out/", sel_year, "-", ref_unit, "tabla-renta.csv"))
-fwrite(reg_tenencia, paste0("out/", sel_year, "-", ref_unit, "reg_tenenciaa.csv"))
+# export AEAT/out
+fwrite(final_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
+fwrite(renta_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-renta.csv"))
+fwrite(reg_tenencia, paste0("AEAT/out/", sel_year, "-", ref_unit, "reg_tenenciaa.csv"))

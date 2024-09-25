@@ -20,7 +20,7 @@ dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
 
 # hardcoded vars
 
-net_var <- colnames(risks)[colnames(risks) %like% tolower(selected)]
+net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
 risk_pov_tier <- risks[year == sel_year, get(net_var)]
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 dt[, CASERO2 := 0][RENTA_ALQ > 1200, CASERO2 := 1]
