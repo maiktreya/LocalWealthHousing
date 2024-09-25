@@ -25,6 +25,7 @@ get_wave <- function(
 
     # Identify towns to analyze
 
+
     dt[, MUESTRA := 0] # add a column for the subsample identifier
     dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
     dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
