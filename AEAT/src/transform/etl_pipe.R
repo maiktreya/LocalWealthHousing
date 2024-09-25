@@ -69,12 +69,6 @@ get_wave <- function(
 
     # Define any new categorical variable before setting the survey object
 
-    dt[MUESTRA == 1, CIUDAD := "Segovia"]
-    dt[MUESTRA == 2, CIUDAD := "La Lastrilla"]
-    dt[MUESTRA == 3, CIUDAD := "San Cristobal"]
-    dt[MUESTRA == 4, CIUDAD := "Palazuelos"]
-    dt[MUESTRA == 5, CIUDAD := "Madrid"]
-
     dt[, TENENCIA := "INQUILINA"]
     dt[PAR150 > 0, TENENCIA := "CASERO"]
     dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
