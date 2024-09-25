@@ -43,7 +43,7 @@ tenencia75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.75
 # Combine the proportions into one data.table
 
 final_table <- rbind(tenencia25, tenencia25to50, tenencia50to75, tenencia75)
-for (i in ncol(final_table)) final_table[, i] <- final_table[, i] %>% prop.table()
+for (i in 1:ncol(final_table)) final_table[, i] <- prop.table(final_table[, i])  # nolint
 
 # TABLA 2: Calculate the median and mean income for each TENENCIA group
 
