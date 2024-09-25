@@ -12,13 +12,11 @@ source("AEAT/src/transform/etl_pipe.R")
 # define city subsample and variables to analyze
 
 city <- "Segovia"
-pop_stats <- fread("AEAT/data/pop-stats.csv")
-municipios <- cbind(mun = c("segovia", "lastrilla", "sancris", "palazuelos"), ind = c(1:4)) %>% data.table()
 represet <- "!is.na(FACTORCAL)" # población
 represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
 sel_year <- 2016
 ref_unit <- "IDENHOG"
-get_col <- colnames(pop_stats)[colnames(pop_stats) %like% tolower(ref_unit)]
+pop_stats <- fread("AEAT/data/pop-stats.csv")
 RNpop <- pop_stats[muni == tolower(city) & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == tolower(city) & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)

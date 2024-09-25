@@ -11,7 +11,6 @@ get_wave <- function(
 
     library(data.table, quietly = TRUE)
 
-
     # Import chosen dataframe (change string according to the data file path)
 
     dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
@@ -27,11 +26,11 @@ get_wave <- function(
     # Identify towns to analyze
 
     dt[, MUESTRA := 0] # add a column for the subsample identifier
-    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := "Segovia"]
-    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := "La Lastrilla"]
-    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := "San Cristobal"]
-    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := "Palazuelos"]
-    dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := "Madrid"]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4]
+    dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := 5]
     dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
 
     # tidy dt for the given reference unit through in-place vectorized operations
@@ -69,6 +68,13 @@ get_wave <- function(
 
     # Define any new categorical variable before setting the survey object
 
+    dt[MUESTRA == 1, CIUDAD := "Segovia"]
+    dt[MUESTRA == 2, CIUDAD := "La Lastrilla"]
+    dt[MUESTRA == 3, CIUDAD := "San Cristobal"]
+    dt[MUESTRA == 4, CIUDAD := "Palazuelos"]
+    dt[MUESTRA == 5, CIUDAD := "Madrid"]
+    dt[, MUESTRA := NULL]
+
     dt[, TENENCIA := "INQUILINA"]
     dt[PAR150 > 0, TENENCIA := "CASERO"]
     dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
@@ -81,5 +87,6 @@ get_wave <- function(
     dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
     # Return the final dt object
+
     return(dt)
 }
