@@ -1,4 +1,9 @@
 env
 .venv
 .lintr
+<<<<<<< HEAD
 AEAT/data/original/
+=======
+AEAT/data/*.gz
+AEAT/data/*.zip
+>>>>>>> 3b8a894c168a22d4f87e65a8170132fefc7e0ea0
