@@ -23,7 +23,7 @@ dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-dt_sv <- subset(dt_sv, MUESTRA == 4) # subset for a given city
+dt_sv <- subset(dt_sv, MUESTRA == 5) # subset for a given city
 quantiles <- seq(.25, .75, .25) # cortes
 quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
 table_names <- c(
@@ -42,18 +42,8 @@ tenencia75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.75
 
 # Combine the proportions into one data.table
 
-final_table <- rbind(
-    data.table(niveles = table_names[1], tenencia25),
-    data.table(niveles = table_names[2], tenencia25to50),
-    data.table(niveles = table_names[3], tenencia50to75),
-    data.table(niveles = table_names[4], tenencia75)
-)
-final_table <- cbind(
-    niveles = final_table[TENENCIA == "INQUILINA"]$niveles,
-    iniquilinas = round(prop.table(final_table[TENENCIA == "INQUILINA"]$N), 3),
-    caseros = round(prop.table(final_table[TENENCIA == "CASERO"]$N), 3),
-    caseros = round(prop.table(final_table[TENENCIA == "PROPIETARIO"]$N), 3)
-)
+final_table <- rbind(tenencia25, tenencia25to50, tenencia50to75, tenencia75)
+for (i in ncol(final_table)) final_table[, i] <- final_table[, i] %>% prop.table()
 
 # TABLA 2: Calculate the median and mean income for each TENENCIA group
 
