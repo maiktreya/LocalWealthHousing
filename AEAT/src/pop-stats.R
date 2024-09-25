@@ -11,7 +11,7 @@ source("AEAT/src/etl_pipe.R")
 
 # import needed data objects
 selected <- "IDENHOG"
-sel_year <- 2016
+sel_year <- 2021
 risks <- fread("AEAT/data/risk.csv")
 dt <- get_wave(sel_year = sel_year, ref_unit = selected)
 
