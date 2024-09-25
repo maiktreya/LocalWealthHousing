@@ -19,7 +19,7 @@ col_iden <- fwf_positions(start = start_iden, end = end_iden) # Use fwf_position
 iden <- read_fwf(paste0("AEAT/data/original/1_IDEN", sel_year, ".txt"), col_positions = col_iden) %>% data.table()
 colnames(iden) <- c("IDENPER", "IDENHOG", "CCAA", "PROV", "MUNI", "TRAMO", "FACTORCAL", "SECCION")
 
-# RENTA
+# RENTA VARIABLES
 if (sel_year == 2021) {
     start_positions <- c(1, 12, 707, 719, 191)
     end_positions <- c(11, 22, 718, 730, 202)
