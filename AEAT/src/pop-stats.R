@@ -1,16 +1,5 @@
 # Obtain population statistics for AEAT subsample
 
-<<<<<<< HEAD
-library(survey)
-library(magrittr)
-library(dineq)
-rm(list = ls()) # clean enviroment to avoid ram bottlenecks
-source("AEAT/src/etl_pipe.R")
-risks <- fread("AEAT/data/risk.csv")
-
-# hardcoded varss
-net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
-=======
 # clean enviroment to avoid ram bottlenecks and import dependencies
 
 rm(list = ls())
@@ -29,16 +18,11 @@ dt <- get_wave(sel_year = sel_year, ref_unit = selected)
 # hardcoded vars
 
 net_var <- colnames(risks)[colnames(risks) %like% tolower(selected)]
->>>>>>> 3b8a894c168a22d4f87e65a8170132fefc7e0ea0
 risk_pov_tier <- risks[year == sel_year, get(net_var)]
 dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
 dt[, CASERO2 := 0][RENTA_ALQ > 1200, CASERO2 := 1]
 
 # Create the survey design object with the initial weights
-<<<<<<< HEAD
-=======
-
->>>>>>> 3b8a894c168a22d4f87e65a8170132fefc7e0ea0
 survey_design <- svydesign(
     ids = ~1,
     data = dt,
@@ -46,26 +30,16 @@ survey_design <- svydesign(
 )
 
 # Subsample for a reference municipio
-<<<<<<< HEAD
-subsample <- subset(survey_design, MUESTRA == 1)
-
-# obtain quantiles for a given variable
-=======
 
 subsample <- subset(survey_design, MUESTRA == 1)
 
 # obtain quantiles for a given variable
 
->>>>>>> 3b8a894c168a22d4f87e65a8170132fefc7e0ea0
 quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.90, 0.95, 0.99))
 quant <- data.table(quantiles$RENTA_ALQ[, 1], seq_along(quantiles$RENTA_ALQ[, 1]) - 1)
 colnames(quant) <- c("cuantil", "index")
 
 # obtain inequality proportions
-<<<<<<< HEAD
-=======
-
->>>>>>> 3b8a894c168a22d4f87e65a8170132fefc7e0ea0
 total_general <- svytotal(~RENTA_ALQ, subsample)["RENTA_ALQ"]
 proportions <- list()
 for (i in seq_along(quant$index)) {
@@ -76,20 +50,11 @@ for (i in seq_along(quant$index)) {
 }
 
 # transform the list into a table
-<<<<<<< HEAD
-proportions <- rbindlist(proportions) %>% print()
-
-# export the output
-fwrite(proportions, file = paste0("AEAT/out/concentracion-caseros-", ref_unit, "-", sel_year, ".csv"))
-
-# print some exploratoty results
-=======
 
 proportions <- rbindlist(proportions) %>% print()
 
 # print some exploratoty results
 
->>>>>>> 3b8a894c168a22d4f87e65a8170132fefc7e0ea0
 prop_rentis <- svymean(~TENENCIA, survey_design) %>% print()
 histrentaB <- svyhist(~RENTA_ALQ, design = subsample, breaks = 30)
 risk_pop <- svymean(~RISK, subsample, FUN = svymean) %>% print()
@@ -97,13 +62,6 @@ renta_alq_gini <- gini.wtd(dt$RENTA_ALQ, dt$FACTORCAL) %>% print()
 renta_alq_deco <- gini_decomp(dt$RENTAB, dt$TENENCIA)
 renta_por_clase <- svyby(~RENTAD, ~TENENCIA, survey_design, svymean) %>% print()
 
-<<<<<<< HEAD
-svytotal(~NPROP_ALQ, subsample) %>% prop.table() %>% print()
-
-svyquantile(~NPROP_ALQ, subsample, quantiles = seq(0.1, 1, 0.1))%>% print()
-
-svytable(~NPROP_ALQ, subsample) %>%   prop.table() %>% View()
-=======
 svytotal(~NPROP_ALQ, subsample) %>%
     prop.table() %>%
     print()
@@ -113,4 +71,3 @@ svyquantile(~NPROP_ALQ, subsample, quantiles = seq(0.1, 1, 0.1)) %>% print()
 svytable(~NPROP_ALQ, subsample) %>%
     prop.table() %>%
     View()
->>>>>>> 3b8a894c168a22d4f87e65a8170132fefc7e0ea0
