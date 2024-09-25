@@ -12,7 +12,7 @@ get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG", represet = "!is.na(F
 
     # Import chosen dataframe (change string according to the data file path)
 
-    dt <- fread(paste0("LocalWealthHousing/AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
+    dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
 
     # Replace NA values with 0 in selected columns
 
