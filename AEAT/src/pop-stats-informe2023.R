@@ -7,14 +7,18 @@ library(data.table)
 library(survey)
 library(magrittr)
 library(dineq)
-source("LocalWealthHousing/AEAT/src/etl_pipe.R")
+source("AEAT/src/etl_pipe2023.R")
 
 # import needed data objects
-risks <- fread("LocalWealthHousing/AEAT/data/risk.csv")
-dt <- get_wave(sel_year = 2016, ref_unit = "IDENHOG")
 
+represet <- "!is.na(FACTORCAL)" # población
+represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
+sel_year <- 2016
+ref_unit <- "IDENHOG"
+risks <- fread("AEAT/data/risk.csv")
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
 
-#### ----- code taken from previous project from here
+#### ------------------------------------ code taken from previous project from here
 
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
