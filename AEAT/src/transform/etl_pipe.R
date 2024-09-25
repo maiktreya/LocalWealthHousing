@@ -26,11 +26,11 @@ get_wave <- function(
     # Identify towns to analyze
 
     dt[, MUESTRA := 0] # add a column for the subsample identifier
-    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1]
-    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2]
-    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3]
-    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4]
-    dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := 5]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
+    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
+    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
+    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
+    dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := 5] # madrid
     dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
 
     # tidy dt for the given reference unit through in-place vectorized operations
@@ -73,7 +73,6 @@ get_wave <- function(
     dt[MUESTRA == 3, CIUDAD := "San Cristobal"]
     dt[MUESTRA == 4, CIUDAD := "Palazuelos"]
     dt[MUESTRA == 5, CIUDAD := "Madrid"]
-    dt[, MUESTRA := NULL]
 
     dt[, TENENCIA := "INQUILINA"]
     dt[PAR150 > 0, TENENCIA := "CASERO"]

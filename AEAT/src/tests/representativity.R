@@ -6,9 +6,6 @@ library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
-
-
-
 # define city subsample and variables to analyze
 
 city <- "Segovia"
@@ -24,7 +21,7 @@ dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
 
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, MUESTRA == city) # subset for a given city
+subsample <- subset(dt_sv, CIUDAD == city) # subset for a given city
 
 # calculate sample means
 
