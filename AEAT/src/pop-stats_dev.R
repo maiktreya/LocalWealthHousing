@@ -10,14 +10,15 @@ library(dineq)
 source("AEAT/src/etl_pipe.R")
 
 # import needed data objects
+
 represet <- "!is.na(FACTORCAL)" # población
 represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
 sel_year <- 2016
 ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
 
-# hardcoded varssç
+# hardcoded vars
 
 net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
 risk_pov_tier <- risks[year == sel_year, get(net_var)]

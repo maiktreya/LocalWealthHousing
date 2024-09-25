@@ -10,10 +10,13 @@ library(data.table)
 source("AEAT/src/etl_pipe.R")
 
 # import needed data objects
-selected <- "IDENHOG"
-sel_year <- 2021
+
+represet <- "!is.na(FACTORCAL)" # población
+represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
+sel_year <- 2016
+ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = sel_year, ref_unit = selected)
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
 
 # hardcoded vars
 

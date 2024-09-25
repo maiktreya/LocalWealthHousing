@@ -3,7 +3,6 @@
 # Use either IDENPER for personal or IDENHOG for household level
 
 get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG", represet = "!is.na(FACTORCAL)") {
-
     # Load required libraries
 
     library(data.table, quietly = TRUE)
