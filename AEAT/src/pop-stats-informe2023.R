@@ -87,6 +87,6 @@ reg_tenencia <- reg_tenencia %>%
 list(final_table, renta_table, reg_tenencia) %>% print()
 
 # export results
-fwrite(final_table, paste0("results/", ref_survey, "-", ref_unit, "tabla-quantiles.csv"))
-fwrite(renta_table, paste0("results/", ref_survey, "-", ref_unit, "tabla-renta.csv"))
-fwrite(reg_tenencia, paste0("results/", ref_survey, "-", ref_unit, "reg_tenenciaa.csv"))
+fwrite(final_table, paste0("results/", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
+fwrite(renta_table, paste0("results/", sel_year, "-", ref_unit, "tabla-renta.csv"))
+fwrite(reg_tenencia, paste0("results/", sel_year, "-", ref_unit, "reg_tenenciaa.csv"))
