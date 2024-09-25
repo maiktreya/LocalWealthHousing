@@ -1,6 +1,6 @@
 # Obtain population statistics for AEAT subsample
 
-# clean enviroment to avoid ram botltenecks and import dependencies
+# Clean environment to avoid RAM bottlenecks and import dependencies
 
 rm(list = ls())
 library(data.table)
@@ -9,36 +9,45 @@ library(magrittr)
 library(dineq)
 source("AEAT/src/etl_pipe.R")
 
-# import needed data objects
+# Import needed data objects
 
 represet <- "!is.na(FACTORCAL)" # población
 represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
 sel_year <- 2016
 ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
-# hardcoded vars
+#### ------------------------------------ code taken from previous project from here
 
-net_var <- colnames(risks)[colnames(risks) %like% tolower(ref_unit)]
-risk_pov_tier <- risks[year == sel_year, get(net_var)]
-dt[, RISK := 0][RENTAD < risk_pov_tier, RISK := 1]
-dt[, CASERO2 := 0][RENTA_ALQ > 1200, CASERO2 := 1]
-
-# Create the survey design object with the initial weights
-
-survey_design <- svydesign(
-    ids = ~1,
-    data = dt,
-    weights = dt$FACTORCAL
+# Prepare survey object from dt and set income cuts for quantiles dynamically
+dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
+dt_sv <- subset(dt_sv, MUESTRA == 1) # subset for a given city
+quantiles <- seq(.25, .75, .25) # cortes
+quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
+table_names <- c(
+    paste0("hasta ", quantiles_renta[, "0.25"]),
+    paste0("entre ", quantiles_renta[, "0.25"], " y ", quantiles_renta[, "0.5"]),
+    paste0("entre ", quantiles_renta[, "0.5"], " y ", quantiles_renta[, "0.75"]),
+    paste0("mas de ", quantiles_renta[, "0.75"])
 )
 
-# Subsample for a reference municipio
+dt[TENENCIA == "PROPIETARIO", TENENCIA] %>%
+    nrow() %>%
+    print()
+dt[TENENCIA == "INQUILINA", TENENCIA] %>%
+    nrow() %>%
+    print()
+dt[TENENCIA == "CASERO", TENENCIA] %>%
+    nrow() %>%
+    print()
 
-subsample <- subset(survey_design, MUESTRA == 1)
-
-# obtain quantiles for a given variable
-
-quantiles <- svyquantile(~RENTA_ALQ, subsample, quantiles = c(0.1, 0.25, 0.5, 0.75, 0.90, 0.95, 0.99))
-
-svyhist(~NPROP_ALQ, design = subsample, breaks = 30) %>% print()
+dt[PROPIETARIO == 1, PROPIETARIO] %>%
+    nrow() %>%
+    print()
+dt[INQUILINO == 1, INQUILINO] %>%
+    nrow() %>%
+    print()
+dt[CASERO == 1, CASERO] %>%
+    nrow() %>%
+    print()

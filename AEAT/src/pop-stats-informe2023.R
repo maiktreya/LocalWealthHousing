@@ -16,7 +16,7 @@ represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de 
 sel_year <- 2016
 ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 #### ------------------------------------ code taken from previous project from here
 
@@ -53,14 +53,14 @@ colnames(final_table) <- c("niveles", "caseros", "inquilinos")
 # TABLA 2--------------------------------------------------------------------
 median_renta_inquili <- svyquantile(~RENTAD, subset(dt_sv, INQUILINO == 1), quantiles = .5, ci = FALSE)$RENTAD[1]
 median_renta_caseros <- svyquantile(~RENTAD, subset(dt_sv, CASERO == 1), quantiles = .5, ci = FALSE)$RENTAD[1]
-median_renta_propsin <- svyquantile(~RENTAD, subset(dt_sv, PROPIETARIO_SIN == 1), quantiles = .5, ci = FALSE)$RENTAD[1]
+median_renta_propsin <- svyquantile(~RENTAD, subset(dt_sv, PROPIETARIO == 1), quantiles = .5, ci = FALSE)$RENTAD[1]
 median_renta_totalpo <- svyquantile(~RENTAD, dt_sv, quantiles = .5, ci = FALSE)$RENTAD[1]
 median_renta_caseros_NOAL <- svyquantile(~RENTAD_NOAL, subset(dt_sv, CASERO == 1), quantiles = .5, ci = FALSE)$RENTAD_NOAL[1]
 
 mean_renta_inquili <- svymean(~RENTAD, subset(dt_sv, INQUILINO == 1))[1]
 mean_renta_caseros <- svymean(~RENTAD, subset(dt_sv, CASERO == 1))[1]
 mean_renta_caseros_NOAL <- svymean(~RENTAD_NOAL, subset(dt_sv, CASERO == 1))[1]
-mean_renta_propsin <- svymean(~RENTAD, subset(dt_sv, PROPIETARIO_SIN == 1))[1]
+mean_renta_propsin <- svymean(~RENTAD, subset(dt_sv, PROPIETARIO == 1))[1]
 mean_renta_totalpo <- svymean(~RENTAD, dt_sv)[1]
 
 medians <- c(median_renta_caseros, median_renta_caseros_NOAL, median_renta_inquili, median_renta_propsin, median_renta_totalpo)
@@ -72,12 +72,12 @@ colnames(renta_table) <- c("tipo", "media", "mediana")
 # Calculate frequencies with survey weights, only including cases where the variable equals 1
 CASERO_FREQ <- svytotal(~CASERO, design = dt_sv, subset = CASERO == 1)[-1]
 INQUILINO_FREQ <- svytotal(~INQUILINO, design = dt_sv, subset = INQUILINO == 1)[1]
-PROPIETARIO_SIN_FREQ <- svytotal(~PROPIETARIO_SIN, design = dt_sv, subset = PROPIETARIO_SIN == 1)[-1]
+PROPIETARIO_FREQ <- svytotal(~PROPIETARIO, design = dt_sv, subset = PROPIETARIO == 1)[-1]
 
 # Create a data frame
 reg_tenencia <- data.frame(
-    Category = c("CASERO", "INQUILINO", "PROPIETARIO_SIN"),
-    Frequency = c(CASERO_FREQ, INQUILINO_FREQ, PROPIETARIO_SIN_FREQ)
+    Category = c("CASERO", "INQUILINO", "PROPIETARIO"),
+    Frequency = c(CASERO_FREQ, INQUILINO_FREQ, PROPIETARIO_FREQ)
 )
 
 reg_tenencia <- reg_tenencia %>%

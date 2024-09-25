@@ -1,6 +1,7 @@
 # Obtain population statistics for AEAT subsample
 
 # Clean environment to avoid RAM bottlenecks and import dependencies
+
 rm(list = ls())
 library(data.table)
 library(survey)
@@ -9,12 +10,15 @@ library(dineq)
 source("AEAT/src/etl_pipe.R")
 
 # Import needed data objects
+
 represet <- "!is.na(FACTORCAL)" # población
 represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
 sel_year <- 2016
 ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
+
+#### ------------------------------------ code taken from previous project from here
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
