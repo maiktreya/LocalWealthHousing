@@ -2,12 +2,15 @@
 
 # Use either IDENPER for personal or IDENHOG for household level
 
-get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG", represet = "!is.na(FACTORCAL)") {
+get_wave <- function(
+    sel_year = 2016,
+    ref_unit = "IDENHOG",
+    represet = "!is.na(FACTORCAL)",
+    sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")) {
     # Load required libraries
 
     library(data.table, quietly = TRUE)
 
-    sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")
 
     # Import chosen dataframe (change string according to the data file path)
 
@@ -24,11 +27,11 @@ get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG", represet = "!is.na(F
     # Identify towns to analyze
 
     dt[, MUESTRA := 0] # add a column for the subsample identifier
-    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
-    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
-    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
-    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
-    dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := 5] # madrid
+    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := "Segovia"]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := "La Lastrilla"]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := "San Cristobal"]
+    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := "Palazuelos"]
+    dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := "Madrid"]
     dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
 
     # tidy dt for the given reference unit through in-place vectorized operations
