@@ -1,7 +1,6 @@
 # Obtain population statistics for AEAT subsample
 
-# clean environment to avoid RAM bottlenecks and import dependencies
-
+# Clean environment to avoid RAM bottlenecks and import dependencies
 rm(list = ls())
 library(data.table)
 library(survey)
@@ -9,20 +8,16 @@ library(magrittr)
 library(dineq)
 source("AEAT/src/etl_pipe.R")
 
-# import microdata and define hardcoded variables
-
+# Import needed data objects
 represet <- "!is.na(FACTORCAL)" # población
 represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
-sel_year <- 2016 # año de la muestra
-ref_unit <- "IDENHOG" # hogares o personas
+sel_year <- 2016
+ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
-dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
-
+dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet2)
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
-
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-dt_sv <- subset(dt_sv, MUESTRA == 1) # Subsample for a reference municipio
 quantiles <- seq(.25, .75, .25) # cortes
 quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
 table_names <- c(
@@ -32,46 +27,49 @@ table_names <- c(
     paste0("mas de ", quantiles_renta[, "0.75"])
 )
 
-# TABLA 1-------------------------------------------------------------------------------
+# TABLA 1: Use svytable and prop.table to get proportions of TENENCIA across income quantiles
+tenencia25 <- svytable(~TENENCIA, subset(dt_sv, RENTAD < quantiles_renta[, "0.25"]))
+tenencia25to50 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.25"] & RENTAD < quantiles_renta[, "0.5"]))
+tenencia50to75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.5"] & RENTAD < quantiles_renta[, "0.75"]))
+tenencia75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.75"]))
 
-tenencia25 <- svytable(~TENENCIA, subset(dt_sv, RENTAD < quantiles_renta[, "0.25"])) %>% data.table()
-tenencia25to50 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.25"] & RENTAD < quantiles_renta[, "0.5"])) %>% data.table()
-tenencia50to75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.5"] & RENTAD < quantiles_renta[, "0.75"])) %>% data.table()
-tenencia75 <- svytable(~TENENCIA, subset(dt_sv, RENTAD > quantiles_renta[, "0.75"])) %>% data.table()
-tenencia25[, Freq := N]
-tenencia25to50[, Freq := N]
-tenencia50to75[, Freq := N]
-tenencia75[, Freq := N]
-tenencia <- rbind(tenencia25, tenencia25to50, tenencia50to75, tenencia75)[, .(Freq = sum(Freq)), by = TENENCIA]
-tenencia[, Proportion := Freq / sum(Freq)]  # Calculate proportions
-final_table <- cbind(table_names, tenencia)
-colnames(final_table) <- c("niveles", "tenencia", "frecuencia", "proporción")
+# Calculate proportions using prop.table() for each income group
+prop_tenencia25 <- prop.table(tenencia25)
+prop_tenencia25to50 <- prop.table(tenencia25to50)
+prop_tenencia50to75 <- prop.table(tenencia50to75)
+prop_tenencia75 <- prop.table(tenencia75)
 
-
-# TABLA 2--------------------------------------------------------------------
-
-median_renta_tenencia <- svyquantile(~RENTAD, dt_sv, quantiles = .5, ci = FALSE)$RENTAD
-mean_renta_tenencia <- svymean(~RENTAD, dt_sv)
-medians <- c(median_renta_tenencia)
-means <- c(mean_renta_tenencia)
-renta_table <- cbind(c("todos"), means, medians)
-colnames(renta_table) <- c("tipo", "media", "mediana")
-
-# TABLA 3-----------------------------------------------------------------------
-
-tenencia_freq <- svytotal(~TENENCIA, design = dt_sv)
-reg_tenencia <- data.table(
-    Category = names(tenencia_freq),
-    Frequency = as.numeric(tenencia_freq)
+# Combine the proportions into one data.table
+final_table <- rbind(
+  data.table(niveles = table_names[1], as.data.table(prop_tenencia25)),
+  data.table(niveles = table_names[2], as.data.table(prop_tenencia25to50)),
+  data.table(niveles = table_names[3], as.data.table(prop_tenencia50to75)),
+  data.table(niveles = table_names[4], as.data.table(prop_tenencia75))
 )
-reg_tenencia[, Percentage := (Frequency / sum(Frequency)) * 100]
+
+# Rename columns to make them more understandable
+setnames(final_table, old = c("N"), new = c("proporción"))
+
+# TABLA 2: Calculate the median and mean income for each TENENCIA group
+renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = 0.5)
+mean_renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svymean)
+
+# Combine median and mean tables
+renta_table <- data.table(
+    TENENCIA = renta_stats$TENENCIA,
+    media = mean_renta_stats$RENTAD,
+    mediana = renta_stats$RENTAD
+)
+
+# TABLA 3: Calculate total frequencies by TENENCIA using svytable
+tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv))
+tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv))
+tenencia_freq <- cbind(tenencia_freq, tenencia_prop)
 
 # Check AEAT/output
-
-list(final_table, renta_table, reg_tenencia) %>% print()
+list(final_table, renta_table, tenencia_freq) %>% print()
 
 # Export AEAT/out
-
 fwrite(final_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-quantiles2.csv"))
 fwrite(renta_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-renta2.csv"))
-fwrite(reg_tenencia, paste0("AEAT/out/", sel_year, "-", ref_unit, "reg_tenencia2.csv"))
+fwrite(tenencia_freq, paste0("AEAT/out/", sel_year, "-", ref_unit, "reg_tenencia2.csv"))

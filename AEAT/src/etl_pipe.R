@@ -28,7 +28,7 @@ get_wave <- function(sel_year = 2016, ref_unit = "IDENHOG", represet = "!is.na(F
     dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
     dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
     dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
-        dt[CCAA == "13" & PROV == "28" & MUNI == "079", MUESTRA := 4] # madrid
+    dt[CCAA == "13" & PROV == "28" & MUNI == "079", MUESTRA := 5] # madrid
     dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
 
     # tidy dt for the given reference unit through in-place vectorized operations
