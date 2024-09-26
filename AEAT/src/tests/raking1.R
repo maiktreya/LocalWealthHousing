@@ -1,4 +1,5 @@
-# Rscript for Resampling Segovia
+# Rscript for Resampling Segovia from: https://chatgpt.com/share/66f53f75-76c4-8007-b2ab-529f437699cd
+
 library("magrittr")
 library("data.table")
 library("survey")
