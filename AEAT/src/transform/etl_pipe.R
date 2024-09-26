@@ -66,7 +66,7 @@ get_wave <- function(
             NPROP_ALQ = mean(NPROP_ALQ),
             IDENHOG = mean(IDENHOG),
             SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = (sel_year) - mean(ANONAC), # Calculate age
+            AGE = mean(AGE), # Calculate age
             RENTAB = sum(RENTAB),
             RENTAD = sum(RENTAD),
             TRAMO = mean(TRAMO),
