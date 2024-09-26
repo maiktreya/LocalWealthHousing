@@ -47,6 +47,7 @@ get_wave <- function(
         CCAA == "7" & PROV == "40" & MUNI == "906", 3, # San Cristobal
         CCAA == "7" & PROV == "40" & MUNI == "155", 4, # Palazuelos
         CCAA == "13" & PROV == "28" & MUNI == "79", 5, # Madrid
+        CCAA == "13" & PROV == "28", 6, # MadridCCCAA
         default = 0
     )]
 
@@ -109,6 +110,7 @@ get_wave <- function(
         MUESTRA == 3, "sancristobal",
         MUESTRA == 4, "palazuelos",
         MUESTRA == 5, "madrid",
+        MUESTRA == 6, "madridCCAA",
         default = NA_character_
     )]
 

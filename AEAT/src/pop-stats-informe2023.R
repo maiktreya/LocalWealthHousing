@@ -9,9 +9,9 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # Import needed data objects
-city <- "madrid"
-represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+city <- "madridCCAA"
+represet <- "!is.na(FACTORCAL)" # población total
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
