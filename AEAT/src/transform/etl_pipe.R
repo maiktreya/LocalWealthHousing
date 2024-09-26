@@ -1,3 +1,5 @@
+# Rscript for transforming base AEAT sample files from their tax record sample
+
 get_wave <- function(
     sel_year = 2016,
     ref_unit = "IDENHOG",
@@ -83,17 +85,6 @@ get_wave <- function(
     dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))]
     dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))]
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
-
-
-    # **Replace numeric MUESTRA with corresponding text labels**
-    dt[, MUESTRA := fcase(
-        MUESTRA == 1, "segovia",
-        MUESTRA == 2, "lastrilla",
-        MUESTRA == 3, "sancristobal",
-        MUESTRA == 4, "palazuelos",
-        MUESTRA == 5, "madrid",
-        default = NA_character_
-    )]
 
     # Return the final dt object
     return(dt)
