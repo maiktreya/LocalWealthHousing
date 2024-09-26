@@ -9,7 +9,7 @@ source("AEAT/src/transform/etl_pipe.R")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)" # población
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENPER"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
