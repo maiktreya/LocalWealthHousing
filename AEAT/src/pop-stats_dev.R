@@ -40,12 +40,16 @@ dt[, age_group := cut(
 )]
 dt <- dt[!is.na(age_group)]
 sex_vector <- sex[, total := NULL][year == sel_year][, year := NULL]
-sex_vector <- sex / sum(sex)
+sex_vector <- sex_vector / sum(sex_vector)
+sex_vector <- sex_vector[order(names(sex_vector))]
 
 # age categories
 age_vector <- age[, get(paste0("total", sel_year))]
 age_vector <- age_vector / sum(age_vector)
 names(age_vector) <- age_labels
+age_vector <- age_vector[order(names(age_vector))]
+
+dt[, age_group := factor(age_group, levels = names(age_vector))]
 
 
 # Define raking margins
