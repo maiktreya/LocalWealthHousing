@@ -1,5 +1,6 @@
 # Rescale the raked weights to match Segovia's total population
 total_population_segovia <- sum(survey_design_segovia$variables[,"FACTORCAL"])
+
 # total_population_segovia <- sum(sex$segoT)
 raked_weights <- raked_design$variables[,"FACTORCAL"]
 rescaled_weights <- raked_weights * (total_population_segovia / sum(raked_weights))
