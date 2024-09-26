@@ -1,112 +1,100 @@
-# Rscript for transforming base AEAT sample files from their tax record sample
-
-# Use either IDENPER for personal or IDENHOG for household level
-
 get_wave <- function(
     sel_year = 2016,
     ref_unit = "IDENHOG",
     represet = "!is.na(FACTORCAL)",
     sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")) {
-    # Load required libraries
 
     library(data.table, quietly = TRUE)
 
-    # Import chosen dataframe (change string according to the data file path)
-
-    dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # from IEAT IRPF sample
+    # Load data
+    dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
 
     # Replace NA values with 0 in selected columns
+    setnafill(dt, type = "const", fill = 0, cols = sel_cols)
 
-    dt[, (sel_cols) := lapply(.SD, function(x) ifelse(is.na(x), 0, x)), .SDcols = sel_cols]
-
-    # Coerce conflicting values of var TRAMO to numeric
-
+    # Coerce TRAMO to numeric
     dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
-    # Identify towns to analyze
+    # Assign sample identifier (MUESTRA)
+    dt[, MUESTRA := fcase(
+        CCAA == "7" & PROV == "40" & MUNI == "194", 1, # segovia
+        CCAA == "7" & PROV == "40" & MUNI == "112", 2, # lastrilla
+        CCAA == "7" & PROV == "40" & MUNI == "906", 3, # sancristobal
+        CCAA == "7" & PROV == "40" & MUNI == "155", 4, # palazuelos
+        CCAA == "13" & PROV == "28" & MUNI == "79", 5, # madrid
+        default = 0
+    )]
 
+    # Calculate rental income
+    dt[, RENTA_ALQ2 := fifelse(PAR150i > 0, INCALQ, 0)]
 
-    dt[, MUESTRA := 0] # add a column for the subsample identifier
-    dt[CCAA == "7" & PROV == "40" & MUNI == "194", MUESTRA := 1] # segovia
-    dt[CCAA == "7" & PROV == "40" & MUNI == "112", MUESTRA := 2] # lastrilla
-    dt[CCAA == "7" & PROV == "40" & MUNI == "906", MUESTRA := 3] # sancris
-    dt[CCAA == "7" & PROV == "40" & MUNI == "155", MUESTRA := 4] # palazuelos
-    dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := 5] # madrid
-    dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
+    # STEP 1: Summarize by person to avoid duplicating records for persons with multiple properties
+    dt <- dt[, .(
+        MIEMBROS = uniqueN(IDENPER),
+        NPROP_ALQ = uniqueN(REFCAT),
+        IDENHOG = first(IDENHOG),
+        SEXO = first(SEXO),
+        AGE = sel_year - mean(ANONAC),
+        RENTAB = mean(RENTAB),
+        RENTAD = mean(RENTAD),
+        TRAMO = mean(TRAMO),
+        RENTA_ALQ = mean(RENTA_ALQ),
+        RENTA_ALQ2 = mean(RENTA_ALQ2),
+        PAR150 = sum(PAR150i),
+        PATINMO = mean(PATINMO),
+        FACTORCAL = mean(FACTORCAL),
+        CCAA = first(CCAA),
+        PROV = first(PROV),
+        MUNI = first(MUNI),
+        MUESTRA = first(MUESTRA)
+    ), by = .(IDENPER)]
 
-    # STEP 1: Summarize by person information about real estate properties (avoid duplicating records for persons with multiple properties)
+    # STEP 2: Aggregate by reference unit
+    dt <- dt[eval(parse(text = represet)), .(
+        MIEMBROS = mean(MIEMBROS),
+        NPROP_ALQ = mean(NPROP_ALQ),
+        IDENHOG = first(IDENHOG),
+        SEXO = first(SEXO),
+        AGE = mean(AGE),
+        RENTAB = sum(RENTAB),
+        RENTAD = sum(RENTAD),
+        TRAMO = mean(TRAMO),
+        RENTA_ALQ = sum(RENTA_ALQ),
+        RENTA_ALQ2 = sum(RENTA_ALQ2),
+        PAR150 = sum(PAR150),
+        PATINMO = sum(PATINMO),
+        FACTORCAL = mean(FACTORCAL),
+        CCAA = first(CCAA),
+        PROV = first(PROV),
+        MUNI = first(MUNI),
+        MUESTRA = first(MUESTRA)
+    ), by = .(reference = get(ref_unit))]
 
-    dt <- dt[,
-        .(
-            MIEMBROS = uniqueN(IDENPER),
-            NPROP_ALQ = uniqueN(REFCAT),
-            IDENHOG = mean(IDENHOG),
-            SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = (sel_year) - mean(ANONAC), # Calculate age
-            RENTAB = mean(RENTAB),
-            RENTAD = mean(RENTAD),
-            TRAMO = mean(TRAMO),
-            RENTA_ALQ = mean(RENTA_ALQ),
-            RENTA_ALQ2 = mean(RENTA_ALQ2),
-            PAR150 = sum(PAR150i),
-            PATINMO = mean(PATINMO),
-            FACTORCAL = mean(FACTORCAL),
-            CCAA = mean(CCAA),
-            PROV = mean(PROV),
-            MUNI = mean(MUNI),
-            MUESTRA = mean(MUESTRA)
-        ),
-        by = .(IDENPER)
-    ]
-
-
-  # STEP2: tidy dt for the given reference unit through in-place vectorized operations
-
-    dt <- dt[eval(parse(text = represet)),
-        .(
-            MIEMBROS = mean(MIEMBROS),
-            NPROP_ALQ = mean(NPROP_ALQ),
-            IDENHOG = mean(IDENHOG),
-            SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = mean(AGE), # Calculate age
-            RENTAB = sum(RENTAB),
-            RENTAD = sum(RENTAD),
-            TRAMO = mean(TRAMO),
-            RENTA_ALQ = sum(RENTA_ALQ),
-            RENTA_ALQ2 = sum(RENTA_ALQ2),
-            PAR150 = sum(PAR150),
-            PATINMO = sum(PATINMO),
-            FACTORCAL = mean(FACTORCAL),
-            CCAA = mean(CCAA),
-            PROV = mean(PROV),
-            MUNI = mean(MUNI),
-            MUESTRA = mean(MUESTRA)
-        ),
-        by = .(reference = get(ref_unit))
-    ]
-
-    # Rename the reference column to match 'ref_unit'
-
+    # Rename column
     if (ref_unit == "IDENHOG") {
-        dt <- dt[, -c("reference")]
+        dt[, reference := NULL]
     } else {
         setnames(dt, "reference", as.character(ref_unit))
     }
 
-    # Define any new categorical variable before setting the survey object
+    # Define new categorical variables
+    dt[, TENENCIA := fifelse(PAR150 > 0, "CASERO", fifelse(PATINMO > 0, "PROPIETARIO", "INQUILINA"))]
+    dt[, CASERO := factor(fifelse(PAR150 > 0, 1, 0))]
+    dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))]
+    dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))]
+    dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
-    dt[, TENENCIA := "INQUILINA"]
-    dt[PAR150 > 0, TENENCIA := "CASERO"]
-    dt[PATINMO > 0 & TENENCIA != "CASERO", TENENCIA := "PROPIETARIO"]
-    dt[, TENENCIA := factor(TENENCIA)]
 
-    dt[, CASERO := 0][PAR150 > 0, CASERO := 1][, CASERO := factor(CASERO)]
-    dt[, PROPIETARIO := 0][PATINMO > 0 & CASERO == 0, PROPIETARIO := 1][, PROPIETARIO := factor(PROPIETARIO)]
-    dt[, INQUILINO := 1][PROPIETARIO == 1, INQUILINO := 0][CASERO == 1, INQUILINO := 0][, INQUILINO := factor(INQUILINO)]
-
-    dt[, RENTAD_NOAL := 0][, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
+    # **Replace numeric MUESTRA with corresponding text labels**
+    dt[, MUESTRA := fcase(
+        MUESTRA == 1, "segovia",
+        MUESTRA == 2, "lastrilla",
+        MUESTRA == 3, "sancristobal",
+        MUESTRA == 4, "palazuelos",
+        MUESTRA == 5, "madrid",
+        default = NA_character_
+    )]
 
     # Return the final dt object
-
     return(dt)
 }

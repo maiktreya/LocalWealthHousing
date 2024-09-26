@@ -21,7 +21,7 @@ dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
 
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, MUESTRA == 4) # subset for a given city
+subsample <- subset(dt_sv, MUESTRA == 5) # subset for a given city
 
 # calculate sample means
 
