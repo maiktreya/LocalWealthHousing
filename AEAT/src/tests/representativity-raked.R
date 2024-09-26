@@ -28,7 +28,7 @@ subsample <- subset(dt_sv, MUESTRA == 5) # subset for a given city
 calibrated_design <- calibrate(
     subsample,
     formula = ~RENTAB,
-    population = RBpop
+    population = RBpop * 3182981
 )
 # calculate sample means
 
