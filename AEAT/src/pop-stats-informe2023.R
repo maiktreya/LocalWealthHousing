@@ -20,7 +20,7 @@ dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-dt_sv <- subset(dt_sv, muestra == "madrid") # subset for a given city
+dt_sv <- subset(dt_sv, CIUDAD == "madrid") # subset for a given city
 quantiles <- seq(.25, .75, .25) # cortes
 quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
 table_names <- c(

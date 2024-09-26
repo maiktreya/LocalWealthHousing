@@ -5,7 +5,6 @@ get_wave <- function(
     ref_unit = "IDENHOG",
     represet = "!is.na(FACTORCAL)",
     sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")) {
-
     library(data.table, quietly = TRUE)
 
     # Load data
@@ -30,47 +29,55 @@ get_wave <- function(
     # Calculate rental income
     dt[, RENTA_ALQ2 := fifelse(PAR150i > 0, INCALQ, 0)]
 
-    # STEP 1: Summarize by person to avoid duplicating records for persons with multiple properties
-    dt <- dt[, .(
-        MIEMBROS = uniqueN(IDENPER),
-        NPROP_ALQ = uniqueN(REFCAT),
-        IDENHOG = first(IDENHOG),
-        SEXO = first(SEXO),
-        AGE = sel_year - mean(ANONAC),
-        RENTAB = mean(RENTAB),
-        RENTAD = mean(RENTAD),
-        TRAMO = mean(TRAMO),
-        RENTA_ALQ = mean(RENTA_ALQ),
-        RENTA_ALQ2 = mean(RENTA_ALQ2),
-        PAR150 = sum(PAR150i),
-        PATINMO = mean(PATINMO),
-        FACTORCAL = mean(FACTORCAL),
-        CCAA = first(CCAA),
-        PROV = first(PROV),
-        MUNI = first(MUNI),
-        MUESTRA = first(MUESTRA)
-    ), by = .(IDENPER)]
+    # STEP 1: Summarize by person information about real estate properties (avoid duplicating records for persons with multiple properties)
 
-    # STEP 2: Aggregate by reference unit
-    dt <- dt[eval(parse(text = represet)), .(
-        MIEMBROS = mean(MIEMBROS),
-        NPROP_ALQ = mean(NPROP_ALQ),
-        IDENHOG = first(IDENHOG),
-        SEXO = first(SEXO),
-        AGE = mean(AGE),
-        RENTAB = sum(RENTAB),
-        RENTAD = sum(RENTAD),
-        TRAMO = mean(TRAMO),
-        RENTA_ALQ = sum(RENTA_ALQ),
-        RENTA_ALQ2 = sum(RENTA_ALQ2),
-        PAR150 = sum(PAR150),
-        PATINMO = sum(PATINMO),
-        FACTORCAL = mean(FACTORCAL),
-        CCAA = first(CCAA),
-        PROV = first(PROV),
-        MUNI = first(MUNI),
-        MUESTRA = first(MUESTRA)
-    ), by = .(reference = get(ref_unit))]
+    dt <- dt[,
+        .(
+            MIEMBROS = uniqueN(IDENPER),
+            NPROP_ALQ = uniqueN(REFCAT),
+            IDENHOG = mean(IDENHOG),
+            SEXO = mean(SEXO), # 1 = Male, 2 = Female
+            AGE = (sel_year) - mean(ANONAC), # Calculate age
+            RENTAB = mean(RENTAB),
+            RENTAD = mean(RENTAD),
+            TRAMO = mean(TRAMO),
+            RENTA_ALQ = mean(RENTA_ALQ),
+            RENTA_ALQ2 = mean(RENTA_ALQ2),
+            PAR150 = sum(PAR150i),
+            PATINMO = mean(PATINMO),
+            FACTORCAL = mean(FACTORCAL),
+            CCAA = mean(CCAA),
+            PROV = mean(PROV),
+            MUNI = mean(MUNI),
+            MUESTRA = mean(MUESTRA)
+        ),
+        by = .(IDENPER)
+    ]
+
+    # STEP2: tidy dt for the given reference unit through in-place vectorized operations
+
+    dt <- dt[eval(parse(text = represet)),
+        .(
+            MIEMBROS = mean(MIEMBROS),
+            NPROP_ALQ = mean(NPROP_ALQ),
+            IDENHOG = mean(IDENHOG),
+            SEXO = mean(SEXO), # 1 = Male, 2 = Female
+            AGE = mean(AGE), # Calculate age
+            RENTAB = sum(RENTAB),
+            RENTAD = sum(RENTAD),
+            TRAMO = mean(TRAMO),
+            RENTA_ALQ = sum(RENTA_ALQ),
+            RENTA_ALQ2 = sum(RENTA_ALQ2),
+            PAR150 = sum(PAR150),
+            PATINMO = sum(PATINMO),
+            FACTORCAL = mean(FACTORCAL),
+            CCAA = mean(CCAA),
+            PROV = mean(PROV),
+            MUNI = mean(MUNI),
+            MUESTRA = mean(MUESTRA)
+        ),
+        by = .(reference = get(ref_unit))
+    ]
 
     # Rename column
     if (ref_unit == "IDENHOG") {
