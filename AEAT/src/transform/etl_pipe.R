@@ -57,21 +57,21 @@ get_wave <- function(
     dt <- dt[, .(
         MIEMBROS = uniqueN(IDENPER), # Number of unique family members
         NPROP_ALQ = uniqueN(REFCAT), # Number of unique rental properties
-        IDENHOG = mean(IDENHOG), # Average household identifier
-        SEXO = mean(SEXO), # Average sex (1 = Male, 2 = Female)
+        IDENHOG = mean(IDENHOG), # household identifier
+        SEXO = mean(SEXO), # sex (1 = Male, 2 = Female)
         AGE = (sel_year) - mean(ANONAC), # Calculate average age
-        RENTAB = mean(RENTAB), # Average rental income
-        RENTAD = mean(RENTAD), # Average declared income
-        TRAMO = mean(TRAMO), # Average TRAMO
-        RENTA_ALQ = mean(RENTA_ALQ), # Average rental income
-        RENTA_ALQ2 = mean(RENTA_ALQ2), # Average calculated rental income
+        RENTAB = mean(RENTAB), # rental income
+        RENTAD = mean(RENTAD), # declared income
+        TRAMO = mean(TRAMO), # TRAMO
+        RENTA_ALQ = mean(RENTA_ALQ), # rental income
+        RENTA_ALQ2 = mean(RENTA_ALQ2), # calculated rental income
         PAR150 = sum(PAR150i), # Total number of properties owned
-        PATINMO = mean(PATINMO), # Average property value
-        FACTORCAL = mean(FACTORCAL), # Average calculation factor
-        CCAA = mean(CCAA), # Average Autonomous Community
-        PROV = mean(PROV), # Average Province
-        MUNI = mean(MUNI), # Average Municipality
-        MUESTRA = mean(MUESTRA) # Average sample identifier
+        PATINMO = mean(PATINMO), # property value
+        FACTORCAL = mean(FACTORCAL), # calculation factor
+        CCAA = mean(CCAA), # Autonomous Community
+        PROV = mean(PROV), # Province
+        MUNI = mean(MUNI), # Municipality
+        MUESTRA = mean(MUESTRA) # City identifiers (CCAA+PROV+MUNI)
     ), by = .(IDENPER)]
 
     # STEP 2: Filter and tidy data for the specified reference unit
@@ -79,20 +79,20 @@ get_wave <- function(
         MIEMBROS = mean(MIEMBROS),
         NPROP_ALQ = mean(NPROP_ALQ),
         IDENHOG = mean(IDENHOG),
-        SEXO = mean(SEXO), # Average sex (1 = Male, 2 = Female)
-        AGE = mean(AGE), # Average age
-        RENTAB = sum(RENTAB), # Total rental income
-        RENTAD = sum(RENTAD), # Total declared income
-        TRAMO = mean(TRAMO), # Average TRAMO
-        RENTA_ALQ = sum(RENTA_ALQ), # Total rental income
-        RENTA_ALQ2 = sum(RENTA_ALQ2), # Total calculated rental income
-        PAR150 = sum(PAR150), # Total properties owned
-        PATINMO = sum(PATINMO), # Total property value
-        FACTORCAL = mean(FACTORCAL), # Average calculation factor
-        CCAA = mean(CCAA), # Average Autonomous Community
-        PROV = mean(PROV), # Average Province
-        MUNI = mean(MUNI), # Average Municipality
-        MUESTRA = mean(MUESTRA) # Average sample identifier
+        SEXO = mean(SEXO),
+        AGE = mean(AGE),
+        RENTAB = sum(RENTAB),
+        RENTAD = sum(RENTAD),
+        TRAMO = mean(TRAMO),
+        RENTA_ALQ = sum(RENTA_ALQ),
+        RENTA_ALQ2 = sum(RENTA_ALQ2),
+        PAR150 = sum(PAR150),
+        PATINMO = sum(PATINMO),
+        FACTORCAL = mean(FACTORCAL),
+        CCAA = mean(CCAA),
+        PROV = mean(PROV),
+        MUNI = mean(MUNI),
+        MUESTRA = mean(MUESTRA)
     ), by = .(reference = get(ref_unit))]
 
     # Rename column based on reference unit
