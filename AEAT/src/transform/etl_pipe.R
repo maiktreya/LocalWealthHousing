@@ -1,98 +1,126 @@
-# Rscript for transforming base AEAT sample files from their tax record sample
+# R script for transforming base AEAT sample files from their tax record sample.
+#
+#' @description
+#' This script processes AEAT sample files to generate summarized and cleaned data
+#' for analysis. It allows selection of data from specified years (2016 or 2019) and
+#' aggregates information based on either household or individual reference units.
+#' The script performs data transformations, including handling missing values.
+#' The final output is a tidy data table ready for further analysis.
+#
+#' @details
+#' The following parameters can be adjusted:
+#' - sel_year: The year to select data from (2016 or 2019). Default is 2016.
+#' - ref_unit: Aggregation unit: "IDENHOG" (household) or "IDENPER" (individual).
+#' - represet: Logical condition representing the population analyzed;
+#'   for only declarants: 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)'.
+#'   for whole population: '!is.na(FACTORCAL)'.
+#' - sel_cols: Chosen columns to coerce to numeric types.
+#'
+#' Outputs a data.table with aggregated and processed information.
 
 get_wave <- function(
+    #' @param sel_year Year to select data from (2016 or 2019). Default is 2016.
     sel_year = 2016,
+    #' @param ref_unit Aggregation unit: "IDENHOG" (household) or "IDENPER" (individual).
     ref_unit = "IDENHOG",
+    #' @param represet Represents the whole population analyzed. For only declarants:
+    #' 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)'.
     represet = "!is.na(FACTORCAL)",
+    #' @param sel_cols Chosen columns to coerce to numeric types.
     sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")) {
+    # Load the data.table library for efficient data manipulation.
     library(data.table, quietly = TRUE)
 
-    # Load data
+    # Load data from the specified year
     dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
 
     # Replace NA values with 0 in selected columns
     setnafill(dt, type = "const", fill = 0, cols = sel_cols)
 
-    # Coerce TRAMO to numeric
+    # Coerce TRAMO to numeric, treating "N" as 8
     dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
 
-    # Assign sample identifier (MUESTRA)
+    # Assign sample identifier (MUESTRA) based on geographical identifiers
     dt[, MUESTRA := fcase(
-        CCAA == "7" & PROV == "40" & MUNI == "194", 1, # segovia
-        CCAA == "7" & PROV == "40" & MUNI == "112", 2, # lastrilla
-        CCAA == "7" & PROV == "40" & MUNI == "906", 3, # sancristobal
-        CCAA == "7" & PROV == "40" & MUNI == "155", 4, # palazuelos
-        CCAA == "13" & PROV == "28" & MUNI == "79", 5, # madrid
+        CCAA == "7" & PROV == "40" & MUNI == "194", 1, # Segovia
+        CCAA == "7" & PROV == "40" & MUNI == "112", 2, # Lastrilla
+        CCAA == "7" & PROV == "40" & MUNI == "906", 3, # San Cristobal
+        CCAA == "7" & PROV == "40" & MUNI == "155", 4, # Palazuelos
+        CCAA == "13" & PROV == "28" & MUNI == "79", 5, # Madrid
         default = 0
     )]
 
     # Calculate rental income
     dt[, RENTA_ALQ2 := fifelse(PAR150i > 0, INCALQ, 0)]
 
-    # STEP 1: Summarize by person information about real estate properties (avoid duplicating records for persons with multiple properties)
+    # STEP 1: Summarize information about real estate properties
+    dt <- dt[, .(
+        MIEMBROS = uniqueN(IDENPER), # Number of unique family members
+        NPROP_ALQ = uniqueN(REFCAT), # Number of unique rental properties
+        IDENHOG = mean(IDENHOG), # Average household identifier
+        SEXO = mean(SEXO), # Average sex (1 = Male, 2 = Female)
+        AGE = (sel_year) - mean(ANONAC), # Calculate average age
+        RENTAB = mean(RENTAB), # Average rental income
+        RENTAD = mean(RENTAD), # Average declared income
+        TRAMO = mean(TRAMO), # Average TRAMO
+        RENTA_ALQ = mean(RENTA_ALQ), # Average rental income
+        RENTA_ALQ2 = mean(RENTA_ALQ2), # Average calculated rental income
+        PAR150 = sum(PAR150i), # Total number of properties owned
+        PATINMO = mean(PATINMO), # Average property value
+        FACTORCAL = mean(FACTORCAL), # Average calculation factor
+        CCAA = mean(CCAA), # Average Autonomous Community
+        PROV = mean(PROV), # Average Province
+        MUNI = mean(MUNI), # Average Municipality
+        MUESTRA = mean(MUESTRA) # Average sample identifier
+    ), by = .(IDENPER)]
 
-    dt <- dt[,
-        .(
-            MIEMBROS = uniqueN(IDENPER),
-            NPROP_ALQ = uniqueN(REFCAT),
-            IDENHOG = mean(IDENHOG),
-            SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = (sel_year) - mean(ANONAC), # Calculate age
-            RENTAB = mean(RENTAB),
-            RENTAD = mean(RENTAD),
-            TRAMO = mean(TRAMO),
-            RENTA_ALQ = mean(RENTA_ALQ),
-            RENTA_ALQ2 = mean(RENTA_ALQ2),
-            PAR150 = sum(PAR150i),
-            PATINMO = mean(PATINMO),
-            FACTORCAL = mean(FACTORCAL),
-            CCAA = mean(CCAA),
-            PROV = mean(PROV),
-            MUNI = mean(MUNI),
-            MUESTRA = mean(MUESTRA)
-        ),
-        by = .(IDENPER)
-    ]
+    # STEP 2: Filter and tidy data for the specified reference unit
+    dt <- dt[eval(parse(text = represet)), .(
+        MIEMBROS = mean(MIEMBROS),
+        NPROP_ALQ = mean(NPROP_ALQ),
+        IDENHOG = mean(IDENHOG),
+        SEXO = mean(SEXO), # Average sex (1 = Male, 2 = Female)
+        AGE = mean(AGE), # Average age
+        RENTAB = sum(RENTAB), # Total rental income
+        RENTAD = sum(RENTAD), # Total declared income
+        TRAMO = mean(TRAMO), # Average TRAMO
+        RENTA_ALQ = sum(RENTA_ALQ), # Total rental income
+        RENTA_ALQ2 = sum(RENTA_ALQ2), # Total calculated rental income
+        PAR150 = sum(PAR150), # Total properties owned
+        PATINMO = sum(PATINMO), # Total property value
+        FACTORCAL = mean(FACTORCAL), # Average calculation factor
+        CCAA = mean(CCAA), # Average Autonomous Community
+        PROV = mean(PROV), # Average Province
+        MUNI = mean(MUNI), # Average Municipality
+        MUESTRA = mean(MUESTRA) # Average sample identifier
+    ), by = .(reference = get(ref_unit))]
 
-    # STEP2: tidy dt for the given reference unit through in-place vectorized operations
-
-    dt <- dt[eval(parse(text = represet)),
-        .(
-            MIEMBROS = mean(MIEMBROS),
-            NPROP_ALQ = mean(NPROP_ALQ),
-            IDENHOG = mean(IDENHOG),
-            SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = mean(AGE), # Calculate age
-            RENTAB = sum(RENTAB),
-            RENTAD = sum(RENTAD),
-            TRAMO = mean(TRAMO),
-            RENTA_ALQ = sum(RENTA_ALQ),
-            RENTA_ALQ2 = sum(RENTA_ALQ2),
-            PAR150 = sum(PAR150),
-            PATINMO = sum(PATINMO),
-            FACTORCAL = mean(FACTORCAL),
-            CCAA = mean(CCAA),
-            PROV = mean(PROV),
-            MUNI = mean(MUNI),
-            MUESTRA = mean(MUESTRA)
-        ),
-        by = .(reference = get(ref_unit))
-    ]
-
-    # Rename column
+    # Rename column based on reference unit
     if (ref_unit == "IDENHOG") {
-        dt[, reference := NULL]
+        dt[, reference := NULL] # Remove reference column if using IDENHOG
     } else {
-        setnames(dt, "reference", as.character(ref_unit))
+        setnames(dt, "reference", as.character(ref_unit)) # Rename reference column
     }
 
-    # Define new categorical variables
+    # Define new categorical variables based on sample identifiers
+    dt[, CIUDAD := fcase(
+        MUESTRA == 1, "segovia",
+        MUESTRA == 2, "lastrilla",
+        MUESTRA == 3, "sancristobal",
+        MUESTRA == 4, "palazuelos",
+        MUESTRA == 5, "madrid",
+        default = NA_character_
+    )]
+
+    # Define ownership status variables
     dt[, TENENCIA := fifelse(PAR150 > 0, "CASERO", fifelse(PATINMO > 0, "PROPIETARIO", "INQUILINA"))]
-    dt[, CASERO := factor(fifelse(PAR150 > 0, 1, 0))]
-    dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))]
-    dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))]
+    dt[, CASERO := factor(fifelse(PAR150 > 0, 1, 0))] # 1 if "CASERO", else 0
+    dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))] # 1 if "PROPIETARIO", else 0
+    dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))] # 1 if "INQUILINO", else 0
+
+    # Calculate remaining rental income
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
-    # Return the final dt object
+    # Return the final tidy data table
     return(dt)
 }

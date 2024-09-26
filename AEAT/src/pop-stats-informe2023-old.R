@@ -8,10 +8,9 @@ library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
-# import needed data objects
-
-represet <- "!is.na(FACTORCAL)" # población
-represet2 <- 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)' # declarantes de renta
+# Import needed data objects
+city <- "madrid"
+represet <- "!is.na(FACTORCAL)"
 sel_year <- 2016
 ref_unit <- "IDENHOG"
 risks <- fread("AEAT/data/risk.csv")
@@ -19,7 +18,7 @@ dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-dt_sv <- subset(dt_sv, MUESTRA == "Madrid") # subset for a given city
+dt_sv <- subset(dt_sv, ciudad == "Madrid") # subset for a given city
 quantiles <- seq(.25, .75, .25) # cortes
 quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
 table_names <- c(
@@ -84,7 +83,7 @@ reg_tenencia <- reg_tenencia %>%
 # Check AEAT/output
 list(final_table, renta_table, reg_tenencia) %>% print()
 
-# export AEAT/out
-fwrite(final_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
-fwrite(renta_table, paste0("AEAT/out/", sel_year, "-", ref_unit, "tabla-renta.csv"))
-fwrite(reg_tenencia, paste0("AEAT/out/", sel_year, "-", ref_unit, "reg_tenencia.csv"))
+# Export to AEAT/out folder our tables of results
+fwrite(final_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-quantiles2.csv"))
+fwrite(renta_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-renta2.csv"))
+fwrite(tenencia_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "reg_tenencia2.csv"))
