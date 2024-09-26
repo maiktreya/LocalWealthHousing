@@ -2,14 +2,14 @@
 #
 #' @description
 #' This script processes AEAT sample files to generate summarized and cleaned data
-#' for analysis. It allows selection of data from specified years (2016 or 2019) and
+#' for analysis. It allows selection of data from specified years (2016 or 2021) and
 #' aggregates information based on either household or individual reference units.
 #' The script performs data transformations, including handling missing values.
 #' The final output is a tidy data table ready for further analysis.
 #
 #' @details
 #' The following parameters can be adjusted:
-#' - sel_year: The year to select data from (2016 or 2019). Default is 2016.
+#' - sel_year: The year to select data from (2016 or 2021). Default is 2016.
 #' - ref_unit: Aggregation unit: "IDENHOG" (household) or "IDENPER" (individual).
 #' - represet: Logical condition representing the population analyzed;
 #'   for only declarants: 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)'.
