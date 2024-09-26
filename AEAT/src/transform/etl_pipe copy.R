@@ -36,43 +36,19 @@ get_wave <- function(
 
     # tidy dt for the given reference unit through in-place vectorized operations
 
-    dt <- dt[,
+    dt <- dt[eval(parse(text = represet)),
         .(
             MIEMBROS = uniqueN(IDENPER),
             NPROP_ALQ = uniqueN(REFCAT),
             IDENHOG = mean(IDENHOG),
             SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = (sel_year) - mean(ANONAC), # Calculate age
-            RENTAB = mean(RENTAB),
-            RENTAD = mean(RENTAD),
-            TRAMO = mean(TRAMO),
-            RENTA_ALQ = mean(RENTA_ALQ),
-            RENTA_ALQ2 = mean(RENTA_ALQ2),
-            PAR150 = sum(PAR150i),
-            PATINMO = mean(PATINMO),
-            FACTORCAL = mean(FACTORCAL),
-            CCAA = mean(CCAA),
-            PROV = mean(PROV),
-            MUNI = mean(MUNI),
-            MUESTRA = mean(MUESTRA)
-        ),
-        by = .(IDENPER)
-    ]
-
-
-    dt <- dt[eval(parse(text = represet)),
-        .(
-            MIEMBROS = mean(MIEMBROS),
-            NPROP_ALQ = mean(NPROP_ALQ),
-            IDENHOG = mean(IDENHOG),
-            SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = (sel_year) - mean(ANONAC), # Calculate age
+            AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
             RENTAB = sum(RENTAB),
             RENTAD = sum(RENTAD),
             TRAMO = mean(TRAMO),
             RENTA_ALQ = sum(RENTA_ALQ),
             RENTA_ALQ2 = sum(RENTA_ALQ2),
-            PAR150 = sum(PAR150),
+            PAR150 = sum(PAR150i),
             PATINMO = sum(PATINMO),
             FACTORCAL = mean(FACTORCAL),
             CCAA = mean(CCAA),
