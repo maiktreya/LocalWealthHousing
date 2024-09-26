@@ -34,7 +34,7 @@ get_wave <- function(
     dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := 5] # madrid
     dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
 
-    # tidy dt for the given reference unit through in-place vectorized operations
+    # STEP 1: Summarize by person information about real estate properties (avoid duplicating records for persons with multiple properties)
 
     dt <- dt[,
         .(
@@ -59,6 +59,8 @@ get_wave <- function(
         by = .(IDENPER)
     ]
 
+
+  # STEP2: tidy dt for the given reference unit through in-place vectorized operations
 
     dt <- dt[eval(parse(text = represet)),
         .(

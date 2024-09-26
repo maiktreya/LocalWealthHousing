@@ -34,21 +34,47 @@ get_wave <- function(
     dt[CCAA == "13" & PROV == "28" & MUNI == "79", MUESTRA := 5] # madrid
     dt[, RENTA_ALQ2 := 0][PAR150i > 0, RENTA_ALQ2 := INCALQ] # solo ingresos del alquiler de vivienda
 
-    # tidy dt for the given reference unit through in-place vectorized operations
+    # STEP 1: Summarize by person information about real estate properties (avoid duplicating records for persons with multiple properties)
 
-    dt <- dt[eval(parse(text = represet)),
+    dt <- dt[,
         .(
             MIEMBROS = uniqueN(IDENPER),
             NPROP_ALQ = uniqueN(REFCAT),
             IDENHOG = mean(IDENHOG),
             SEXO = mean(SEXO), # 1 = Male, 2 = Female
-            AGE = (sel_year + 1) - mean(ANONAC), # Calculate age
+            AGE = (sel_year) - mean(ANONAC), # Calculate age
+            RENTAB = mean(RENTAB),
+            RENTAD = mean(RENTAD),
+            TRAMO = mean(TRAMO),
+            RENTA_ALQ = mean(RENTA_ALQ),
+            RENTA_ALQ2 = mean(RENTA_ALQ2),
+            PAR150 = sum(PAR150i),
+            PATINMO = mean(PATINMO),
+            FACTORCAL = mean(FACTORCAL),
+            CCAA = mean(CCAA),
+            PROV = mean(PROV),
+            MUNI = mean(MUNI),
+            MUESTRA = mean(MUESTRA)
+        ),
+        by = .(IDENPER)
+    ]
+
+
+  # STEP2: tidy dt for the given reference unit through in-place vectorized operations
+
+    dt <- dt[eval(parse(text = represet)),
+        .(
+            MIEMBROS = mean(MIEMBROS),
+            NPROP_ALQ = mean(NPROP_ALQ),
+            IDENHOG = mean(IDENHOG),
+            SEXO = mean(SEXO), # 1 = Male, 2 = Female
+            AGE = mean(AGE), # Calculate age
             RENTAB = sum(RENTAB),
             RENTAD = sum(RENTAD),
             TRAMO = mean(TRAMO),
             RENTA_ALQ = sum(RENTA_ALQ),
             RENTA_ALQ2 = sum(RENTA_ALQ2),
-            PAR150 = sum(PAR150i),
+            PAR150 = sum(PAR150),
             PATINMO = sum(PATINMO),
             FACTORCAL = mean(FACTORCAL),
             CCAA = mean(CCAA),
