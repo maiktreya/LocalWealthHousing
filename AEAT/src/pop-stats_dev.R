@@ -8,15 +8,14 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # Import needed data objects
-sel_year <- 2016
+sel_year <- 2021
 age <- fread("AEAT/data/madrid-age.csv")
 sex <- fread("AEAT/data/madrid-sex.csv")
-dt <- fread("AEAT/data/IEF-2016-new.gz")
+dt <- fread("AEAT/data/IEF-2021-new.gz")
 # Example age vector (replace this with your actual data)
 dt[, gender := "female"][SEXO == 1, gender := "male"]
 dt[, AGE := sel_year - ANONAC]
 
-# Apply the cut() function with age breaks and labels
 dt[, age_group := cut(
     AGE,
     breaks = seq(0, 105, by = 5), # Adjusting the upper limit to 105 to cover "100 y más años"
@@ -51,7 +50,7 @@ pop_totals <- list(
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, CCAA == "13" & PROV == "28" & MUNI == "79")
+subsample <- subset(dt_sv, CCAA.x == "13" & PROV.x == "28" & MUNI.x == "79")
 
 # Apply raking
 raked_design <- rake(
@@ -59,3 +58,4 @@ raked_design <- rake(
     sample.margins = margins,
     population.margins = pop_totals
 )
+
