@@ -54,12 +54,14 @@ pop_totals <- list(
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
 pre_subsample <- subset(dt_sv, CIUDAD == city)
 
-# Apply raking
-subsample <- rake(
-    design = pre_subsample,
-    sample.margins = margins,
-    population.margins = pop_totals
-)
+# Define the population mean you want to match
+true_mean_income <- 22587  # Replace with the true population mean for your subsample
+pop_size <- 3800000
+calibration_target <- data.frame(`(Intercept)` = pop_size, RENTAB = true_mean_income)
+names(calibration_target)[names(calibration_target) == "X.Intercept."] <- "(Intercept)"
+
+# Perform calibration, including the intercept in the formula
+subsample <- calibrate(pre_subsample, ~1 + RENTAB, calibration_target)
 
 # Test sample means against true population means using svycontrast
 RNmean <- svymean(~RENTAD, subsample)
