@@ -32,7 +32,6 @@ age_vector <- age[, get(paste0("total", sel_year))]
 age_vector <- age_vector / sum(age_vector)
 age_vector <- data.frame(age_group = c(1:21), Freq = as.numeric(age_vector))  # Convert to data.frame)
 
-
 # Clean and normalize sex vector
 sex_vector <- sex[, total := NULL][year == sel_year][, year := NULL]
 sex_vector <- sex_vector / sum(sex_vector)
@@ -52,12 +51,13 @@ pop_totals <- list(
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, CCAA.x == "13" & PROV.x == "28" & MUNI.x == "79")
+subsample <- subset(dt_sv, CIUDAD = "madrid")
 
 # Apply raking
 raked_design <- rake(
     design = subsample,
     sample.margins = margins,
-    population.margins = pop_totals
+    population.margins = pop_totals,
+    allow.missing = TRUE
 )
 
