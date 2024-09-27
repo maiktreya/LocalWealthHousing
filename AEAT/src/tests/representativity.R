@@ -27,13 +27,28 @@ subsample <- subset(dt_sv, CIUDAD == city) # subset for a given city
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
-# Test sample means against true population means
+# Test if the survey means are equal to the population means
+test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% print()
+test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
 
-test_rep1 <- svyttest(I(RENTAD - RNpop) ~ 0, subsample) %>% print()
-test_rep2 <- svyttest(I(RENTAB - RBpop) ~ 0, subsample) %>% print()
+
+# Test sample means against true population means using svycontrast
+test_rep11 <- svyttest(I(RENTAD - RNpop) ~ 0, subsample) %>% print()
+test_rep21 <- svyttest(I(RENTAB - RBpop) ~ 0, subsample) %>% print()
+
 
 # Summarize the results
+net_vals <- data.table(
+    pop = RNpop,
+    mean = coef(RNmean),
+    se = SE(RNmean),
+    dif = (RNpop - coef(RNmean)) / RNpop
+)
 
-net_vals <- data.table(pop = RNpop, mean = RNmean, dif = (RNpop - RNmean) / RNpop)
-gross_vals <- data.table(pop = RBpop, mean = RBmean, dif = (RBpop - RBmean) / RBpop)
-results <- rbind(net_vals, gross_vals) %>% print()
+gross_vals <- data.table(
+    pop = RBpop,
+    mean = coef(RBmean),
+    se = SE(RBmean),
+    dif = (RBpop - coef(RBmean)) / RBpop
+)
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()

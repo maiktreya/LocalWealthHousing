@@ -12,6 +12,7 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
 ref_unit <- "IDENPER"
+age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99", "100+")
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 # population values
@@ -32,7 +33,7 @@ dt[, age_group := cut(
     AGE,
     breaks = c(0, 20, 40, 60, 80, 100, Inf), # Defining 20-year groups with the last being open-ended
     right = FALSE,
-    labels = c("0-19", "20-39", "40-59", "60-79", "80-99", "100+"),
+    labels = age_labels,
     include.lowest = TRUE
 )]
 dt <- dt[!is.na(age_group)]
@@ -55,13 +56,13 @@ dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con co
 pre_subsample <- subset(dt_sv, CIUDAD == city)
 
 # Define the population mean you want to match
-true_mean_income <- 22587  # Replace with the true population mean for your subsample
+true_mean_income <- 22587 # Replace with the true population mean for your subsample
 pop_size <- 3800000
-calibration_target <- data.frame(`(Intercept)` = pop_size, RENTAB = true_mean_income)
+calibration_target <- data.frame(`(Intercept)` = true_mean_income, RENTAB = 0)
 names(calibration_target)[names(calibration_target) == "X.Intercept."] <- "(Intercept)"
 
 # Perform calibration, including the intercept in the formula
-subsample <- calibrate(pre_subsample, ~1 + RENTAB, calibration_target)
+subsample <- calibrate(pre_subsample, ~  RENTAB, calibration_target -1)
 
 # Test sample means against true population means using svycontrast
 RNmean <- svymean(~RENTAD, subsample)

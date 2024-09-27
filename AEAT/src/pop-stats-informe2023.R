@@ -1,7 +1,6 @@
 # Obtain population statistics for AEAT subsample
 
 # Clean environment to avoid RAM bottlenecks and import dependencies
-
 rm(list = ls())
 library(data.table)
 library(survey)
@@ -9,11 +8,10 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # Import needed data objects
-city <- "madridCCAA"
+city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población total
 sel_year <- 2016
-ref_unit <- "IDENHOG"
-risks <- fread("AEAT/data/risk.csv")
+ref_unit <- "IDENPER"
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
