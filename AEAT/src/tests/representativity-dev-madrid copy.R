@@ -51,7 +51,7 @@ pop_totals <- list(
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, CIUDAD = "madrid")
+subsample <- subset(dt_sv, CIUDAD == "madrid")
 
 # Apply raking
 raked_design <- rake(
