@@ -2,6 +2,8 @@
 
 Este proyecto utiliza la muestra anual de información fiscal en España. La muestra se obtiene cruzando delcaraciones de IRPF con información del impuesto de patrimonio, registro catastral y del censo general (INE). Es elaborada por la Agencia Tributaria (AEAT) proporcionando datos desde 2016.
 
+Para conocer como usar este proyecto utiliza nuestra [Guía de Utilización](md/tutorial.md)
+
 ---
 
 ## 🚀 Explotando las ventajas del big-data fiscal
