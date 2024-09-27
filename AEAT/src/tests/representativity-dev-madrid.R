@@ -27,6 +27,7 @@ dt[, age_group := cut(
     labels = c(1:21),
     include.lowest = TRUE # Ensures the lowest interval includes the lower bound
 )]
+dt <- dt[!is.na(age_group)]
 
 # Define raking margins
 margins <- list(
