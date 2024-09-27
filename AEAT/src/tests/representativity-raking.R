@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 # population values
@@ -40,13 +40,13 @@ dt[, gender := "female"][SEXO == 1, gender := "male"]
 
 # Define raking margins
 margins <- list(
-    ~gender, # Rake by gender
+#    ~gender, # Rake by gender
     ~age_group # Rake by sex
 )
 
 # Population proportions for raking
 pop_totals <- list(
-    sex_vector,
+#    sex_vector,
     age_vector # Use the male/female proportions as a data.frame
 )
 

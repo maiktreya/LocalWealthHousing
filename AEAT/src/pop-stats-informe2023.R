@@ -10,10 +10,10 @@ source("AEAT/src/transform/etl_pipe.R")
 # Import needed data objects
 city <- "madridCCAA"
 represet <- "!is.na(FACTORCAL)" # población total
-sel_year <- 2021
-ref_unit <- "IDENPER"
+sel_year <- 2016
+ref_unit <- "IDENHOG"
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
-dt <- dt[RENTAD > 0, ]
+
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
 dt_sv <- subset(dt_sv, CIUDAD == city) # subset for a given city

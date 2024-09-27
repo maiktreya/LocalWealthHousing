@@ -7,18 +7,16 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define city subsample and variables to analyze
-
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
-
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
 subsample <- subset(dt_sv, CIUDAD == city) # subset for a given city
 
@@ -35,7 +33,6 @@ test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
 # Test sample means against true population means using svycontrast
 test_rep11 <- svyttest(I(RENTAD - RNpop) ~ 0, subsample) %>% print()
 test_rep21 <- svyttest(I(RENTAB - RBpop) ~ 0, subsample) %>% print()
-
 
 # Summarize the results
 net_vals <- data.table(
