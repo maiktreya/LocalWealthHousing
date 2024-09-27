@@ -3,3 +3,5 @@ env
 .lintr
 AEAT/data/*.gz
 AEAT/data/*.zip
+AEAT/drafts
+AEAT/rmd
