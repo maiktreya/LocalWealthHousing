@@ -12,9 +12,20 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2016
 ref_unit <- "IDENPER"
-age_vector <- fread("AEAT/data/madrid-age-freq.csv")[, .(age_group, Freq = get(paste0("freq", sel_year)))]
-sex_vector <- fread("AEAT/data/madrid-sex-freq.csv")[, .(gender, Freq = get(paste0("freq", sel_year)))]
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
+
+# population values
+pop_stats <- fread("AEAT/data/pop-stats.csv")
+RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
+RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+
+# reshape sex categories
+sex_vector <- fread("AEAT/data/madrid-sex-freq.csv")[, .(gender, Freq = get(paste0("freq", sel_year)))]
+
+# reshape age categories
+age_vector <- fread("AEAT/data/madrid-age-freq.csv")[, .(age_group, Freq = get(paste0("freq", sel_year)))]
+age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
+age_vector <- cbind(age_group = c("0-19", "20-39", "40-59", "60-79", "80-99", "100+"), age_vector)[, group := NULL]
 
 # Create a new age_group based on broader 20-year intervals, with the last one open-ended
 dt[, age_group := cut(
@@ -26,11 +37,6 @@ dt[, age_group := cut(
 )]
 dt <- dt[!is.na(age_group)]
 dt[, gender := "female"][SEXO == 1, gender := "male"]
-
-# reshape age categories
-age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
-age_vector <- cbind(age_group = c("0-19", "20-39", "40-59", "60-79", "80-99", "100+"), age_vector)[, group := NULL]
-
 
 # Define raking margins
 margins <- list(
