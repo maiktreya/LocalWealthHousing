@@ -28,6 +28,10 @@ dt[, age_group := cut(
     include.lowest = TRUE # Ensures the lowest interval includes the lower bound
 )]
 dt <- dt[!is.na(age_group)]
+# Filter age_vector to retain only categories present in the sample
+# Filter age_vector and sex_vector to retain only categories present in the sample
+age_vector <- age_vector[age_group %in% unique(dt$age_group)]
+sex_vector <- sex_vector[gender %in% unique(dt$gender)]
 
 # Define raking margins
 margins <- list(
@@ -38,14 +42,14 @@ margins <- list(
 # Population proportions for raking
 pop_totals <- list(
     sex_vector,
-    age_vector  # Use the male/female proportions as a data.frame
+    age_vector  # Use the filtered male/female proportions as a data.frame
 )
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
-dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # Muestra con coeficientes de elevación
-pre_subsample <- subset(dt_sv, CCAA == "13" & PROV == "28" & MUNI == "79")
+dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
+pre_subsample <- subset(dt_sv, CIUDAD == city)
 
-# Apply raking without partial argument
+# Apply raking
 subsample <- rake(
     design = pre_subsample,
     sample.margins = margins,
