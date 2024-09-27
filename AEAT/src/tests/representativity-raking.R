@@ -12,8 +12,8 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2016
 ref_unit <- "IDENPER"
-age_vector <- fread("AEAT/data/madrid-age-freq.csv")[, .(age_group, Freq=get(paste0("freq",sel_year)))]
-sex_vector <- fread("AEAT/data/madrid-sex-freq.csv")[, .(gender, Freq=get(paste0("freq",sel_year)))]
+age_vector <- fread("AEAT/data/madrid-age-freq.csv")[, .(age_group, Freq = get(paste0("freq", sel_year)))]
+sex_vector <- fread("AEAT/data/madrid-sex-freq.csv")[, .(gender, Freq = get(paste0("freq", sel_year)))]
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 # Create a new age_group based on broader 20-year intervals, with the last one open-ended
@@ -64,13 +64,17 @@ test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% print()
 test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
 
 # Summarize the results
-net_vals <- data.table(pop = RNpop,
- mean = coef(RNmean),
-se = SE(RNmean),
-dif = (RNpop - coef(RNmean)) / RNpop)
+net_vals <- data.table(
+    pop = RNpop,
+    mean = coef(RNmean),
+    se = SE(RNmean),
+    dif = (RNpop - coef(RNmean)) / RNpop
+)
 
-gross_vals <- data.table(pop = RBpop,
- mean = coef(RBmean),
-  se = SE(RBmean),
-  dif = (RBpop - coef(RBmean)) / RBpop)
+gross_vals <- data.table(
+    pop = RBpop,
+    mean = coef(RBmean),
+    se = SE(RBmean),
+    dif = (RBpop - coef(RBmean)) / RBpop
+)
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
