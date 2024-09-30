@@ -60,12 +60,37 @@ true_mean_income <- 22587 # Replace with the true population mean for your subsa
 pop_size <- 3280782
 calibration_target <- data.frame(
 `(Intercept)` = 3280782, 
-"X.0.19" = 564105,
-"X20.39" = 843254,
-"X40.59" = 1003744,
-"X60.79" = 636385,
-"X80.900" = 231678,
-"X100." = 1616)
+"agegroup0-19" = 564105,
+"agegroup20-39" = 843254,
+"agegroup40-59" = 1003744,
+"agegroup60-79" = 636385,
+"agegroup80-900" = 231678,
+"agegroup100+" = 1616)
 
-subsample <- calibrate(pre_subsample, ~  age_group, calibration_target)
+# Run the calibration again
+subsample <- calibrate(pre_subsample, ~age_group, calibration_target)
 
+
+# Test sample means against true population means using svycontrast
+RNmean <- svymean(~RENTAD, subsample)
+RBmean <- svymean(~RENTAB, subsample)
+
+# Test if the survey means are equal to the population means
+test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% print()
+test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
+
+# Summarize the results
+net_vals <- data.table(
+    pop = RNpop,
+    mean = coef(RNmean),
+    se = SE(RNmean),
+    dif = (RNpop - coef(RNmean)) / RNpop
+)
+
+gross_vals <- data.table(
+    pop = RBpop,
+    mean = coef(RBmean),
+    se = SE(RBmean),
+    dif = (RBpop - coef(RBmean)) / RBpop
+)
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
