@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENHOG"
+ref_unit <- "IDENPER"
 age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99", "100+")
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
