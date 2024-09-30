@@ -71,7 +71,6 @@ calibration_target <- data.frame(
 # Run the calibration again
 subsample <- calibrate(pre_subsample, ~age_group, calibration_target)
 
-
 # Test sample means against true population means using svycontrast
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
