@@ -26,7 +26,7 @@ sex_vector <- fread("AEAT/data/madrid-sex-freq.csv")[, .(gender, Freq = get(past
 # reshape age categories
 age_vector <- fread("AEAT/data/madrid-age-freq.csv")[, .(age_group, Freq = get(paste0("freq", sel_year)))]
 age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
-age_vector <- cbind(age_group =age_labels, age_vector)[, group := NULL]
+age_vector <- cbind(age_group = age_labels, age_vector)[, group := NULL]
 
 # Create a new age_group based on broader 20-year intervals, with the last one open-ended
 dt[, age_group := cut(
@@ -59,13 +59,14 @@ pre_subsample <- subset(dt_sv, CIUDAD == city)
 true_mean_income <- 22587 # Replace with the true population mean for your subsample
 pop_size <- 3280782
 calibration_target <- data.frame(
-`(Intercept)` = 3280782, 
-"agegroup0-19" = 564105,
-"agegroup20-39" = 843254,
-"agegroup40-59" = 1003744,
-"agegroup60-79" = 636385,
-"agegroup80-900" = 231678,
-"agegroup100+" = 1616)
+    `(Intercept)` = 3280782,
+    "agegroup0-19" = 564105,
+    "agegroup20-39" = 843254,
+    "agegroup40-59" = 1003744,
+    "agegroup60-79" = 636385,
+    "agegroup80-900" = 231678,
+    "agegroup100+" = 1616
+)
 
 # Run the calibration again
 subsample <- calibrate(pre_subsample, ~age_group, calibration_target)
