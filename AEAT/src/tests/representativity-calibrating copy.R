@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENHOG"
+ref_unit <- "IDENPER"
 age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99", "100+")
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
@@ -26,7 +26,7 @@ sex_vector <- fread("AEAT/data/madrid-sex-freq.csv")[, .(gender, Freq = get(past
 # reshape age categories
 age_vector <- fread("AEAT/data/madrid-age-freq.csv")[, .(age_group, Freq = get(paste0("freq", sel_year)))]
 age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
-age_vector <- cbind(age_group = c("0-19", "20-39", "40-59", "60-79", "80-99", "100+"), age_vector)[, group := NULL]
+age_vector <- cbind(age_group =age_labels, age_vector)[, group := NULL]
 
 # Create a new age_group based on broader 20-year intervals, with the last one open-ended
 dt[, age_group := cut(
@@ -41,13 +41,13 @@ dt[, gender := "female"][SEXO == 1, gender := "male"]
 
 # Define raking margins
 margins <- list(
-#    ~gender, # Rake by gender
+    ~gender, # Rake by gender
     ~age_group # Rake by sex
 )
 
 # Population proportions for raking
 pop_totals <- list(
-#    sex_vector,
+    sex_vector,
     age_vector # Use the male/female proportions as a data.frame
 )
 
@@ -55,12 +55,14 @@ pop_totals <- list(
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
 pre_subsample <- subset(dt_sv, CIUDAD == city)
 
-# Apply raking
-subsample <- rake(
-    design = pre_subsample,
-    sample.margins = margins,
-    population.margins = pop_totals
-)
+# Define the population mean you want to match
+true_mean_income <- 22587 # Replace with the true population mean for your subsample
+pop_size <- 3800000
+calibration_target <- data.frame(`(Intercept)` = true_mean_income, RENTAB = 0)
+names(calibration_target)[names(calibration_target) == "X.Intercept."] <- "(Intercept)"
+
+# Perform calibration, including the intercept in the formula
+subsample <- calibrate(pre_subsample, ~  RENTAB, calibration_target -1)
 
 # Test sample means against true population means using svycontrast
 RNmean <- svymean(~RENTAD, subsample)
