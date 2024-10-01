@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99", "100+")
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
@@ -41,13 +41,13 @@ dt[, gender := "female"][SEXO == 1, gender := "male"]
 
 # Define raking margins
 margins <- list(
-#    ~gender, # Rake by gender
+    #    ~gender, # Rake by gender
     ~age_group # Rake by sex
 )
 
 # Population proportions for raking
 pop_totals <- list(
-#    sex_vector,
+    #    sex_vector,
     age_vector # Use the male/female proportions as a data.frame
 )
 
@@ -55,9 +55,16 @@ pop_totals <- list(
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
 pre_subsample <- subset(dt_sv, CIUDAD == city)
 
-# Apply raking
+# STEP 1: Calibrate for mean income
+calibration_target <- c(
+ #   RENTAD = RNpop * sum(pre_subsample$variables[, FACTORCAL]),
+    RENTAB = RBpop * sum(pre_subsample$variables[, FACTORCAL])
+)
+cal_subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
+
+# STEP 2: Apply raking for sex and age cohorts
 subsample <- rake(
-    design = pre_subsample,
+    design = cal_subsample,
     sample.margins = margins,
     population.margins = pop_totals
 )

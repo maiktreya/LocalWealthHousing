@@ -25,11 +25,8 @@ dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con co
 pre_subsample <- subset(dt_sv, CIUDAD == city)
 
 # Define the population mean you want to match
-true_mean_income <- RBpop # Replace with the true population mean for your subsample
 pop_size <- pre_subsample$variables[, FACTORCAL] %>% sum() # 3280782
-calibration_target <- c(RENTAB = true_mean_income * pop_size)
-
-# Run the calibration again
+calibration_target <- c(RENTAB = RBpop * pop_size)
 subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
 
 # Test sample means against true population means using svycontrast
