@@ -8,7 +8,7 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define city subsample and variables to analyze
-city <- "madrid"
+city <- "segovia"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
 ref_unit <- "IDENPER"
