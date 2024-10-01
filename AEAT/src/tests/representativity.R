@@ -10,11 +10,13 @@ source("AEAT/src/transform/etl_pipe.R")
 # define city subsample and variables to analyze
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+
+# get subsample
 dt <- get_wave(
     city = city,
     sel_year = sel_year,
@@ -29,7 +31,6 @@ dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con co
 subsample <- subset(dt_sv, CIUDAD == city) # subset for a given city
 
 # calculate sample means
-
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
