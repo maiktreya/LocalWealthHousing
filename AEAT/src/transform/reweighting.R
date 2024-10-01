@@ -4,6 +4,11 @@
 # STEP 1: Iterative reweighting given known frequencies of sex and age groups
 
 rake_data <- function(dt = dt, sel_year = sel_year, city = "madrid") {
+    # function dependencies
+    library(data.table, quietly = TRUE)
+    library(survey, quietly = TRUE)
+
+    # labels and indexes
     age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99", "100+")
     city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
 
@@ -57,7 +62,11 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = "madrid") {
 # STEP 2: Calibrate for mean income or other known population parameter
 
 calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = "madrid") {
-    # population values
+    # function dependencies
+    library(data.table, quietly = TRUE)
+    library(survey, quietly = TRUE)
+
+    # population values and indexes
     pop_stats <- fread("AEAT/data/pop-stats.csv")
     city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
     RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]

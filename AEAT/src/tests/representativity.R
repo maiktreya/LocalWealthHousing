@@ -1,5 +1,6 @@
 # Obtain t-statisctics for representative mean for AEAT subsample
 
+# clean enviroment and import dependencies
 rm(list = ls())
 library(data.table)
 library(survey)
@@ -19,7 +20,7 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = TRUE, # Working just for Madrid city
+    calibrated = TRUE,
     raked = TRUE  # Working just for Madrid city
 )
 
@@ -43,7 +44,6 @@ net_vals <- data.table(
     se = SE(RNmean),
     dif = (RNpop - coef(RNmean)) / RNpop
 )
-
 gross_vals <- data.table(
     pop = RBpop,
     mean = coef(RBmean),
