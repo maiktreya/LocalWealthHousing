@@ -35,11 +35,6 @@ RBmean <- svymean(~RENTAB, subsample)
 test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% print()
 test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
 
-
-# Test sample means against true population means using svycontrast
-test_rep11 <- svyttest(I(RENTAD - RNpop) ~ 0, subsample) %>% print()
-test_rep21 <- svyttest(I(RENTAB - RBpop) ~ 0, subsample) %>% print()
-
 # Summarize the results
 net_vals <- data.table(
     pop = RNpop,
