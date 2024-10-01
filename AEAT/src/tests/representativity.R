@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2016
-ref_unit <- "IDENHOG"
+ref_unit <- "IDENPER"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
