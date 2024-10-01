@@ -10,7 +10,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 # get subsample
 dt <- get_wave(
     city = city,
