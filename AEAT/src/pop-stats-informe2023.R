@@ -8,13 +8,13 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 for (i in c("segovia", "madrid")) {
+    city <- i
     for (j in c(2016, 2021)) {
+        sel_year <- j
         for (k in c("IDENHOG", "IDENPER")) {
             # define city subsample and variables to analyze
-            city <- i
-            represet <- "!is.na(FACTORCAL)" # población
-            sel_year <- j
             ref_unit <- k
+            represet <- "!is.na(FACTORCAL)" # población
             ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
 
             # get subsample
