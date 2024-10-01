@@ -13,13 +13,11 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = "madrid") {
     city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
 
     # reshape sex categories
-    sex_vector <- fread(paste0("AEAT/data/", city, "-sex-freq.csv"))
-    sex_vector[, .(gender, Freq = get(paste0("freq", sel_year)))]
+    sex_vector <- fread(paste0("AEAT/data/", city, "-sex-freq.csv"))[, .(gender, Freq = get(paste0("freq", sel_year)))]
 
     # reshape age categories
-    age_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))
-    age_vector <- age_vector[, .(age_group, Freq = get(paste0("freq", sel_year)))]
-    age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
+    age_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freq", sel_year)))]
+    age_vector <-age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
     age_vector <- cbind(age_group = age_labels, age_vector)[, group := NULL]
 
     # Create a new age_group based on broader 20-year intervals
