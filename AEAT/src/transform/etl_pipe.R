@@ -19,6 +19,8 @@
 #' Outputs a data.table with aggregated and processed information.
 
 get_wave <- function(
+    #' @param reference city to subsample. Default is NULL
+    city = NULL,
     #' @param sel_year Year to select data from (2016 or 2019). Default is 2016.
     sel_year = 2016,
     #' @param ref_unit Aggregation unit: "IDENHOG" (household) or "IDENPER" (individual).
