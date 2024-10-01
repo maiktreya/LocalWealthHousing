@@ -137,7 +137,7 @@ get_wave <- function(
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
     if (calibrated) {
-        dt <- calibrate_data(dt, sel_year, ref_unit)
+        dt <- calibrate_data(dt, sel_year, ref_unit, city)
     }
     # Return the final tidy data table
     return(dt)

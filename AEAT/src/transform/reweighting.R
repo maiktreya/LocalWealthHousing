@@ -3,7 +3,7 @@
 
 # STEP 1: Iterative reweighting given known frequencies of sex and age groups
 
-rake_data <- function(dt = dt, sel_year = sel_year, city = "madrid") {
+rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -59,7 +59,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = "madrid") {
 
 # STEP 2: Calibrate for mean income or other known population parameter
 
-calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = "madrid") {
+calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)

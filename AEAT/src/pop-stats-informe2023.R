@@ -7,12 +7,19 @@ library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
-# Import needed data objects
-city <- "madridCCAA"
-represet <- "!is.na(FACTORCAL)" # población total
-sel_year <- 2016
-ref_unit <- "IDENHOG"
-dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
+city <- "madrid"
+represet <- "!is.na(FACTORCAL)" # población
+sel_year <- 2021
+ref_unit <- "IDENPER"
+# get subsample
+dt <- get_wave(
+    city = city,
+    sel_year = sel_year,
+    ref_unit = ref_unit,
+    represet = represet,
+    calibrated = TRUE,
+    raked = TRUE  # Working just for Madrid city
+)
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
@@ -60,6 +67,3 @@ list(final_table, renta_table, tenencia_freq) %>% print()
 fwrite(final_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
 fwrite(renta_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-renta.csv"))
 fwrite(tenencia_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "reg_tenencia.csv"))
-
-
-svyquantile(~RENTAD, design = subset(dt_sv, TENENCIA == "INQUILINA"), quantiles = 0.5)
