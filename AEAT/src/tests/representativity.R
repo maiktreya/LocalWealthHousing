@@ -9,12 +9,13 @@ source("AEAT/src/transform/etl_pipe.R")
 # define city subsample and variables to analyze
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 dt <- get_wave(
+    city = city,
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
