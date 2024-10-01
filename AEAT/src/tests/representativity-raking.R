@@ -57,7 +57,6 @@ pre_subsample <- subset(dt_sv, CIUDAD == city)
 
 # STEP 1: Calibrate for mean income
 calibration_target <- c(
- #   RENTAD = RNpop * sum(pre_subsample$variables[, FACTORCAL]),
     RENTAB = RBpop * sum(pre_subsample$variables[, FACTORCAL])
 )
 cal_subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
