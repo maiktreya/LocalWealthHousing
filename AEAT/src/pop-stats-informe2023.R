@@ -11,6 +11,8 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
 ref_unit <- "IDENHOG"
+ref_pop <- fread("AEAT/data/madrid-sex.csv")[year == sel_year, total]
+
 # get subsample
 dt <- get_wave(
     city = city,
@@ -18,7 +20,7 @@ dt <- get_wave(
     ref_unit = ref_unit,
     represet = represet,
     calibrated = TRUE,
-    raked = TRUE  # Working just for Madrid city
+    raked = TRUE # Working just for Madrid city
 )
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
@@ -56,7 +58,7 @@ renta_table <- data.table(
 )
 
 # TABLA 3: Calculate total frequencies by TENENCIA using svytable
-tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv))
+tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv, Ntotal = RBpop))
 tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv))
 tenencia_table <- cbind(tenencia_freq, tenencia_prop)
 
