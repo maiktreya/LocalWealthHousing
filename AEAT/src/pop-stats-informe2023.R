@@ -10,7 +10,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENHOG"
+ref_unit <- "IDENPER"
 ref_pop <- fread("AEAT/data/madrid-sex.csv")[year == sel_year, total]
 
 # get subsample
