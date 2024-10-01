@@ -14,7 +14,12 @@ ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
-dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
+dt <- get_wave(
+    sel_year = sel_year,
+    ref_unit = ref_unit,
+    represet = represet,
+    calibrated = TRUE # Working just for Madrid city
+)
 
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación

@@ -115,10 +115,10 @@ get_wave <- function(
             default = NA_character_
         )]
         # Define raking margins
-        margins <- list(~age_group, ~gender)
+        margins <- list(~age_group)
 
         # Population proportions for raking
-        pop_totals <- list(age_vector, sex_vector)
+        pop_totals <- list(age_vector)
 
         # Prepare survey object from dt and set income cuts for quantiles dynamically
         dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación

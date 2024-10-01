@@ -40,16 +40,10 @@ dt <- dt[!is.na(age_group)]
 dt[, gender := "female"][SEXO == 1, gender := "male"]
 
 # Define raking margins
-margins <- list(
-    #    ~gender, # Rake by gender
-    ~age_group # Rake by sex
-)
+margins <- list( ~gender,  ~age_group )
 
 # Population proportions for raking
-pop_totals <- list(
-    #    sex_vector,
-    age_vector # Use the male/female proportions as a data.frame
-)
+pop_totals <- list(sex_vector, age_vector )
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
@@ -57,6 +51,7 @@ pre_subsample <- subset(dt_sv, CIUDAD == city)
 
 # STEP 1: Calibrate for mean income
 calibration_target <- c(
+ #   RENTAD = RNpop * sum(pre_subsample$variables[, FACTORCAL]),
     RENTAB = RBpop * sum(pre_subsample$variables[, FACTORCAL])
 )
 cal_subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
