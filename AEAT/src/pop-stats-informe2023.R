@@ -10,8 +10,8 @@ source("AEAT/src/transform/etl_pipe.R")
 # define control parameters
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2016
-ref_unit <- "IDENHOG"
+sel_year <- 2021
+ref_unit <- "IDENPER"
 ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
 
 # get subsample
