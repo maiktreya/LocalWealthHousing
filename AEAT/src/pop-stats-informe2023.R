@@ -9,8 +9,8 @@ source("AEAT/src/transform/etl_pipe.R")
 
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
-sel_year <- 2021
-ref_unit <- "IDENPER"
+sel_year <- 2016
+ref_unit <- "IDENHOG"
 ref_pop <- fread("AEAT/data/madrid-sex.csv")[year == sel_year, total]
 
 # get subsample
@@ -58,8 +58,8 @@ renta_table <- data.table(
 )
 
 # TABLA 3: Calculate total frequencies by TENENCIA using svytable
-tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv, Ntotal = RBpop))
-tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv))
+tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv, Ntotal = ref_pop))
+tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv, Ntotal = ref_pop))
 tenencia_table <- cbind(tenencia_freq, tenencia_prop)
 
 # Check output
