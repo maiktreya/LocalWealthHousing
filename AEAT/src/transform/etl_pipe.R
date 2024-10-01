@@ -85,7 +85,7 @@ get_wave <- function(
 
     # Apply calibration if requested
     if (raked) {
-        dt <- rake_data(dt, sel_year)
+        dt <- rake_data(dt, sel_year,city )
     }
 
     # STEP 2: Filter and tidy data for the specified reference unit
@@ -136,6 +136,7 @@ get_wave <- function(
     # Calculate remaining rental income
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
+    # finally calibrate if needed
     if (calibrated) {
         dt <- calibrate_data(dt, sel_year, ref_unit, city)
     }
