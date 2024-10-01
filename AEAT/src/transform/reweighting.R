@@ -24,7 +24,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # Create a new age_group based on broader 20-year intervals
     dt[, age_group := cut(
         AGE,
-        breaks = c(0, 20, 40, 60, 80, 100, Inf), # Defining 20-year groups
+        breaks = c(0, 20, 40, 60, 80, Inf), # Defining 20-year groups
         right = FALSE,
         labels = age_labels,
         include.lowest = TRUE
