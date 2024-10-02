@@ -71,13 +71,13 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
 
     # reshape age categories
-    m_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqmale", sel_year)))]
+    m_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(sex_age, Freq = get(paste0("freqmale", sel_year)))]
     m_vector <- m_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
-    m_vector <- cbind(age_group = m_labels, m_vector)[, group := NULL]
-    f_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqfemale", sel_year)))]
+    m_vector <- cbind(sex_age = m_labels, m_vector)[, group := NULL]
+    f_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(sex_age, Freq = get(paste0("freqfemale", sel_year)))]
     f_vector <- f_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
-    f_vector <- cbind(age_group = f_labels, f_vector)[, group := NULL]
-    age_vector <- rbind(m_vector, f_vector)
+    f_vector <- cbind(sex_age = f_labels, f_vector)[, group := NULL]
+    age_vector <- rbind(f_vector, m_vector)
 
     # Create a new age_group based on broader 20-year intervals
     dt[, age_group := cut(
@@ -90,11 +90,10 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     dt <- dt[!is.na(age_group)]
     dt <- dt[!is.na(FACTORCAL)]
     dt[, gender := fifelse(SEXO == 1, "male", "female")]
-    dt[, gender_age := interaction(gender, age_group, sep = "_")]
-        dt[, gender_age := paste0(gender,"_", age_group)]
+    dt[, sex_age := interaction(gender, age_group, sep = "_")]
 
     # Define raking margins
-    margins <- list(~gender_age)
+    margins <- list(~sex_age)
 
     # Population proportions for raking
     pop_totals <- list(age_vector)
