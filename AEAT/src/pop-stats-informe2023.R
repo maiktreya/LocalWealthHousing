@@ -8,11 +8,12 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define control parameters
-city <- "segovia"
+city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
 ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
+city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
 
 # get subsample
 dt <- get_wave(
@@ -26,7 +27,7 @@ dt <- get_wave(
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-dt_sv <- subset(dt_sv, CIUDAD == city) # subset for a given city
+dt_sv <- subset(dt_sv, MUESTRA == city_index) # subset for a given city
 quantiles <- seq(.25, .75, .25) # cortes
 quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
 table_names <- c(

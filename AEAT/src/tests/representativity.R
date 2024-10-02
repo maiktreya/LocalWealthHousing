@@ -11,8 +11,9 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2016
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
+city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 
@@ -28,7 +29,7 @@ dt <- get_wave(
 
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, CIUDAD == city) # subset for a given city
+subsample <- subset(dt_sv, MUESTRA == city_index) # subset for a given city
 
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)

@@ -13,12 +13,12 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2016
 ref_unit <- "IDENHOG"
-risks <- fread("AEAT/data/risk.csv")
+city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
 dt <- get_wave(sel_year = sel_year, ref_unit = ref_unit, represet = represet)
 
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-dt_sv <- subset(dt_sv, ciudad == "Madrid") # subset for a given city
+dt_sv <- subset(dt_sv, MUESTRA == city_index) # subset for a given city
 quantiles <- seq(.25, .75, .25) # cortes
 quantiles_renta <- svyquantile(~RENTAD, design = dt_sv, quantiles = quantiles, ci = FALSE)$RENTAD # rentas asociadas a cores
 table_names <- c(
