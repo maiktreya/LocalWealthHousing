@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
-ref_unit <- "IDENHOG"
+ref_unit <- "IDENPER"
 ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
 city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
 
