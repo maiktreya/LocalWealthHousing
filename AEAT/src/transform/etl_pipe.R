@@ -117,15 +117,6 @@ get_wave <- function(
     }
 
     # Define new categorical variables based on sample identifiers
-    dt[, CIUDAD := fcase(
-        MUESTRA == 1, "segovia",
-        MUESTRA == 2, "lastrilla",
-        MUESTRA == 3, "sancristobal",
-        MUESTRA == 4, "palazuelos",
-        MUESTRA == 5, "madrid",
-        MUESTRA == 6, "madridCCAA",
-        default = NA_character_
-    )]
 
     # Define ownership status variables
     dt[, TENENCIA := fifelse(PAR150 > 0, "CASERO", fifelse(PATINMO > 0, "PROPIETARIO", "INQUILINA"))]
