@@ -23,12 +23,17 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = TRUE,
+    calibrated = FALSE,
     raked = TRUE # Working just for Madrid & Segovia cities
 )
 dt2 <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
-original_design <- svydesign(ids = ~1, data = subset(dt2, MUESTRA == city_index), weights = dt2$FACTORCAL)
-calibrated_design <- svydesign(ids = ~1, data = subset(dt, MUESTRA == city_index), weights = dt$FACTORCAL)
+original_design <- svydesign(ids = ~1, data = subset(dt2, CCAA == "13" & PROV == "28" & MUNI == "79"), weights = dt2$FACTORCAL)
+calibrated_design <- svydesign(
+    ids = ~1,
+    data = subset(dt, MUESTRA == city_index),
+    weights = dt$FACTORCAL
+)
+
 
 #################################
 
@@ -36,23 +41,8 @@ calibrated_design <- svydesign(ids = ~1, data = subset(dt, MUESTRA == city_index
 ori_weights <- summary(weights(original_design)) %>% print()
 cal_weights <- summary(weights(calibrated_design)) %>% print()
 
-# Plot distribution of weights
-hist(weights(calibrated_design), main = "Distribution of Weights", xlab = "Weights")
-hist(weights(original_design), main = "Distribution of Weights", xlab = "Weights")
 
-
-cal_weights_trimmed <- pmax(cal_weights, 0)  # Replace negative weights with 0
 min_weight <- min(ori_weights)
 max_weight <- max(ori_weights)
 
-trimmed_weights <- pmax(pmin(cal_weights, max_weight), min_weight)
-
-
-#############################
-
-# Calculate percentiles
-quantile(weights(calibrated_design), probs = c(0.01, 0.99))
-
-# Set max and min weight based on percentiles
-min_weight <- quantile(weights(calibrated_design), probs = 0.01)
-max_weight <- quantile(weights(calibrated_design), probs = 0.99)
+trimmed_weights <- pmax(pmin(weights(calibrated_design), max_weight), min_weight)
