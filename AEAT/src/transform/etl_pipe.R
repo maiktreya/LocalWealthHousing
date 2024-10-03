@@ -82,13 +82,11 @@ get_wave <- function(
         MUESTRA = mean(MUESTRA) # City identifiers (CCAA+PROV+MUNI)
     ), by = .(IDENPER)]
 
-    # Apply calibration if requested
-    if (raked) {
-        if (raked == TRUE) {
-            dt <- rake_data(dt, sel_year, city)
-        } else if (raked == "INTERACTION") {
-            dt <- rake_data_interaction(dt, sel_year, city)
-        }
+    # Apply raking if requested
+    if (raked == TRUE) {
+        dt <- rake_data(dt, sel_year, city)
+    } else if (calibrated == "INTERACTION") {
+        dt <- rake_data_interaction(dt, sel_year, city)
     }
 
     # STEP 2: Filter and tidy data for the specified reference unit
