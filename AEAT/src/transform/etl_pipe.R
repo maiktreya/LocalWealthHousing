@@ -33,8 +33,7 @@ get_wave <- function(
     #' @param calibrated Set an intermediate step to calibrate for a subsample
     calibrated = FALSE,
     #' @param raked Set an intermediate step to rake for a subsample
-    raked = FALSE
-    ) {
+    raked = FALSE) {
     # Load the data.table library for efficient data manipulation.
     library(data.table, quietly = TRUE)
     source("AEAT/src/transform/reweighting.R")
@@ -85,7 +84,11 @@ get_wave <- function(
 
     # Apply calibration if requested
     if (raked) {
-        dt <- rake_data(dt, sel_year,city )
+        if (raked == TRUE) {
+            dt <- rake_data(dt, sel_year, city)
+        } else if (raked == "INTERACTION") {
+            dt <- rake_data_interaction(dt, sel_year, city)
+        }
     }
 
     # STEP 2: Filter and tidy data for the specified reference unit
