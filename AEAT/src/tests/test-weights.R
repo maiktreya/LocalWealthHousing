@@ -26,7 +26,7 @@ dt <- get_wave(
     calibrated = TRUE,
     raked = TRUE # Working just for Madrid & Segovia cities
 )
-dt2 <- fread("AEAT/doc/IEF-2016-nocal.gz")
+dt2 <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
 original_design <- svydesign(ids = ~1, data = subset(dt2, MUESTRA == city_index), weights = dt2$FACTORCAL)
 calibrated_design <- svydesign(ids = ~1, data = subset(dt, MUESTRA == city_index), weights = dt$FACTORCAL)
 
