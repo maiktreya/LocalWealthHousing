@@ -85,7 +85,7 @@ get_wave <- function(
     # Apply raking if requested
     if (raked == TRUE) {
         dt <- rake_data(dt, sel_year, city)
-    } else if (calibrated == "INTERACTION") {
+    } else if (raked == "INTERACTION") {
         dt <- rake_data_interaction(dt, sel_year, city)
     }
 
