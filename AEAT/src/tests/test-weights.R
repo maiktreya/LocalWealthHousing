@@ -28,11 +28,7 @@ dt <- get_wave(
 )
 dt2 <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
 original_design <- svydesign(ids = ~1, data = subset(dt2, CCAA == "13" & PROV == "28" & MUNI == "79"), weights = dt2$FACTORCAL)
-calibrated_design <- svydesign(
-    ids = ~1,
-    data = subset(dt, MUESTRA == city_index),
-    weights = dt$FACTORCAL
-)
+calibrated_design <- svydesign(ids = ~1, data = subset(dt, MUESTRA == city_index), weights = dt$FACTORCAL)
 
 
 #################################
@@ -41,8 +37,19 @@ calibrated_design <- svydesign(
 ori_weights <- summary(weights(original_design)) %>% print()
 cal_weights <- summary(weights(calibrated_design)) %>% print()
 
-
 min_weight <- min(ori_weights)
 max_weight <- max(ori_weights)
-
 trimmed_weights <- pmax(pmin(weights(calibrated_design), max_weight), min_weight)
+
+add <- TRUE
+if (add) {
+    subsample <- calibrated_design
+    weights(subsample) <- trimmed_weights
+    # calculate sample means
+    RNmean <- svymean(~RENTAD, subsample)
+    RBmean <- svymean(~RENTAB, subsample)
+
+    # Test if the survey means are equal to the population means
+    test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% print()
+    test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
+}

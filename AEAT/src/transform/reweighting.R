@@ -49,7 +49,7 @@ rake_data_interaction <- function(dt = dt, sel_year = sel_year, city = city) {
         design = pre_subsample,
         sample.margins = margins,
         population.margins = pop_totals,
-        control = list(scaler = FALSE)
+        control = list(epsilon = 1, verbose = TRUE)
     )
 
     dt <- subsample$variables
@@ -104,10 +104,10 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         design = pre_subsample,
         sample.margins = margins,
         population.margins = pop_totals,
-        control = list(scaler = FALSE)
+        control = list(epsilon = 1, verbose = TRUE)
     )
     dt <- subsample$variables
-    dt[, FACTORCAL := weights(subsample)]
+    dt[, FACTORCAL := weights(subsample)* sum(FACTORCAL)]
 
     # return data with new weights
     return(dt)
