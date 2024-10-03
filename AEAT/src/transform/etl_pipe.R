@@ -32,7 +32,7 @@ get_wave <- function(
     sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i"),
     #' @param calibrated Set an intermediate step to calibrate for a subsample
     calibrated = FALSE,
-    #' @param raked Set an intermediate step to rake for a subsample
+    #' @param raked Set an intermediate step to rake for a subsample. Ternary TRUE/FALSE/INTERACTION. Default is false
     raked = FALSE) {
     # Load the data.table library for efficient data manipulation.
     library(data.table, quietly = TRUE)
