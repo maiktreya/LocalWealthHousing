@@ -3,7 +3,7 @@
 
 # STEP 1: Iterative reweighting given known frequencies of sex and age groups
 
-rake_data_new <- function(dt = dt, sel_year = sel_year, city = city) {
+rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -58,7 +58,7 @@ rake_data_new <- function(dt = dt, sel_year = sel_year, city = city) {
     return(dt)
 }
 
-rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
+rake_data1 <- function(dt = dt, sel_year = sel_year, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)

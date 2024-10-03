@@ -8,7 +8,7 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define city subsample and variables to analyze
-city <- "segovia"
+city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2016
 ref_unit <- "IDENPER"
@@ -24,7 +24,7 @@ dt <- get_wave(
     ref_unit = ref_unit,
     represet = represet,
     calibrated = TRUE,
-    raked = TRUE # Working just for Madrid & Segovia cities
+    raked = FALSE # Working just for Madrid & Segovia cities
 )
 
 ## Prepare survey object from dt and set income cuts for quantiles dynamically
