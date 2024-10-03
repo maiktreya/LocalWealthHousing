@@ -30,7 +30,7 @@ get_wave <- function(
     represet = "!is.na(FACTORCAL)",
     #' @param sel_cols Chosen columns to coerce to numeric types.
     sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i"),
-    #' @param calibrated Set an intermediate step to calibrate for a subsample
+    #' @param calibrated Set an intermediate step to calibrate for a subsample. Boolean. Default is false
     calibrated = FALSE,
     #' @param raked Set an intermediate step to rake for a subsample. Ternary TRUE/FALSE/INTERACTION. Default is false
     raked = FALSE) {
