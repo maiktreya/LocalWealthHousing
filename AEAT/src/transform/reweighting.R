@@ -123,7 +123,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
 
 # STEP 2: Calibrate for mean income or other known population parameter
 
-calibrate_data_income <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
+calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -150,7 +150,7 @@ calibrate_data_income <- function(dt = dt, sel_year = sel_year, ref_unit = ref_u
     return(dt)
 }
 
-calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
+calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
