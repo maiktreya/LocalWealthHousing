@@ -35,3 +35,5 @@ Aunque la inferencia de valores poblacionales reales para un municipio suele ser
 En caso de problemas de representatividad, el script `AEAT/src/tests/representativity-raking.R` puede corregir los sesgos recalibrando los pesos de la submuestra. Es necesario proporcionar frecuencias y distribuciones marginales de las variables demográficas utilizadas para la recalibración. Por defecto, esta versión utiliza sexo y grupo de edad (valores disponibles solo para Madrid capital).
 
 **Importante:** La muestra garantiza representatividad a nivel nacional y de las Comunidades Autónomas. Para análisis a nivel provincial o municipal, se recomienda verificar la representatividad de la submuestra antes de realizar inferencias estadísticas.
+
+Para conocer las funcionalidades para recalibrar pesos y analizar su representatividad [Guía de calibrado y representatividad](md/reweighting.md)

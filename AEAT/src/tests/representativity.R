@@ -4,6 +4,7 @@ library(data.table)
 library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
+pop_stats <- fread("AEAT/data/pop-stats.csv")
 
 # define city subsample and variables to analyze
 city <- "segovia" # city to subsample
@@ -11,7 +12,6 @@ represet <- "!is.na(FACTORCAL)" # reference population
 sel_year <- 2016 # wave
 ref_unit <- "IDENHOG" # PSU
 rake_mode <- "INTERACTION"
-pop_stats <- fread("AEAT/data/pop-stats.csv")
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
