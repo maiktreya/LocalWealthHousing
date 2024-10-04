@@ -10,8 +10,8 @@ source("AEAT/src/transform/etl_pipe.R")
 # define city subsample and variables to analyze
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
-sel_year <- 2016
-ref_unit <- "IDENPER"
+sel_year <- 2021
+ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -26,30 +26,36 @@ dt <- get_wave(
     calibrated = FALSE,
     raked = TRUE # Working just for Madrid & Segovia cities
 )
-dt2 <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
-original_design <- svydesign(ids = ~1, data = subset(dt2, CCAA == "13" & PROV == "28" & MUNI == "79"), weights = dt2$FACTORCAL)
-calibrated_design <- svydesign(ids = ~1, data = subset(dt, MUESTRA == city_index), weights = dt$FACTORCAL)
+dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
+subsample <- subset(dt_sv, MUESTRA == city_index) # subset for a given city
 
+# calculate sample means
+RNmean <- svymean(~RENTAD, subsample)
+RBmean <- svymean(~RENTAB, subsample)
 
-#################################
-
-# Summary statistics for weights
-ori_weights <- summary(weights(original_design)) %>% print()
-cal_weights <- summary(weights(calibrated_design)) %>% print()
-
-min_weight <- min(ori_weights)
-max_weight <- max(ori_weights)
-trimmed_weights <- pmax(pmin(weights(calibrated_design), max_weight), min_weight)
-
-add <- TRUE
-if (add) {
-    subsample <- calibrated_design
-    weights(subsample) <- trimmed_weights
-    # calculate sample means
-    RNmean <- svymean(~RENTAD, subsample)
-    RBmean <- svymean(~RENTAB, subsample)
-
-    # Test if the survey means are equal to the population means
-    test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% print()
-    test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
-}
+# Test if the survey means are equal to the population means
+test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop))
+test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop))
+net_vals <- data.table(
+    pop = RNpop,
+    mean = coef(RNmean),
+    stat = as.numeric(test_rep1),
+    b95l = as.numeric(test_rep1) + SE(RNmean) * -1.96,
+    b95u = as.numeric(test_rep1) + SE(RNmean) * 1.96,
+    se = SE(RNmean),
+    dif = (RNpop - coef(RNmean)) / RNpop
+)
+gross_vals <- data.table(
+    pop = RBpop,
+    mean = coef(RBmean),
+    stat = as.numeric(test_rep2),
+    b95l = as.numeric(test_rep2) + SE(RBmean) * -1.96,
+    b95u = as.numeric(test_rep2) + SE(RBmean) * 1.96,
+    se = SE(RBmean),
+    dif = (RBpop - coef(RBmean)) / RBpop
+)
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
+    round(2) %>%
+    print()
+sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
+sum(subsample$variables[, "FACTORCAL"]) %>% print()

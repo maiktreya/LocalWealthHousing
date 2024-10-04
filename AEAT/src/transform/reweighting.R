@@ -11,10 +11,11 @@ rake_data_interaction <- function(dt = dt, sel_year = sel_year, city = city) {
     f_labels <- c("female_0-19", "female_20-39", "female_40-59", "female_60-79", "female_80-99+")
     age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99+")
     city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
+    total_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
 
     # reshape age categories
     m_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqmale", sel_year)))]
-    m_vector <- m_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
+    m_vector <- m_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
     m_vector <- cbind(sex_age = m_labels, m_vector)[, group := NULL]
     f_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqfemale", sel_year)))]
     f_vector <- f_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
@@ -45,11 +46,10 @@ rake_data_interaction <- function(dt = dt, sel_year = sel_year, city = city) {
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
     # Apply raking for sex and age cohorts
-    subsample <- rake(
+    subsample <- postStratify(
         design = pre_subsample,
-        sample.margins = margins,
-        population.margins = pop_totals,
-        control = list(epsilon = 1, verbose = TRUE)
+        strata = ~sex_age,
+        population = as.data.frame(age_vector)
     )
 
     dt <- subsample$variables
@@ -68,13 +68,14 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99+")
     pop_stats <- fread("AEAT/data/pop-stats.csv")
     city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
+    total_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
 
     # reshape sex categories
     sex_vector <- fread(paste0("AEAT/data/", city, "-sex-freq.csv"))[, .(gender, Freq = get(paste0("freq", sel_year)))]
 
     # reshape age categories
     age_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freq", sel_year)))]
-    age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
+    age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
     age_vector <- cbind(age_group = age_labels, age_vector)[, group := NULL]
 
     # Create a new age_group based on broader 20-year intervals
@@ -90,10 +91,16 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     dt[, gender := fifelse(SEXO == 1, "male", "female")]
 
     # Define raking margins
-    margins <- list(~age_group, ~gender)
+    margins <- list(
+        ~gender,
+        ~age_group
+    )
 
     # Population proportions for raking
-    pop_totals <- list(age_vector, sex_vector)
+    pop_totals <- list(
+        sex_vector,
+        age_vector
+    )
 
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
@@ -104,10 +111,10 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         design = pre_subsample,
         sample.margins = margins,
         population.margins = pop_totals,
-        control = list(epsilon = 1, verbose = TRUE)
+        control = list(verbose = TRUE)
     )
     dt <- subsample$variables
-    dt[, FACTORCAL := weights(subsample)* sum(FACTORCAL)]
+    dt[, FACTORCAL := weights(subsample)]
 
     # return data with new weights
     return(dt)
