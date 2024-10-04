@@ -157,7 +157,7 @@ calibrate_data1 <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, c
     return(dt)
 }
 
-calibrate_data <- function(dt = dt, sel_year = sel_year, city = city, ref_unit = ref_unit) {
+calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -193,8 +193,8 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, city = city, ref_unit =
 
     # Population totals for calibration
     calibration_totals <- list(
-        gender = sex_vector$Freq,
-        age_group = age_vector$Freq,
+         sex_vector,
+       age_vector,
         RENTAB = RBpop * sum(dt$FACTORCAL)  # Include income in the calibration
     )
 
