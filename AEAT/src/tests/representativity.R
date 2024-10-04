@@ -21,7 +21,7 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = "TWO-STEP",# Requieres auxiliary pop. data
+    calibrated = "TWO-STEP", # Requieres auxiliary pop. data
     raked = FALSE # Requieres auxiliary pop. data
 )
 subsample <- svydesign(
