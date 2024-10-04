@@ -6,10 +6,11 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define city subsample and variables to analyze
-city <- "madrid" # city to subsample
+city <- "segovia" # city to subsample
 represet <- "!is.na(FACTORCAL)" # reference population
 sel_year <- 2021 # wave
 ref_unit <- "IDENHOG" # PSU
+rake_mode <- TRUE
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -17,12 +18,12 @@ RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(re
 
 # get a sample weighted for a given city
 dt <- get_wave(
-    city = city,
-    sel_year = sel_year,
-    ref_unit = ref_unit,
-    represet = represet,
-    calibrated = TRUE, # Requieres auxiliary pop. data
-    raked = FALSE # Requieres auxiliary pop. data
+    city = city, # subregional unit
+    sel_year = sel_year, # wave
+    ref_unit = ref_unit, # reference PSU (either household or individual)
+    represet = represet, # reference universe/population (whole pop. or tax payers)
+    calibrated = TRUE, # Requieres auxiliary pop. data on mean RENTAD for the choosen city
+    raked = rake_mode # Requieres auxiliary pop. age and sex frequencies for the choosen city
 )
 
 # define survey for the subsample of interest
@@ -70,3 +71,5 @@ results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
 # Print sample sizes
 sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
+
+fwrite(subsample$variables, paste0("AEAT/data/", city, represet, ref_unit, sel_year, rake_mode, ".gz"))

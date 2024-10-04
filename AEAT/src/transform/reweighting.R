@@ -132,6 +132,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     pop_stats <- fread("AEAT/data/pop-stats.csv")
     city_index <- pop_stats[muni == city & year == sel_year, index]
     RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+    RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
@@ -139,9 +140,9 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # Calibrate for mean income
     calibration_target <- c(
-        RENTAB = RBpop * sum(pre_subsample$variables[, FACTORCAL])
+        RENTAD = RNpop * sum(pre_subsample$variables[, FACTORCAL])
     )
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target)
 
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
