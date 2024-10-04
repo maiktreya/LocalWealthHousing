@@ -210,7 +210,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + gender + age_group ,
+        formula = ~ -1 + gender + age_group,
         population = calibration_totals_vec,
         dbounds = c(0.5, 400)
     )
