@@ -6,10 +6,10 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define city subsample and variables to analyze
-city <- "madrid"
-represet <- "!is.na(FACTORCAL)" # población
-sel_year <- 2021
-ref_unit <- "IDENHOG"
+city <- "madrid" # city to subsample
+represet <- "!is.na(FACTORCAL)" # reference population
+sel_year <- 2021 # wave
+ref_unit <- "IDENHOG" # PSU
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -21,8 +21,8 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = "TWO-STEP", # Requieres auxiliary pop. data
-    raked = FALSE # Requieres auxiliary pop. data
+    calibrated =  TRUE, # Requieres auxiliary pop. data
+    raked = "INTERACTION" # Requieres auxiliary pop. data
 )
 subsample <- svydesign(
     ids = ~1,
