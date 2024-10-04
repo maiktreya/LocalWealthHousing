@@ -1,5 +1,3 @@
-# Obtain t-statisctics for representative mean for AEAT subsample
-
 # clean enviroment and import dependencies
 rm(list = ls())
 library(data.table)
@@ -8,7 +6,7 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define city subsample and variables to analyze
-city <- "segovia"
+city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
 ref_unit <- "IDENHOG"
@@ -30,8 +28,7 @@ subsample <- svydesign(
     ids = ~1,
     data = subset(dt, MUESTRA == city_index),
     weights = dt$FACTORCAL,
-    # calibrate.formula = ~1
-) # muestra con coeficientes de elevación
+)
 
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)
@@ -40,6 +37,16 @@ RBmean <- svymean(~RENTAB, subsample)
 # Test if the survey means are equal to the population means
 test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop))
 test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop))
+
+# Calculate t-statistics
+t_stat1 <- as.numeric(test_rep1) / SE(RNmean)
+t_stat2 <- as.numeric(test_rep2) / SE(RBmean)
+
+# Calculate p-values using two-tailed test
+p_val1 <- 2 * (1 - pnorm(abs(t_stat1)))
+p_val2 <- 2 * (1 - pnorm(abs(t_stat2)))
+
+# Prepare the results table with p-values
 net_vals <- data.table(
     pop = RNpop,
     mean = coef(RNmean),
@@ -47,7 +54,8 @@ net_vals <- data.table(
     b95l = as.numeric(test_rep1) + SE(RNmean) * -1.96,
     b95u = as.numeric(test_rep1) + SE(RNmean) * 1.96,
     se = SE(RNmean),
-    dif = (RNpop - coef(RNmean)) / RNpop
+    dif = (RNpop - coef(RNmean)) / RNpop,
+    p_value = p_val1
 )
 gross_vals <- data.table(
     pop = RBpop,
@@ -56,10 +64,15 @@ gross_vals <- data.table(
     b95l = as.numeric(test_rep2) + SE(RBmean) * -1.96,
     b95u = as.numeric(test_rep2) + SE(RBmean) * 1.96,
     se = SE(RBmean),
-    dif = (RBpop - coef(RBmean)) / RBpop
+    dif = (RBpop - coef(RBmean)) / RBpop,
+    p_value = p_val2
 )
+
+# Combine and print the results
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
     round(2) %>%
     print()
+
+# Print sample sizes
 sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
 sum(subsample$variables[, "FACTORCAL"]) %>% print()

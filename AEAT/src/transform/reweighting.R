@@ -179,7 +179,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # Create a new age_group based on broader 20-year intervals
     dt[, age_group := cut(
         AGE,
-        breaks = c(0, 20, 40, 60, 80, Inf), # Defining 20-year groups
+        breaks = c(0, 30, 40, 60, 80, Inf), # Defining 20-year groups
         right = FALSE,
         labels = age_labels,
         include.lowest = TRUE
@@ -188,26 +188,23 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     dt <- dt[!is.na(FACTORCAL)]
     dt[, gender := fifelse(SEXO == 1, "male", "female")]
 
-    # Income population value
-    RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+    # Coerce gender and age group into named vectors
+    gender_vector <- setNames(calibration_totals[[1]]$Freq, paste0("gender", calibration_totals[[1]]$gender))
+    age_vector <- setNames(calibration_totals[[2]]$Freq, paste0("age_group", calibration_totals[[2]]$age_group))
 
-    # Population totals for calibration
-    calibration_totals <- list(
-         sex_vector,
-       age_vector,
-        RENTAB = RBpop * sum(dt$FACTORCAL)  # Include income in the calibration
-    )
+    # Combine gender and age group vectors, and add RENTAB with a proper name
+    calibration_totals_vec <- c(gender_vector, age_vector, RENTAB = calibration_totals$RENTAB)
 
-    # Prepare survey object
-    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
-    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+    # Print to ensure it looks correct
+    print(calibration_totals_vec)
 
-    # Apply calibration for age, gender, and income (RENTAB), with -1 to remove intercept
+    # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~-1 + gender + age_group + RENTAB,
-        population = calibration_totals
+        formula = ~ -1 + gender + age_group + RENTAB,
+        population = calibration_totals_vec
     )
+
 
     # Update weights after calibration
     dt <- subsample$variables

@@ -39,7 +39,6 @@ col_pat <- fwf_positions(start = start_pat, end = end_pat) # Use fwf_positions t
 pat <- read_fwf(paste0("AEAT/data/original/5_Patrimonio", sel_year, ".txt"), col_positions = col_pat) %>% data.table()
 colnames(pat) <- c("IDENPER", "IDENHOG", "PATINMO")
 
-
 # RENTA TIPO DECLARANTE
 if (sel_year == 2021) {
     start_dt_dec <- c(1, 12, 23)
@@ -57,7 +56,6 @@ if (sel_year == 2016) {
 }
 
 # PAR150 REDUCCIÓN ALQUILER VIVIENDA
-
 if (sel_year == 2021) {
     start_dt150 <- c(1, 12, 23, 154, 962)
     end_dt150 <- c(11, 22, 33, 173, 981)
@@ -74,7 +72,6 @@ if (sel_year == 2016) {
 }
 
 # Merge both datasets based on IDs
-
 dt <- merge(iden, test_total, by = c("IDENPER", "IDENHOG"))
 dt <- merge(dt, pat, by = c("IDENPER", "IDENHOG"))
 dt <- merge(dt, dt_dec, by = c("IDENPER", "IDENHOG"))
