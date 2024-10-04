@@ -19,6 +19,7 @@ La función `get_wave`, que es utilizada por otros scripts para establecer tanto
 - El parametro `calibrate` (boolean) permite calibrar la encuesta reescalando para el ingreso bruto (RENTAB) como referencia.
 
 - El parametro `rake` (boolean) permite realizar "Iterative Proportional Fitting" (IPS) to adjust for known population proportions (age group and gender)
+
 ```{r}
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
