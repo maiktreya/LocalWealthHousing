@@ -9,7 +9,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
