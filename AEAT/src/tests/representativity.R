@@ -21,8 +21,8 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = "TWO-STEP",
-    raked = "INTERACTION" # Working just for Madrid & Segovia cities
+    calibrated = "TWO-STEP",# Requieres auxiliary pop. data
+    raked = FALSE # Requieres auxiliary pop. data
 )
 subsample <- svydesign(
     ids = ~1,
@@ -35,12 +35,12 @@ RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
 # Test if the survey means are equal to the population means
-test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop))
-test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop))
+test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
+test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
 
 # Calculate t-statistics
-t_stat1 <- as.numeric(test_rep1) / SE(RNmean)
-t_stat2 <- as.numeric(test_rep2) / SE(RBmean)
+t_stat1 <- test_rep1 / SE(RNmean)
+t_stat2 <- test_rep2 / SE(RBmean)
 
 # Calculate p-values using two-tailed test
 p_val1 <- 2 * (1 - pnorm(abs(t_stat1)))
@@ -50,9 +50,7 @@ p_val2 <- 2 * (1 - pnorm(abs(t_stat2)))
 net_vals <- data.table(
     pop = RNpop,
     mean = coef(RNmean),
-    stat = as.numeric(test_rep1),
-    b95l = as.numeric(test_rep1) + SE(RNmean) * -1.96,
-    b95u = as.numeric(test_rep1) + SE(RNmean) * 1.96,
+    stat = test_rep1,
     se = SE(RNmean),
     dif = (RNpop - coef(RNmean)) / RNpop,
     p_value = p_val1
@@ -60,9 +58,7 @@ net_vals <- data.table(
 gross_vals <- data.table(
     pop = RBpop,
     mean = coef(RBmean),
-    stat = as.numeric(test_rep2),
-    b95l = as.numeric(test_rep2) + SE(RBmean) * -1.96,
-    b95u = as.numeric(test_rep2) + SE(RBmean) * 1.96,
+    stat = test_rep2,
     se = SE(RBmean),
     dif = (RBpop - coef(RBmean)) / RBpop,
     p_value = p_val2
