@@ -8,7 +8,7 @@ library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
 # define city subsample and variables to analyze
-city <- "madrid"
+city <- "segovia"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
 ref_unit <- "IDENHOG"
@@ -23,11 +23,15 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated =  TRUE,
-    raked = TRUE # Working just for Madrid & Segovia cities
+    calibrated = TRUE,
+    raked = FALSE # Working just for Madrid & Segovia cities
 )
-dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, MUESTRA == city_index) # subset for a given city
+subsample <- svydesign(
+    ids = ~1,
+    data = subset(dt, MUESTRA == city_index),
+    weights = dt$FACTORCAL,
+    # calibrate.formula = ~1
+) # muestra con coeficientes de elevación
 
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)

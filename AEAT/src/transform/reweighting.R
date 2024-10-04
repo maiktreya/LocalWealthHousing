@@ -130,7 +130,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
 
 # STEP 2: Calibrate for mean income or other known population parameter
 
-calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
+calibrate_data1 <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -150,6 +150,66 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     )
     subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
 
+    dt <- subsample$variables
+    dt[, FACTORCAL := weights(subsample)]
+
+    # return data with new weights
+    return(dt)
+}
+
+calibrate_data <- function(dt = dt, sel_year = sel_year, city = city, ref_unit = ref_unit) {
+    # function dependencies
+    library(data.table, quietly = TRUE)
+    library(survey, quietly = TRUE)
+
+    # labels and indexes
+    age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99+")
+    pop_stats <- fread("AEAT/data/pop-stats.csv")
+    city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
+    total_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
+
+    # reshape sex categories
+    sex_vector <- fread(paste0("AEAT/data/", city, "-sex-freq.csv"))[, .(gender, Freq = get(paste0("freq", sel_year)))]
+
+    # reshape age categories
+    age_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freq", sel_year)))]
+    age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
+    age_vector <- cbind(age_group = age_labels, age_vector)[, group := NULL]
+
+    # Create a new age_group based on broader 20-year intervals
+    dt[, age_group := cut(
+        AGE,
+        breaks = c(0, 20, 40, 60, 80, Inf), # Defining 20-year groups
+        right = FALSE,
+        labels = age_labels,
+        include.lowest = TRUE
+    )]
+    dt <- dt[!is.na(age_group)]
+    dt <- dt[!is.na(FACTORCAL)]
+    dt[, gender := fifelse(SEXO == 1, "male", "female")]
+
+    # Income population value
+    RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+
+    # Population totals for calibration
+    calibration_totals <- list(
+        gender = sex_vector$Freq,
+        age_group = age_vector$Freq,
+        RENTAB = RBpop * sum(dt$FACTORCAL)  # Include income in the calibration
+    )
+
+    # Prepare survey object
+    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+
+    # Apply calibration for age, gender, and income (RENTAB), with -1 to remove intercept
+    subsample <- calibrate(
+        design = pre_subsample,
+        formula = ~-1 + gender + age_group + RENTAB,
+        population = calibration_totals
+    )
+
+    # Update weights after calibration
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
 
