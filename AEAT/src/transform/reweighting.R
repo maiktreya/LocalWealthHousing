@@ -163,7 +163,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     library(survey, quietly = TRUE)
 
     # labels and indexes
-    age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99+")
+    age_labels <- c("0-24", "25-49", "50-74", "+75")
     pop_stats <- fread("AEAT/data/pop-stats.csv")
     city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
     total_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
@@ -173,13 +173,13 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # reshape age categories
     age_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freq", sel_year)))]
-    age_vector <- age_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
+    age_vector <- age_vector[, group := ceiling(.I / 5)][, .(Freq = sum(Freq)), by = group]
     age_vector <- cbind(age_group = age_labels, age_vector)[, group := NULL]
 
     # Create a new age_group based on broader 20-year intervals
     dt[, age_group := cut(
         AGE,
-        breaks = c(0, 20, 40, 60, 80, Inf), # Defining 20-year groups
+        breaks = c(0, 25, 50, 75, Inf), # Defining 20-year groups
         right = FALSE,
         labels = age_labels,
         include.lowest = TRUE
