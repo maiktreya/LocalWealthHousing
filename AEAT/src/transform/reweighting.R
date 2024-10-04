@@ -198,18 +198,20 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
+    # Calibrate for mean income
+    calibration_target <- c(
+        RENTAB = RBpop * sum(weights(pre_subsample))
+    )
+    post_subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
+
     # Apply calibration with the new named vector
-    post_subsample <- calibrate(
-        design = pre_subsample,
+    subsample <- calibrate(
+        design = post_subsample,
         formula = ~ -1 + gender + age_group,
         population = calibration_totals_vec
     )
 
-    # Calibrate for mean income
-    calibration_target <- c(
-        RENTAB = RBpop * sum(post_subsample$variables[, FACTORCAL])
-    )
-    subsample <- calibrate(post_subsample, ~ -1 + RENTAB, calibration_target)
+
 
     # Update weights after calibration
     dt <- subsample$variables
