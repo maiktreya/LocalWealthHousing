@@ -192,7 +192,7 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     age_vector <- setNames(calibration_totals[[2]]$Freq, paste0("age_group", calibration_totals[[2]]$age_group))
 
     # Combine gender and age group vectors, and add RENTAB with a proper name
-    calibration_totals_vec <- c(gender_vector, age_vector )
+    calibration_totals_vec <- c(gender_vector, age_vector)
 
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
