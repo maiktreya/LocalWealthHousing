@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -23,8 +23,8 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = FALSE,
-    raked = "INTERACTION" # Working just for Madrid & Segovia cities
+    calibrated =  TRUE,
+    raked = TRUE # Working just for Madrid & Segovia cities
 )
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
 subsample <- subset(dt_sv, MUESTRA == city_index) # subset for a given city

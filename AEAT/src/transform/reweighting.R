@@ -18,7 +18,7 @@ rake_data_interaction <- function(dt = dt, sel_year = sel_year, city = city) {
     m_vector <- m_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
     m_vector <- cbind(sex_age = m_labels, m_vector)[, group := NULL]
     f_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqfemale", sel_year)))]
-    f_vector <- f_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group]
+    f_vector <- f_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
     f_vector <- cbind(sex_age = f_labels, f_vector)[, group := NULL]
     age_vector <- rbind(f_vector, m_vector)
 
@@ -46,11 +46,19 @@ rake_data_interaction <- function(dt = dt, sel_year = sel_year, city = city) {
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
     # Apply raking for sex and age cohorts
-    subsample <- postStratify(
+    subsample <- rake(
         design = pre_subsample,
-        strata = ~sex_age,
-        population = as.data.frame(age_vector)
+        sample.margins = margins,
+        population.margins = pop_totals,
+        control = list(verbose = TRUE)
     )
+
+    # Apply raking for sex and age cohorts
+    # subsample <- postStratify(
+    #     design = pre_subsample,
+    #     strata = ~sex_age,
+    #     population = as.data.frame(age_vector)
+    # )
 
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
