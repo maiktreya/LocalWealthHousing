@@ -201,17 +201,13 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
     # Apply calibration with the new named vector
-    post_subsample <- calibrate(
+    subsample <- calibrate(
         design = pre_subsample,
         formula = ~ -1 + gender + age_group,
-        population = calibration_totals_vec
+        population = calibration_totals_vec,
+        dbounds = c(0.5, 400)
     )
 
-    # Calibrate for mean income
-    calibration_target <- c(
-        RENTAB = RBpop * sum(post_subsample$variables[, FACTORCAL])
-    )
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
 
     # Update weights after calibration
     dt <- subsample$variables

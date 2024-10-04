@@ -129,8 +129,11 @@ get_wave <- function(
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
     # finally calibrate if needed
-    if (calibrated) {
+
+    if (calibrated == TRUE) {
         dt <- calibrate_data(dt, sel_year, ref_unit, city)
+    } else if (calibrated == "TWO-STEP") {
+        dt <- calibrate_data_full(dt, sel_year, ref_unit, city)
     }
     # Return the final tidy data table
     return(dt)
