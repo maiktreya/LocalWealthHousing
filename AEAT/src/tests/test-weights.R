@@ -24,7 +24,7 @@ dt <- get_wave(
     ref_unit = ref_unit,
     represet = represet,
     calibrated = FALSE,
-    raked = TRUE # Working just for Madrid & Segovia cities
+    raked = "INTERACTION" # Working just for Madrid & Segovia cities
 )
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
 subsample <- subset(dt_sv, MUESTRA == city_index) # subset for a given city
