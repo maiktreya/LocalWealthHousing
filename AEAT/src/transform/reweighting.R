@@ -142,7 +142,8 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     calibration_target <- c(
         RENTAD = RNpop * sum(pre_subsample$variables[, FACTORCAL])
     )
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target)
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target, bounds = c(max(weights(pre_subsample)),max(weights(pre_subsample))))
+   # if (min(weights(subsample)) < 0) subsample <- trimWeights(subsample, upper = max(weights(pre_subsample)), lower = min(weights(pre_subsample)))
 
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
@@ -170,10 +171,10 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     age_vector <- age_vector[, group := ceiling(.I / 5)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
     age_vector <- cbind(age_group = age_labels, age_vector)[, group := NULL]
 
-    # Create a new age_group based on broader 20-year intervals
+    # Create a new age_group based on broader 25-year intervals
     dt[, age_group := cut(
         AGE,
-        breaks = c(0, 25, 50, 75, Inf), # Defining 20-year groups
+        breaks = c(0, 25, 50, 75, Inf), # Defining 25-year groups
         right = FALSE,
         labels = age_labels,
         include.lowest = TRUE
