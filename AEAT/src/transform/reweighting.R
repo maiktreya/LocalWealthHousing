@@ -181,37 +181,21 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     dt <- dt[!is.na(FACTORCAL)]
     dt[, gender := fifelse(SEXO == 1, "male", "female")]
 
-    # Population totals for calibration
-    calibration_totals <- list(
-        sex_vector,
-        age_vector
-    )
-
     # Coerce gender and age group into named vectors
-    gender_vector <- setNames(calibration_totals[[1]]$Freq, paste0("gender", calibration_totals[[1]]$gender))
-    age_vector <- setNames(calibration_totals[[2]]$Freq, paste0("age_group", calibration_totals[[2]]$age_group))
-
-    # Combine gender and age group vectors, and add RENTAB with a proper name
-    calibration_totals_vec <- c(gender_vector, age_vector)
+    gender_vector <- setNames(sex_vector$Freq, paste0("gender", sex_vector$gender))
+    age_vector <- setNames(age_vector$Freq, paste0("age_group", age_vector$age_group))
+    calibration_totals_vec <- c(gender_vector, age_vector, RENTAB = RBpop * sum(weights(pre_subsample)))
 
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
-    # Calibrate for mean income
-    calibration_target <- c(
-        RENTAB = RBpop * sum(weights(pre_subsample))
-    )
-    post_subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
-
     # Apply calibration with the new named vector
     subsample <- calibrate(
-        design = post_subsample,
-        formula = ~ -1 + gender + age_group,
+        design = pre_subsample,
+        formula = ~ -1 + gender + age_group + RENTAB,
         population = calibration_totals_vec
     )
-
-
 
     # Update weights after calibration
     dt <- subsample$variables
