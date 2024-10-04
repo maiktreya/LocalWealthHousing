@@ -21,7 +21,7 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = FALSE,
+    calibrated = TRUE,
     raked = TRUE # Working just for Madrid & Segovia cities
 )
 subsample <- svydesign(
