@@ -1,5 +1,3 @@
-# Obtain t-statisctics for representative mean for AEAT subsample
-
 # clean enviroment and import dependencies
 rm(list = ls())
 library(data.table)
@@ -10,8 +8,8 @@ source("AEAT/src/transform/etl_pipe.R")
 # define city subsample and variables to analyze
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)" # población
-sel_year <- 2016
-ref_unit <- "IDENHOG"
+sel_year <- 2021
+ref_unit <- "IDENPER"
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -23,33 +21,58 @@ dt <- get_wave(
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
-    calibrated = FALSE,
-    raked = "INTERACTION" # Working just for Madrid & Segovia cities
+    calibrated = TRUE,
+    raked = FALSE # Working just for Madrid & Segovia cities
 )
-
-## Prepare survey object from dt and set income cuts for quantiles dynamically
-dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL) # muestra con coeficientes de elevación
-subsample <- subset(dt_sv, MUESTRA == city_index) # subset for a given city
+subsample <- svydesign(
+    ids = ~1,
+    data = subset(dt, MUESTRA == city_index),
+    weights = dt$FACTORCAL
+)
 
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
 # Test if the survey means are equal to the population means
-test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% print()
-test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% print()
+test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop))
+test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop))
 
-# Summarize the results
+# Calculate t-statistics
+t_stat1 <- as.numeric(test_rep1) / SE(RNmean)
+t_stat2 <- as.numeric(test_rep2) / SE(RBmean)
+
+# Calculate p-values using two-tailed test
+p_val1 <- 2 * (1 - pnorm(abs(t_stat1)))
+p_val2 <- 2 * (1 - pnorm(abs(t_stat2)))
+
+# Prepare the results table with p-values
 net_vals <- data.table(
     pop = RNpop,
     mean = coef(RNmean),
+    stat = as.numeric(test_rep1),
+    b95l = as.numeric(test_rep1) + SE(RNmean) * -1.96,
+    b95u = as.numeric(test_rep1) + SE(RNmean) * 1.96,
     se = SE(RNmean),
-    dif = (RNpop - coef(RNmean)) / RNpop
+    dif = (RNpop - coef(RNmean)) / RNpop,
+    p_value = p_val1
 )
 gross_vals <- data.table(
     pop = RBpop,
     mean = coef(RBmean),
+    stat = as.numeric(test_rep2),
+    b95l = as.numeric(test_rep2) + SE(RBmean) * -1.96,
+    b95u = as.numeric(test_rep2) + SE(RBmean) * 1.96,
     se = SE(RBmean),
-    dif = (RBpop - coef(RBmean)) / RBpop
+    dif = (RBpop - coef(RBmean)) / RBpop,
+    p_value = p_val2
 )
-results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
+
+# Combine and print the results
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
+    round(2) %>%
+    print()
+
+# Print sample sizes
+sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
+sum(subsample$variables[, "FACTORCAL"]) %>% print()
