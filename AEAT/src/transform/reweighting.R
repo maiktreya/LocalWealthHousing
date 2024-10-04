@@ -203,8 +203,9 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # Combine gender and age group vectors, and add RENTAB with a proper name
     calibration_totals_vec <- c(gender_vector, age_vector, RENTAB = calibration_totals$RENTAB)
 
-    # Print to ensure it looks correct
-    print(calibration_totals_vec)
+    # Prepare survey object
+    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
