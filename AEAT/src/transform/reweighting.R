@@ -99,7 +99,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
 
     # Population proportions for raking
     pop_totals <- list(
-    #    sex_vector,
+        sex_vector,
         age_vector
     )
 

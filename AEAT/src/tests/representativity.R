@@ -15,15 +15,17 @@ city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 
-# get subsample
+# get a sample weighted for a given city
 dt <- get_wave(
     city = city,
     sel_year = sel_year,
     ref_unit = ref_unit,
     represet = represet,
     calibrated =  TRUE, # Requieres auxiliary pop. data
-    raked = "INTERACTION" # Requieres auxiliary pop. data
+    raked = FALSE # Requieres auxiliary pop. data
 )
+
+# define survey for the subsample of interest
 subsample <- svydesign(
     ids = ~1,
     data = subset(dt, MUESTRA == city_index),
@@ -38,13 +40,9 @@ RBmean <- svymean(~RENTAB, subsample)
 test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
 test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
 
-# Calculate t-statistics
-t_stat1 <- test_rep1 / SE(RNmean)
-t_stat2 <- test_rep2 / SE(RBmean)
-
-# Calculate p-values using two-tailed test
-p_val1 <- 2 * (1 - pnorm(abs(t_stat1)))
-p_val2 <- 2 * (1 - pnorm(abs(t_stat2)))
+# Calculate p-values using two-tailed test over t-statistics
+p_val1 <- 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean))))
+p_val2 <- 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean))))
 
 # Prepare the results table with p-values
 net_vals <- data.table(
