@@ -210,7 +210,7 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     calibration_target <- c(
         RENTAB = RBpop * sum(post_subsample$variables[, FACTORCAL])
     )
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
+    subsample <- calibrate(post_subsample, ~ -1 + RENTAB, calibration_target)
 
     # Update weights after calibration
     dt <- subsample$variables
