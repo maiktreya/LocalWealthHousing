@@ -70,7 +70,7 @@ gross_vals <- data.table(
 
 # Combine and print the results
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
-    round(2) %>%
+    round(3) %>%
     print()
 
 # Print sample sizes
