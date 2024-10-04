@@ -185,7 +185,6 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     calibration_totals <- list(
         sex_vector,
         age_vector
-   #     RENTAB = RBpop * sum(dt$FACTORCAL) # Include income in the calib
     )
 
     # Coerce gender and age group into named vectors
@@ -193,7 +192,7 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     age_vector <- setNames(calibration_totals[[2]]$Freq, paste0("age_group", calibration_totals[[2]]$age_group))
 
     # Combine gender and age group vectors, and add RENTAB with a proper name
-    calibration_totals_vec <- c(gender_vector, age_vector ) # RENTAB = calibration_totals$RENTAB
+    calibration_totals_vec <- c(gender_vector, age_vector )
 
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
