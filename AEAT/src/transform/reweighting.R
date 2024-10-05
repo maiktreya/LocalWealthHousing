@@ -142,7 +142,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     }
     calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)),RENTAB = RBpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD + RENTAB, calibration_target, bounds = c(0.8, 500), trim =c(2,10))
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD + RENTAB, calibration_target, bounds = c(0.8, 500))
 
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
