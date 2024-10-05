@@ -137,13 +137,12 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-
-    # Calibrate for mean income
-    calibration_target <- c(
-        RENTAD = RNpop * sum(pre_subsample$variables[, FACTORCAL])
-    )
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target, bounds = c(max(weights(pre_subsample)),max(weights(pre_subsample))))
-   # if (min(weights(subsample)) < 0) subsample <- trimWeights(subsample, upper = max(weights(pre_subsample)), lower = min(weights(pre_subsample)))
+        if (min(weights(pre_subsample)) < 0) {
+        pre_subsample <- trimWeights(pre_subsample, upper = 500, lower = 0.8)
+    }
+    calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)),RENTAB = RBpop * sum(weights(pre_subsample)))
+    limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD + RENTAB, calibration_target, bounds = c(0.8, 500), trim =c(2,10))
 
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
@@ -160,6 +159,8 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     # labels and indexes
     age_labels <- c("0-24", "25-49", "50-74", "+75")
     pop_stats <- fread("AEAT/data/pop-stats.csv")
+    RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+    RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
     city_index <- pop_stats[muni == city & year == sel_year, index] %>% as.numeric()
     total_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
 
@@ -190,15 +191,23 @@ calibrate_data_full <- function(dt = dt, sel_year = sel_year, ref_unit = ref_uni
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-    calibration_totals_vec <- c(gender_vector, age_vector, RENTAB = RBpop * sum(weights(pre_subsample)))
+    calibration_totals_vec <- c(gender_vector, age_vector)
 
     # Apply calibration with the new named vector
-    subsample <- calibrate(
+    pre_subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + gender + age_group + RENTAB,
+        formula = ~ -1 + gender + age_group,
         population = calibration_totals_vec
     )
-
+    if (min(weights(pre_subsample)) < 0) {
+        pre_subsample <- trimWeights(pre_subsample, upper = 500, lower = 0.8)
+    }
+    calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)))
+    limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target)
+    if (min(weights(subsample)) < 0) {
+        subsample <- trimWeights(subsample, upper = 500, lower = 0.8)
+    }
     # Update weights after calibration
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
