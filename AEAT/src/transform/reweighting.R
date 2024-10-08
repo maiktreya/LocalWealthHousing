@@ -60,7 +60,69 @@ rake_data_interaction <- function(dt = dt, sel_year = sel_year, city = city) {
     return(dt)
 }
 
+
 rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
+    # function dependencies
+    library(data.table, quietly = TRUE)
+    library(survey, quietly = TRUE)
+
+    m_labels <- c("male_0-19", "male_20-39", "male_40-59", "male_60-79", "male_80-99+")
+    f_labels <- c("female_0-19", "female_20-39", "female_40-59", "female_60-79", "female_80-99+")
+    age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99+")
+    city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
+    total_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
+
+    # reshape age categories
+    m_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqmale", sel_year)))]
+    m_vector <- m_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
+    m_vector <- cbind(sex_age = m_labels, m_vector)[, group := NULL]
+    f_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqfemale", sel_year)))]
+    f_vector <- f_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
+    f_vector <- cbind(sex_age = f_labels, f_vector)[, group := NULL]
+    age_vector <- rbind(f_vector, m_vector)
+
+    # Create a new age_group based on broader 20-year intervals
+    dt[, age_group := cut(
+        AGE,
+        breaks = c(0, 20, 40, 60, 80, Inf), # Defining 20-year groups
+        right = FALSE,
+        labels = age_labels,
+        include.lowest = TRUE
+    )]
+    dt <- dt[!is.na(age_group)]
+    dt <- dt[!is.na(FACTORCAL)]
+    dt[, gender := fifelse(SEXO == 1, "male", "female")]
+    dt[, sex_age := interaction(gender, age_group, sep = "_")]
+
+    # Prepare survey object
+    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+    calibration_totals_vec <- age_vector
+
+    # Apply calibration with the new named vector
+    pre_subsample <- calibrate(
+        design = pre_subsample,
+        formula = ~ -1 +  sex_age,
+        population = calibration_totals_vec
+    )
+    if (min(weights(pre_subsample)) < 0) {
+        pre_subsample <- trimWeights(pre_subsample, upper = 500, lower = 0.8)
+    }
+    calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)))
+    limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target)
+
+    # Update weights after calibration
+    dt <- subsample$variables
+    dt[, FACTORCAL := weights(subsample)]
+
+    # return data with new weights
+    return(dt)
+}
+
+
+
+rake_old_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
