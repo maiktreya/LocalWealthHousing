@@ -24,5 +24,4 @@ colnames(iden) <- c("IDENPER", "IDENHOG", "CCAA", "PROV", "MUNI", "TIPOHOG", "TR
 dt <- merge(dt, iden, by = c("IDENPER", "IDENHOG"))
 
 # export the results to an optimized gz file
-
 fwrite(dt, paste0("AEAT/data/IEF-", sel_year, "-new.gz")) # exportar objeto preparado
