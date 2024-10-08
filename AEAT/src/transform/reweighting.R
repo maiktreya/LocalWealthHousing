@@ -137,13 +137,13 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-        if (min(weights(pre_subsample)) < 0) {
+    if (min(weights(pre_subsample)) < 0) {
         print("trimming")
         pre_subsample <- trimWeights(pre_subsample, upper = 500, lower = 0.8)
     }
     calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target, bounds=limits, bounds.const = TRUE)
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target, bounds = limits, bounds.const = TRUE)
 
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
