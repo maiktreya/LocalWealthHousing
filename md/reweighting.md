@@ -18,7 +18,7 @@ La función `get_wave`, que es utilizada por otros scripts para establecer tanto
 - El parametro `ref_unit` fija el nivel base de identificación (a elegir entre personas y hogares).
 - El parametro `calibrate` (boolean) permite calibrar la encuesta reescalando para el ingreso bruto (RENTAB) como referencia.
 
-- El parametro `rake` (boolean) permite realizar "Iterative Proportional Fitting" (IPS) to adjust for known population proportions (age group and gender)
+- El parametro `rake` (logical) permite realizar "Iterative Proportional Fitting" (IPS) to adjust for known population proportions (age group and gender)
 
 ```{r}
 # get a sample weighted for a given city
@@ -86,12 +86,29 @@ results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
 sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
 
+
+#### Results for 2016 calibrated on RENTAD not raked
+|==================================================|
+     pop     mean   stat se.RENTAD    dif p_value.RENTAD
+   <num>    <num>  <num>     <num>  <num>          <num>
+1: 39613 40072.83 459.83   265.109 -0.012          0.083   RENTAD
+2: 49831 50076.93 245.93   354.593 -0.005          0.488   RENTAB
+[1] 13576.06
+[1] 1240068
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.111   2.842   6.390  25.190  30.864 574.437 
+
+
+#### Results for 2021 calibrated on RENTAD not raked
+|==================================================|
      pop     mean     stat se.RENTAD    dif p_value.RENTAD
    <num>    <num>    <num>     <num>  <num>          <num>
-1: 30203 31693.28 1490.281  2500.030 -0.049          0.551
-2: 35772 37790.48 2018.479  3117.154 -0.056          0.517
-[1] 100.9781
-[1] 26033.73
+1: 43953 44370.26  417.262   262.413 -0.009          0.112  RENTAD
+2: 56453 56184.57 -268.432   364.460  0.005          0.461  RENTAB
+[1] 72688.25
+[1] 1288813
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+  0.0018   1.1300   3.8677  16.5557  24.3365 599.5457 
 
 ```
 
