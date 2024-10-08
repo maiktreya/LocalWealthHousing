@@ -97,7 +97,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # Prepare survey object
     dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-    calibration_totals_vec <- age_vector
+    calibration_totals_vec <-  setNames(age_vector$Freq, paste0("gender", age_vector$sex_age))
 
     # Apply calibration with the new named vector
     pre_subsample <- calibrate(
