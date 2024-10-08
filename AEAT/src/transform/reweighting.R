@@ -42,7 +42,7 @@ rake_data_interaction <- function(dt = dt, sel_year = sel_year, city = city) {
     pop_totals <- list(age_vector)
 
     # Prepare survey object
-    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
     # Apply raking for sex and age cohorts
@@ -98,7 +98,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     dt[, sex_age := interaction(gender, age_group, sep = "_")]
 
     # Prepare survey object
-    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     calibration_totals_vec <- setNames(age_vector$Freq, paste0("sex_age", as.character(age_vector$sex_age)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
@@ -160,7 +160,7 @@ rake_data_alt <- function(dt = dt, sel_year = sel_year, city = city) {
     age_vector <- setNames(age_vector$Freq, paste0("age_group", age_vector$age_group))
 
     # Prepare survey object
-    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     calibration_totals_vec <- c(gender_vector, age_vector)
 
@@ -223,7 +223,7 @@ rake_old_data <- function(dt = dt, sel_year = sel_year, city = city) {
     )
 
     # Prepare survey object
-    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
     # Apply raking for sex and age cohorts
@@ -254,7 +254,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 
     # Prepare survey object
-    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+    dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     if (min(weights(pre_subsample)) < 0) {
         print("trimming")

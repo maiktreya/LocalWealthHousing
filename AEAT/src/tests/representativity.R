@@ -30,7 +30,7 @@ dt <- get_wave(
 dt <- subset(dt, MUESTRA == city_index)
 
 # define survey for the subsample of interest
-subsample <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
+subsample <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
 
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)
