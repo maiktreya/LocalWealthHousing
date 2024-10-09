@@ -10,7 +10,12 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # import external population values
     city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
-    calibration_totals_vec <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+    # reshape sex categories
+    sex_vector <- fread(paste0("AEAT/data/", city, "-sex-freq.csv"))[, .(gender, Freq = get(paste0("freq", sel_year)))]
+
+    tipohog_vector <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+    sex_vector <- setNames(sex_vector$Freq, paste0("gender", sex_vector$gender))
+    calibration_totals_vec <- c(tipohog_vector, sex_vector)
 
     # coerce needed variables
     dt <- dt[!is.na(FACTORCAL)]
@@ -31,7 +36,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + TIPOHOG,
+        formula = ~ -1 + TIPOHOG + gender,
         population = calibration_totals_vec,
         calfun = "raking"
     )
