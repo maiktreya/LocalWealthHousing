@@ -88,3 +88,12 @@ dt <- dt[eval(parse(text = represet)), .(
     MUESTRA = mean(MUESTRA)
 ), by = .(reference = get(ref_unit))]
 
+    # Prepare survey object
+    dt_sv <- svydesign(
+        ids = ~IDENHOG,
+        strata = ~ CCAA + TIPOHOG + TRAMO,
+        data = dt,
+        weights = dt$FACTORCAL,
+        nest = TRUE
+    )
+    pre_subsample <- subset(dt_sv, MUESTRA == city_index)

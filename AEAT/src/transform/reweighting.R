@@ -47,6 +47,51 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     return(dt)
 }
 
+
+rake_data_alt <- function(dt = dt, sel_year = sel_year, city = city) {
+    # function dependencies
+    library(data.table, quietly = TRUE)
+    library(survey, quietly = TRUE)
+
+    # import external population values
+    city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
+    tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+
+    calibration_totals_vec <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+
+    # coerce needed variables
+    dt <- dt[!is.na(FACTORCAL)]
+    dt[, gender := fifelse(SEXO == 1, "male", "female")]
+    dt[, TIPOHOG := as.factor(TIPOHOG)]
+
+    # Prepare survey object
+    dt_sv <- svydesign(
+        ids = ~IDENHOG,
+        strata = ~ CCAA + TIPOHOG + TRAMO,
+        data = dt,
+        weights = dt$FACTORCAL,
+        nest = TRUE
+    )
+    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+    limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+
+    # Apply calibration with the new named vector
+    subsample <- calibrate(
+        design = pre_subsample,
+        formula = ~ -1 + TIPOHOG,
+        population = calibration_totals_vec,
+        calfun = "raking",
+        bounds = limits,
+        epsilon = 1e-5,
+        maxit = 1000
+    )
+
+    # Update weights after calibration
+    dt <- subsample$variables
+    dt[, FACTORCAL := weights(subsample)]
+
+    return(dt)
+}
 # STEP 2: Calibrate for mean income or other known population parameter
 
 calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
@@ -67,9 +112,9 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         print("trimming")
         pre_subsample <- trimWeights(pre_subsample, upper = 500, lower = 0.8)
     }
-    calibration_target <- c(RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
+    calibration_target <- c(RENTAB = RBpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB + RENTAD, calibration_target)
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
 #     subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target, bounds = limits, bounds.const = TRUE)
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
