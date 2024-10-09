@@ -17,3 +17,9 @@ calib_mode <- FALSE
 tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"))
 
 dt <- fread("AEAT/data/IEF-2016-new.gz")
+
+subsample_cp <- subsample
+subsample <- trimWeights(subsample_cp, lower = 0, upper = 1000, strict = TRUE)
+
+# 25/77845
+# [1] 0.000321151

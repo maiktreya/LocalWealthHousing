@@ -45,7 +45,7 @@ get_wave <- function(
     setnafill(dt, type = "const", fill = 0, cols = sel_cols)
 
     # Coerce TRAMO to numeric, treating "N" as 8
-    dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
+    dt[TRAMO == "N", TRAMO := -1][, TRAMO := as.numeric(TRAMO) + 1]
 
     # Assign sample identifier (MUESTRA) based on geographical identifiers
     dt[, MUESTRA := fcase(

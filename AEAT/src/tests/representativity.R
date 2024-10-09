@@ -66,7 +66,6 @@ gross_vals <- data.table(
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
 
 # Print sample sizes
-sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
 summary(weights(subsample)) %>% print()
 

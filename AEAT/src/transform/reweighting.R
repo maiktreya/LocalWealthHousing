@@ -73,6 +73,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         population = calibration_totals_vec
     )
 
+
     # Update weights after calibration
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
@@ -94,14 +95,11 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # Prepare survey object
     dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
-    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-    if (min(weights(pre_subsample)) < 0) {
-        print("trimming")
-        pre_subsample <- trimWeights(pre_subsample, upper = 500, lower = 0.8)
-    }
-    calibration_target <- c(RENTAB = RBpop * sum(weights(pre_subsample)))
+    pre_subsample <- subset(dt_sv,
+     MUESTRA == city_index)
+    calibration_target <- c(RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target)
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB + RENTAD, calibration_target, calfun = "raking")
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
 
