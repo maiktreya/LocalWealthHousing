@@ -88,17 +88,41 @@ dt <- dt[eval(parse(text = represet)), .(
     MUESTRA = mean(MUESTRA)
 ), by = .(reference = get(ref_unit))]
 
+# import external population values
+city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
+tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+tramo_pop <- fread(paste0("AEAT/data/base_hogar/", city, sel_year, "_tramo.csv"))[, .(index = as.factor(index), Total)]
+tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$index))
+calibration_totals_vec <- c(tipohog_pop, tramo_pop)
+
+# coerce needed variables
+dt <- dt[!is.na(FACTORCAL)]
+dt[, gender := fifelse(SEXO == 1, "male", "female")]
+dt[, TIPOHOG := as.factor(TIPOHOG)]
+
 # Prepare survey object
-subsample <- svydesign(
+dt_sv <- svydesign(
     ids = ~IDENHOG,
     strata = ~ CCAA + TIPOHOG + TRAMO,
     data = dt,
     weights = dt$FACTORCAL,
     nest = TRUE
 )
+pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 
-sample_tramo <- svytotal(~ factor(TRAMO), subsample, ) %>%
-    prop.table() %>%
-    data.table()
-sample_tramo_tot <- svytotal(~ factor(TRAMO), subsample, ) %>% data.table()
-fwrite(cbind(Freq = sample_tramo, Total = sample_tramo_tot), paste0(city_index, sel_year, "_tramo.csv"), row.names = TRUE)
+# Apply calibration with the new named vector
+subsample <- calibrate(
+    design = pre_subsample,
+    formula = ~ -1 + TIPOHOG,
+    population = calibration_totals_vec,
+    calfun = "raking",
+    bounds = limits,
+    epsilon = 1e-5,
+    maxit = 1000
+)
+
+# Update weights after calibration
+dt <- subsample$variables
+dt[, FACTORCAL := weights(subsample)]
