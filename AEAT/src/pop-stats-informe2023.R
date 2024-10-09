@@ -51,12 +51,16 @@ final_table <- cbind(quantiles = table_names, final_table)
 # TABLA 2: Calculate the median and mean income for each TENENCIA group
 renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = 0.5)
 mean_renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svymean)
+mean_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svymean) %>% print()
+medi_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = .5) %>% print()
 
 # Combine median and mean tables
 renta_table <- data.table(
     TENENCIA = renta_stats$TENENCIA,
     media = mean_renta_stats$RENTAD,
-    mediana = renta_stats$RENTAD
+    mediana = renta_stats$RENTAD,
+    media_noal = mean_renta_stats_noal$RENTAD_NOAL,
+    mediana_noal = medi_renta_stats_noal$RENTAD_NOAL
 )
 
 # TABLA 3: Calculate total frequencies by TENENCIA using svytable
@@ -71,6 +75,3 @@ list(final_table, renta_table, tenencia_freq) %>% print()
 fwrite(final_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
 fwrite(renta_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-renta.csv"))
 fwrite(tenencia_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "reg_tenencia.csv"))
-
-mean_renta_stats_noal <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svymean) %>% print()
-medi_renta_stats_noal <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = .5) %>% print()
