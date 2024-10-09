@@ -12,13 +12,10 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2016
 ref_unit <- "IDENHOG"
-rake_mode <- TRUE
-calib_mode <- FALSE
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")
-
 
 # Load the data.table library for efficient data manipulation.
 library(data.table, quietly = TRUE)
@@ -69,7 +66,6 @@ dt <- dt[, .(
     MUESTRA = mean(MUESTRA) # City identifiers (CCAA+PROV+MUNI)
 ), by = .(IDENPER)]
 
-
 # STEP 2: Filter and tidy data for the specified reference unit
 dt <- dt[eval(parse(text = represet)), .(
     MIEMBROS = mean(MIEMBROS),
@@ -92,31 +88,3 @@ dt <- dt[eval(parse(text = represet)), .(
     MUESTRA = mean(MUESTRA)
 ), by = .(reference = get(ref_unit))]
 
-
-# import external population values
-city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
-tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
-
-# coerce needed variables
-dt <- dt[!is.na(FACTORCAL)]
-dt[, gender := fifelse(SEXO == 1, "male", "female")]
-dt[, TIPOHOG := as.factor(TIPOHOG)]
-calibration_totals_vec <- setNames(tipohog_pop$Total, tipohog_pop$Tipohog)
-
-# Prepare survey object
-dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
-pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-calibration_totals_vec <- setNames(age_vector$Freq, paste0("sex_age", as.character(age_vector$sex_age)))
-limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-
-# Apply calibration with the new named vector
-subsample <- calibrate(
-    design = pre_subsample,
-    formula = ~ -1 + TIPOHOG,
-    population = calibration_totals_vec,
-    calfun = "raking"
-)
-
-# Update weights after calibration
-dt <- subsample$variables
-dt[, FACTORCAL := weights(subsample)]

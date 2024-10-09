@@ -17,5 +17,3 @@ calib_mode <- FALSE
 tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"))
 
 dt <- fread("AEAT/data/IEF-2016-new.gz")
-
-

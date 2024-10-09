@@ -82,13 +82,6 @@ get_wave <- function(
         MUESTRA = mean(MUESTRA) # City identifiers (CCAA+PROV+MUNI)
     ), by = .(IDENPER)]
 
-    # Apply raking if requested
-    if (raked == TRUE) {
-        dt <- rake_data(dt, sel_year, city)
-    } else if (raked == "INTERACTION") {
-        dt <- rake_data_interaction(dt, sel_year, city)
-    }
-
     # STEP 2: Filter and tidy data for the specified reference unit
     dt <- dt[eval(parse(text = represet)), .(
         MIEMBROS = mean(MIEMBROS),
@@ -128,8 +121,14 @@ get_wave <- function(
     # Calculate remaining rental income
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
-    # finally calibrate if needed
+    # Apply raking if requested (Iterative Proportional fitting / GREG)
+    if (raked == TRUE) {
+        dt <- rake_data(dt, sel_year, city)
+    } else if (raked == "INTERACTION") {
+        dt <- rake_data_interaction(dt, sel_year, city)
+    }
 
+    # finally calibrate if needed
     if (calibrated == TRUE) {
         dt <- calibrate_data(dt, sel_year, ref_unit, city)
     } else if (calibrated == "TWO-STEP") {
