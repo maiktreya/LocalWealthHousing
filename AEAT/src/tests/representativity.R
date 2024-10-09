@@ -12,7 +12,7 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
-rake_mode <- TRUE
+rake_mode <- "INTERACTION"
 calib_mode <- TRUE
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -72,5 +72,3 @@ summary(weights(subsample)) %>% print()
 
 # Export the final reweighted subsample if needed
 if (export_object) fwrite(subsample$variables, paste0("AEAT/out/", city, ref_unit, sel_year, rake_mode, ".gz"))
-
-

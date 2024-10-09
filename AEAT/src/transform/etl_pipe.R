@@ -127,15 +127,14 @@ get_wave <- function(
     if (raked == TRUE) {
         dt <- rake_data(dt, sel_year, city)
     } else if (raked == "INTERACTION") {
-        dt <- rake_data_interaction(dt, sel_year, city)
+        dt <- rake_data_multi(dt, sel_year, city)
     }
 
     # finally calibrate if needed
     if (calibrated == TRUE) {
         dt <- calibrate_data(dt, sel_year, ref_unit, city)
-    } else if (calibrated == "TWO-STEP") {
-        dt <- calibrate_data_full(dt, sel_year, ref_unit, city)
     }
+
     # Return the final tidy data table
     return(dt)
 }

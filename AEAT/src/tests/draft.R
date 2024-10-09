@@ -93,11 +93,12 @@ tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), 
 tramo_pop <- fread(paste0("AEAT/data/base_hogar/", city, sel_year, "_tramo.csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
 tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
 tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
-calibration_totals_vec <- c(tipohog_pop, tramo_pop)
+calibration_totals_vec <- c(tipohog_pop, tramo_pop[-1])
 
 # coerce needed variables
 dt <- dt[!is.na(FACTORCAL)]
 dt[, TIPOHOG := as.factor(TIPOHOG)]
+dt[, TRAMO := as.factor(TRAMO)]
 
 # Prepare survey object
 dt_sv <- svydesign(
@@ -114,11 +115,7 @@ limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 subsample <- calibrate(
     design = pre_subsample,
     formula = ~ -1 + TIPOHOG + TRAMO,
-    population = calibration_totals_vec,
-    calfun = "raking",
-    bounds = limits,
-    epsilon = 1e-5,
-    maxit = 1000
+    population = calibration_totals_vec
 )
 
 # Update weights after calibration
