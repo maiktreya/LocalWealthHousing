@@ -57,11 +57,11 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
 
     # Prepare survey object
     dt_sv <- svydesign(
-        ids = ~IDENHOG,
-        strata = ~ CCAA + TIPOHOG + TRAMO,
+        ids = ~IDENHOG, # household identifier for base PSU
+        strata = ~ CCAA + TIPOHOG + TRAMO, # region, type of household and income quantile
         data = dt,
         weights = dt$FACTORCAL,
-        nest = TRUE
+        nest = TRUE # households are nested inside IDENPER and multiple REFCAT
     )
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
@@ -72,7 +72,6 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         formula = ~ -1 + TIPOHOG,
         population = calibration_totals_vec
     )
-
 
     # Update weights after calibration
     dt <- subsample$variables
@@ -95,11 +94,13 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # Prepare survey object
     dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
-    pre_subsample <- subset(dt_sv,
-     MUESTRA == city_index)
-    calibration_target <- c(RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
+    pre_subsample <- subset(
+        dt_sv,
+        MUESTRA == city_index
+    )
+    calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB + RENTAD, calibration_target, calfun = "raking")
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target, calfun = "raking")
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
 
