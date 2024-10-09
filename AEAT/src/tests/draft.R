@@ -10,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 export_object <- FALSE
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -89,16 +89,14 @@ dt <- dt[eval(parse(text = represet)), .(
 ), by = .(reference = get(ref_unit))]
 
 # import external population values
-city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
 tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
-tramo_pop <- fread(paste0("AEAT/data/base_hogar/", city, sel_year, "_tramo.csv"))[, .(index = as.factor(index), Total)]
+tramo_pop <- fread(paste0("AEAT/data/base_hogar/", city, sel_year, "_tramo.csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
 tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
-tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$index))
+tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
 calibration_totals_vec <- c(tipohog_pop, tramo_pop)
 
 # coerce needed variables
 dt <- dt[!is.na(FACTORCAL)]
-dt[, gender := fifelse(SEXO == 1, "male", "female")]
 dt[, TIPOHOG := as.factor(TIPOHOG)]
 
 # Prepare survey object
@@ -115,7 +113,7 @@ limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 # Apply calibration with the new named vector
 subsample <- calibrate(
     design = pre_subsample,
-    formula = ~ -1 + TIPOHOG,
+    formula = ~ -1 + TIPOHOG + TRAMO,
     population = calibration_totals_vec,
     calfun = "raking",
     bounds = limits,
