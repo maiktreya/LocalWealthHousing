@@ -97,6 +97,5 @@ subsample <- svydesign(
     nest = TRUE
 )
 
-sample_tramo <- svytotal(~ TRAMO, subsample) %>% data.table()
+sample_tramo <- svytotal(~TRAMO, subsample) %>% data.table()
 sample_tramo %>% print()
-
