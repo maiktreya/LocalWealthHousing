@@ -15,8 +15,8 @@ for (i in c("madrid")) {
             # define city subsample and variables to analyze
             rake_mode <- TRUE
             calib_mode <- TRUE
-            ref_unit <- k
-            represet <- "!is.na(FACTORCAL)" # población
+            ref_unit <- k # reference PSU (either household or individual)
+            represet <- "!is.na(FACTORCAL)" #  universe, households (default) or tax payers
             ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
             city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
 
@@ -26,8 +26,8 @@ for (i in c("madrid")) {
                 sel_year = sel_year, # wave
                 ref_unit = ref_unit, # reference PSU (either household or individual)
                 represet = represet, # reference universe/population (whole pop. or tax payers)
-                calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
-                raked = TRUE # Iterative resampling (TRUE, FALSE, INTERACTION) Requieres auxiliary freq. data
+                calibrated = calib_mode, # Weight calib. (TRUE, FALSE) Requieres auxiliary total/mean data
+                raked = rake_mode # Iterative resampling (TRUE, FALSE) Requieres auxiliary freq. data
             )
 
             # Prepare survey object from dt and set income cuts for quantiles dynamically
@@ -54,14 +54,18 @@ for (i in c("madrid")) {
             final_table <- cbind(quantiles = table_names, final_table)
 
             # TABLA 2: Calculate the median and mean income for each TENENCIA group
-            renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = 0.5)
+            renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = .5)
             mean_renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svymean)
+            mean_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svymean)
+            medi_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = .5)
 
             # Combine median and mean tables
             renta_table <- data.table(
                 TENENCIA = renta_stats$TENENCIA,
                 media = mean_renta_stats$RENTAD,
-                mediana = renta_stats$RENTAD
+                mediana = renta_stats$RENTAD,
+                media_noal = mean_renta_stats_noal$RENTAD_NOAL,
+                mediana_noal = medi_renta_stats_noal$RENTAD_NOAL
             )
 
             # TABLA 3: Calculate total frequencies by TENENCIA using svytable

@@ -11,7 +11,7 @@ source("AEAT/src/transform/etl_pipe.R")
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
-ref_unit <- "IDENPER"
+ref_unit <- "IDENHOG"
 ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
 city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
 
@@ -51,8 +51,8 @@ final_table <- cbind(quantiles = table_names, final_table)
 # TABLA 2: Calculate the median and mean income for each TENENCIA group
 renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = 0.5)
 mean_renta_stats <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svymean)
-mean_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svymean) %>% print()
-medi_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = .5) %>% print()
+mean_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svymean)
+medi_renta_stats_noal <- svyby(~RENTAD_NOAL, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = .5)
 
 # Combine median and mean tables
 renta_table <- data.table(

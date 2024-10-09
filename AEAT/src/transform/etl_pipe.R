@@ -24,15 +24,15 @@ get_wave <- function(
     #' @param sel_year Year to select data from (2016 or 2019). Default is 2016. Number
     sel_year = 2016,
     #' @param ref_unit Aggregation unit: "IDENHOG" (household) or "IDENPER" (individual). String
-    ref_unit = "IDENPER",
+    ref_unit = "IDENHOG",
     #' @param represet Represents the whole population analyzed. For only declarants:
     #' 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)'.
     represet = "!is.na(FACTORCAL)",
     #' @param sel_cols Chosen columns to coerce to numeric types.
     sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i"),
-    #' @param calibrated Set an intermediate step to calibrate for a subsample. Boolean. Default is false
+    #' @param calibrated Set an intermediate step to calibrate for a subsample. Boolean. Default is false.
     calibrated = FALSE,
-    #' @param raked Set an intermediate step to rake for a subsample. Ternary TRUE/FALSE/INTERACTION. Default is false
+    #' @param raked Set an intermediate step to rake for a subsample. Boolean. Default is false.
     raked = FALSE) {
     # Load the data.table library for efficient data manipulation.
     library(data.table, quietly = TRUE)
