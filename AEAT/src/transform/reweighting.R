@@ -18,14 +18,13 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     dt[, TIPOHOG := as.factor(TIPOHOG)]
 
     # Prepare survey object
-    # dt_sv <- svydesign(
-    #     ids = ~IDENHOG,
-    #     strata = ~ CCAA + TIPOHOG + TRAMO,
-    #     data = dt,
-    #     weights = dt$FACTORCAL,
-    #     nest = TRUE
-    # )
-    dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
+    dt_sv <- svydesign(
+        ids = ~IDENHOG,
+        strata = ~ CCAA + TIPOHOG + TRAMO,
+        data = dt,
+        weights = dt$FACTORCAL,
+        nest = TRUE
+    )
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 
@@ -34,7 +33,12 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         design = pre_subsample,
         formula = ~ -1 + TIPOHOG,
         population = calibration_totals_vec,
-        calfun = "raking"
+        calfun = "raking",
+        trim = c(0.5, 2),
+        bounds = limits,
+        bounds.const = TRUE,
+        epsilon = 1e-5,
+        maxit = 1000
     )
 
     # Update weights after calibration
