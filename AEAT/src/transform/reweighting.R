@@ -33,12 +33,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         design = pre_subsample,
         formula = ~ -1 + TIPOHOG,
         population = calibration_totals_vec,
-        calfun = "raking",
-        trim = c(0.5, 2),
-        bounds = limits,
-        bounds.const = TRUE,
-        epsilon = 1e-5,
-        maxit = 1000
+        calfun = "raking"
     )
 
     # Update weights after calibration
