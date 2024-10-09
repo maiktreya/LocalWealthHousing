@@ -95,9 +95,9 @@ dt <- dt[eval(parse(text = represet)), .(
 
 # import external population values
 city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
-tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog=as.factor(Tipohog), Total)]
+tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
 
-# coerce needed variables 
+# coerce needed variables
 dt <- dt[!is.na(FACTORCAL)]
 dt[, gender := fifelse(SEXO == 1, "male", "female")]
 dt[, TIPOHOG := as.factor(TIPOHOG)]
@@ -120,4 +120,3 @@ subsample <- calibrate(
 # Update weights after calibration
 dt <- subsample$variables
 dt[, FACTORCAL := weights(subsample)]
-
