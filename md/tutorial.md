@@ -36,4 +36,5 @@ En caso de problemas de representatividad, el script `AEAT/src/tests/representat
 
 **Importante:** La muestra garantiza representatividad a nivel nacional y de las Comunidades Autónomas. Para análisis a nivel provincial o municipal, se recomienda verificar la representatividad de la submuestra antes de realizar inferencias estadísticas.
 
-Para conocer las funcionalidades para recalibrar pesos y analizar su representatividad [Guía de calibrado y representatividad](md/reweighting.md)
+Para conocer las funcionalidades para recalibrar pesos y analizar su representatividad [Guía de calibrado y representatividad](md/reweighting/reweighting.md)
+Para ver los resultados de un caso práctico de recalibración efectivo echa un vistazo a [Estimando nuevos pesos muestrales iterativamente](md/reweighting/results-calib.md)

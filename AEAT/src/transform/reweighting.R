@@ -22,11 +22,11 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
 
     # Prepare survey object
     dt_sv <- svydesign(
-        ids = ~IDENHOG,
-        strata = ~ CCAA + TIPOHOG + TRAMO,
+        ids = ~IDENHOG, # household identifier for base PSU
+        strata = ~ CCAA + TIPOHOG + TRAMO, # region, type of household and income quantile
         data = dt,
         weights = dt$FACTORCAL,
-        nest = TRUE
+        nest = TRUE # households are nested inside IDENPER and multiple REFCAT
     )
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))

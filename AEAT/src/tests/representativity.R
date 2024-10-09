@@ -10,10 +10,10 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 export_object <- FALSE
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
-rake_mode <- "INTERACTION"
-calib_mode <- TRUE
+rake_mode <- FALSE
+calib_mode <- FALSE
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]

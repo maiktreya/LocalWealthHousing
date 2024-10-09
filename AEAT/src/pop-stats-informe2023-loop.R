@@ -7,14 +7,14 @@ library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
-for (i in c("madrid")) {
+for (i in c("madridCCAA")) {
     city <- i
     for (j in c(2016, 2021)) {
         sel_year <- j
         for (k in c("IDENHOG")) {
             # define city subsample and variables to analyze
-            rake_mode <- TRUE
-            calib_mode <- TRUE
+            rake_mode <- FALSE
+            calib_mode <- FALSE
             ref_unit <- k # reference PSU (either household or individual)
             represet <- "!is.na(FACTORCAL)" #  universe, households (default) or tax payers
             ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
@@ -69,8 +69,8 @@ for (i in c("madrid")) {
             )
 
             # TABLA 3: Calculate total frequencies by TENENCIA using svytable
-            tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv, Ntotal = ref_pop))
-            tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv, Ntotal = ref_pop))
+            tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv, Ntotal =  sum(weights(dt_sv))))
+            tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv, Ntotal =  sum(weights(dt_sv))))
             tenencia_table <- cbind(tenencia_freq, tenencia_prop)
 
             # Check output
