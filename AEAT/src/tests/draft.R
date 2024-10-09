@@ -95,6 +95,9 @@ dt <- dt[eval(parse(text = represet)), .(
 
 
 city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
+tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"))
+
+
 
 dt <- dt[!is.na(FACTORCAL)]
 dt[, gender := fifelse(SEXO == 1, "male", "female")]

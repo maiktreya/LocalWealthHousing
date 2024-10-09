@@ -14,14 +14,8 @@ ref_unit <- "IDENHOG"
 rake_mode <- TRUE
 calib_mode <- FALSE
 
-tipohog_pop <- read_excel("AEAT/data/base_hogar/madrid-hog2020.xlsx", sheet = "Sheet5")  %>% data.table()
+tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"))
 
-tipohog_pop <- tipohog_pop[Tipohog != "T", ][, index := .I]
+dt <- fread("AEAT/data/IEF-2016-new.gz")
 
-setorder(tipohog_pop, Tipohog)
-
-tipohog_pop %>% print()
-
-fwrite(tipohog_pop, "AEAT/data/tipohog-madrid-2021.csv")
-
-# dt <- fread("AEAT/data/IEF-2016-new.gz")
+dt$TIPOHOG %>% as.factor() %>% names()
