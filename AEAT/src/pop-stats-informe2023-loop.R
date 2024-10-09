@@ -13,7 +13,7 @@ for (i in c("madrid")) {
         sel_year <- j
         for (k in c("IDENHOG")) {
             # define city subsample and variables to analyze
-            rake_mode <- "INTERACTION"
+            rake_mode <- TRUE
             calib_mode <- TRUE
             ref_unit <- k
             represet <- "!is.na(FACTORCAL)" # población

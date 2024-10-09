@@ -124,16 +124,10 @@ get_wave <- function(
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
 
     # Apply raking if requested (Iterative Proportional fitting / GREG)
-    if (raked == TRUE) {
-        dt <- rake_data(dt, sel_year, city)
-    } else if (raked == "INTERACTION") {
-        dt <- rake_data_multi(dt, sel_year, city)
-    }
+    if (raked) dt <- rake_data(dt, sel_year, city)
 
     # finally calibrate if needed
-    if (calibrated == TRUE) {
-        dt <- calibrate_data(dt, sel_year, ref_unit, city)
-    }
+    if (calibrated) dt <- calibrate_data(dt, sel_year, ref_unit, city)
 
     # Return the final tidy data table
     return(dt)

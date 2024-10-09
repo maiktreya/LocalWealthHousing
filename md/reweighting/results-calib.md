@@ -15,7 +15,7 @@
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
   0.000   1.129   3.865  16.524  24.281 599.279
 
-## TRAMO + TIPOHOG 1st and then calib on RENTAD (method raking, 2021)
+## TRAMO + TIPOHOG 1st and then calib on RENTAD (method raking, 2016)
 |--------------------------------------------------|
 |==================================================|
      pop     mean     stat se.RENTAD    dif  RENTAD

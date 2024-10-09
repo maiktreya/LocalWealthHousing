@@ -71,3 +71,6 @@ list(final_table, renta_table, tenencia_freq) %>% print()
 fwrite(final_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
 fwrite(renta_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-renta.csv"))
 fwrite(tenencia_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "reg_tenencia.csv"))
+
+mean_renta_stats_noal <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svymean) %>% print()
+medi_renta_stats_noal <- svyby(~RENTAD, ~TENENCIA, design = dt_sv, FUN = svyquantile, quantiles = .5) %>% print()
