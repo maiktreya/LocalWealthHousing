@@ -40,7 +40,6 @@ rake_data_multi <- function(dt = dt, sel_year = sel_year, city = city) {
     return(dt)
 }
 
-
 rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
@@ -72,10 +71,6 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         design = pre_subsample,
         formula = ~ -1 + TIPOHOG,
         population = calibration_totals_vec
-        # calfun = "raking",
-        # bounds = limits,
-        # epsilon = 1e-5,
-        # maxit = 1000
     )
 
     # Update weights after calibration
