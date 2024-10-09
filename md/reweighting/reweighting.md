@@ -193,5 +193,14 @@ Si la recalibración iterativa fue efectiva, pueden aplicarse los mismos paramet
 -13.028   1.147   3.437  16.690  18.756 570.469 
 
 # RESULTS FOR FULLY SPECIFIED SVYDESIGN (RAKED = TRUE, CALIBRATED = TRUE) on RENTAB + RENTAD
-
+|--------------------------------------------------|
+|==================================================|
+     pop     mean     stat se.RENTAD    dif p_value.RENTAD
+   <num>    <num>    <num>     <num>  <num>          <num>
+1: 43953 44964.87 1011.872   848.496 -0.023          0.233
+2: 56453 57752.64 1299.643  1212.701 -0.023          0.284
+[1] 20790.8
+[1] 1278254
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+-35.511   1.158   3.460  16.420  18.326 570.469 
 ```

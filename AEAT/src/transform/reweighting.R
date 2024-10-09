@@ -34,7 +34,10 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         design = pre_subsample,
         formula = ~ -1 + TIPOHOG,
         population = calibration_totals_vec,
-        calfun = "raking"
+        calfun = "raking",
+        bounds = limits,
+        epsilon = 1e-5,
+        maxit = 1000
     )
 
     # Update weights after calibration
@@ -64,11 +67,10 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         print("trimming")
         pre_subsample <- trimWeights(pre_subsample, upper = 500, lower = 0.8)
     }
-    calibration_target <- c(RENTAB = RBpop * sum(weights(pre_subsample)))
+    calibration_target <- c(RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target, bounds = c(0.5, 2))
-    #     subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target, bounds = limits, bounds.const = TRUE)
-
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAB + RENTAD, calibration_target)
+#     subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target, bounds = limits, bounds.const = TRUE)
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
 

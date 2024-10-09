@@ -72,3 +72,5 @@ summary(weights(subsample)) %>% print()
 
 # Export the final reweighted subsample if needed
 if (export_object) fwrite(subsample$variables, paste0("AEAT/out/", city, ref_unit, sel_year, rake_mode, ".gz"))
+
+
