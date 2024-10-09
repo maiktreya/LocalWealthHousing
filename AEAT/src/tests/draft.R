@@ -52,6 +52,7 @@ dt <- dt[, .(
     MIEMBROS = uniqueN(IDENPER), # Number of unique family members
     NPROP_ALQ = uniqueN(REFCAT), # Number of unique rental properties
     IDENHOG = mean(IDENHOG), # household identifier
+    TIPOHOG = first(TIPOHOG), # household type
     SEXO = mean(SEXO), # sex (1 = Male, 2 = Female)
     AGE = (sel_year) - mean(ANONAC), # Calculate average age
     RENTAB = mean(RENTAB), # rental income
@@ -69,55 +70,24 @@ dt <- dt[, .(
 ), by = .(IDENPER)]
 
 
-##########################################
-
-    m_labels <- c("male_0-19", "male_20-39", "male_40-59", "male_60-79", "male_80-99+")
-    f_labels <- c("female_0-19", "female_20-39", "female_40-59", "female_60-79", "female_80-99+")
-    age_labels <- c("0-19", "20-39", "40-59", "60-79", "80-99+")
-    city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
-    total_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
-
-    # reshape age categories
-    m_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqmale", sel_year)))]
-    m_vector <- m_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
-    m_vector <- cbind(sex_age = m_labels, m_vector)[, group := NULL]
-    f_vector <- fread(paste0("AEAT/data/", city, "-age-freq.csv"))[, .(age_group, Freq = get(paste0("freqfemale", sel_year)))]
-    f_vector <- f_vector[, group := ceiling(.I / 4)][, .(Freq = sum(Freq)), by = group][, Freq := Freq * total_pop]
-    f_vector <- cbind(sex_age = f_labels, f_vector)[, group := NULL]
-    age_vector <- rbind(f_vector, m_vector)
-    age_vector$sex_age <- factor(age_vector$sex_age, levels = unique(age_vector$sex_age))
-    age_vector <- age_vector[order(age_vector$sex_age), ]
-
-    # Create a new age_group based on broader 20-year intervals
-    dt[, age_group := cut(
-        AGE,
-        breaks = c(0, 20, 40, 60, 80, Inf), # Defining 20-year groups
-        right = FALSE,
-        labels = age_labels,
-        include.lowest = TRUE
-    )]
-    dt <- dt[!is.na(age_group)]
-    dt <- dt[!is.na(FACTORCAL)]
-    dt[, gender := fifelse(SEXO == 1, "male", "female")]
-    dt[, sex_age := interaction(gender, age_group, sep = "_")]
-
-    # Prepare survey object
-    dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
-    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-    calibration_totals_vec <- setNames(age_vector$Freq, paste0("sex_age", as.character(age_vector$sex_age)))
-    limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-
-    # Apply calibration with the new named vector
-    subsample <- calibrate(
-        design = pre_subsample,
-        formula = ~ -1 + sex_age,
-        population = calibration_totals_vec,
-        calfun = "raking",
-        trim = c(0.1, 2),
-        epsilon = 1e-5,
-        maxit = 1000
-    )
-
-        # Update weights after calibration
-    dt <- subsample$variables
-    dt[, FACTORCAL := weights(subsample)]
+# STEP 2: Filter and tidy data for the specified reference unit
+dt <- dt[eval(parse(text = represet)), .(
+    MIEMBROS = mean(MIEMBROS),
+    NPROP_ALQ = mean(NPROP_ALQ),
+    IDENHOG = mean(IDENHOG),
+    TIPOHOG = first(TIPOHOG), # household type
+    SEXO = mean(SEXO),
+    AGE = mean(AGE),
+    RENTAB = sum(RENTAB),
+    RENTAD = sum(RENTAD),
+    TRAMO = mean(TRAMO),
+    RENTA_ALQ = sum(RENTA_ALQ),
+    RENTA_ALQ2 = sum(RENTA_ALQ2),
+    PAR150 = sum(PAR150),
+    PATINMO = sum(PATINMO),
+    FACTORCAL = mean(FACTORCAL),
+    CCAA = mean(CCAA),
+    PROV = mean(PROV),
+    MUNI = mean(MUNI),
+    MUESTRA = mean(MUESTRA)
+), by = .(reference = get(ref_unit))]
