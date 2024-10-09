@@ -155,7 +155,7 @@ Si la recalibración iterativa fue efectiva, pueden aplicarse los mismos paramet
   0.0028   1.1521   3.4684  16.7981  18.9233 569.948
 
 
-# RESULTS FOR FULLY SPECIFIED SVYDESIGN (RAKED = TRUE, CALIBRATED = TRUE) on RENTAD
+# RESULTS FOR FULLY SPECIFIED SVYDESIGN (RAKED = TRUE, CALIBRATED = TRUE) on RENTAD and bounded calibration
 |--------------------------------------------------|
 |==================================================|
      pop     mean     stat se.RENTAD    dif p_value.RENTAD
@@ -167,6 +167,9 @@ Si la recalibración iterativa fue efectiva, pueden aplicarse los mismos paramet
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
   0.0028   1.1336   3.3982  16.5126  18.3637 570.4690 
 
-# RESULTS FOR FULLY SPECIFIED SVYDESIGN (RAKED = TRUE+sex, CALIBRATED = TRUE) on RENTAD 
+# RESULTS FOR FULLY SPECIFIED SVYDESIGN (RAKED = TRUE, CALIBRATED = TRUE) on RENTAD 
+
+
+# RESULTS FOR FULLY SPECIFIED SVYDESIGN (RAKED = TRUE, CALIBRATED = TRUE) on RENTAB
 
 ```

@@ -10,12 +10,8 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # import external population values
     city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
-    # reshape sex categories
-    sex_vector <- fread(paste0("AEAT/data/", city, "-sex-freq.csv"))[, .(gender, Freq = get(paste0("freq", sel_year)))]
 
-    tipohog_vector <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
-    sex_vector <- setNames(sex_vector$Freq, paste0("gender", sex_vector$gender))
-    calibration_totals_vec <- c(tipohog_vector, sex_vector)
+    calibration_totals_vec <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
 
     # coerce needed variables
     dt <- dt[!is.na(FACTORCAL)]
@@ -36,7 +32,7 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + TIPOHOG + gender,
+        formula = ~ -1 + TIPOHOG,
         population = calibration_totals_vec,
         calfun = "raking"
     )
@@ -70,7 +66,8 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     }
     calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target, bounds = limits, bounds.const = TRUE)
+    subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target)
+#     subsample <- calibrate(pre_subsample, ~ -1 + RENTAB, calibration_target, bounds = limits, bounds.const = TRUE)
 
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
