@@ -28,7 +28,7 @@ dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
 setnafill(dt, type = "const", fill = 0, cols = sel_cols)
 
 # Coerce TRAMO to numeric, treating "N" as 8
-dt[TRAMO == "N", TRAMO := 8][, TRAMO := as.numeric(TRAMO)]
+dt[, TRAMO := as.numeric(TRAMO)][TRAMO == "N", TRAMO := 0][,TRAMO := as.factor(TRAMO)]
 
 # Assign sample identifier (MUESTRA) based on geographical identifiers
 dt[, MUESTRA := fcase(
@@ -97,5 +97,5 @@ subsample <- svydesign(
     nest = TRUE
 )
 
-sample_tramo <- svytotal(~TRAMO, subsample) %>% data.table()
+sample_tramo <- svytotal(~TRAMO, subsample) %>% prop.table() %>% data.table()
 sample_tramo %>% print()
