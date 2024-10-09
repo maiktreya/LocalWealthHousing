@@ -1,6 +1,5 @@
 # Functions needed to reweight subsamples from AEAT from levels below CCAA
 
-
 # STEP 1: Iterative reweighting given known frequencies of sex and age groups
 
 rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
@@ -11,21 +10,22 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # import external population values
     city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+    calibration_totals_vec <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
 
     # coerce needed variables
     dt <- dt[!is.na(FACTORCAL)]
     dt[, gender := fifelse(SEXO == 1, "male", "female")]
     dt[, TIPOHOG := as.factor(TIPOHOG)]
-    calibration_totals_vec <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
 
     # Prepare survey object
-    dt_sv <- svydesign(
-        ids = ~IDENHOG,
-        strata = ~ CCAA + TIPOHOG + TRAMO,
-        data = dt,
-        weights = dt$FACTORCAL,
-        nest = TRUE
-    )
+    # dt_sv <- svydesign(
+    #     ids = ~IDENHOG,
+    #     strata = ~ CCAA + TIPOHOG + TRAMO,
+    #     data = dt,
+    #     weights = dt$FACTORCAL,
+    #     nest = TRUE
+    # )
+    dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 

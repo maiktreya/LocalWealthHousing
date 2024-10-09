@@ -66,6 +66,7 @@ get_wave <- function(
         MIEMBROS = uniqueN(IDENPER), # Number of unique family members
         NPROP_ALQ = uniqueN(REFCAT), # Number of unique rental properties
         IDENHOG = mean(IDENHOG), # household identifier
+        TIPOHOG = first(TIPOHOG),
         SEXO = mean(SEXO), # sex (1 = Male, 2 = Female)
         AGE = (sel_year) - mean(ANONAC), # Calculate average age
         RENTAB = mean(RENTAB), # rental income
@@ -87,6 +88,7 @@ get_wave <- function(
         MIEMBROS = mean(MIEMBROS),
         NPROP_ALQ = mean(NPROP_ALQ),
         IDENHOG = mean(IDENHOG),
+        TIPOHOG = first(TIPOHOG),
         SEXO = mean(SEXO),
         AGE = mean(AGE),
         RENTAB = sum(RENTAB),
