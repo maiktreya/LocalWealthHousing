@@ -10,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 export_object <- FALSE
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENHOG"
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -28,7 +28,7 @@ dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
 setnafill(dt, type = "const", fill = 0, cols = sel_cols)
 
 # Coerce TRAMO to numeric, treating "N" as 8
-dt[, TRAMO := as.numeric(TRAMO)][TRAMO == "N", TRAMO := 0][,TRAMO := as.factor(TRAMO)]
+dt[TRAMO == "N", TRAMO := -1][, TRAMO := as.numeric(TRAMO) + 2]
 
 # Assign sample identifier (MUESTRA) based on geographical identifiers
 dt[, MUESTRA := fcase(
@@ -97,5 +97,8 @@ subsample <- svydesign(
     nest = TRUE
 )
 
-sample_tramo <- svytotal(~TRAMO, subsample) %>% prop.table() %>% data.table()
-sample_tramo %>% print()
+sample_tramo <- svytotal(~ factor(TRAMO), subsample, ) %>%
+    prop.table() %>%
+    data.table()
+sample_tramo_tot <- svytotal(~ factor(TRAMO), subsample, ) %>% data.table()
+fwrite(cbind(Freq = sample_tramo, Total = sample_tramo_tot), paste0(city_index, sel_year, "_tramo.csv"), row.names = TRUE)
