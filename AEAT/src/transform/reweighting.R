@@ -12,9 +12,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
     city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
-    tramo_pop <- fread(paste0("AEAT/data/base_hogar/", city, sel_year, "_tramo.csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
     tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
-    tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
 
     # coerce needed variables
     dt <- dt[!is.na(FACTORCAL)]
@@ -30,7 +28,11 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     )
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-    calibration_totals_vec <- c(tipohog_pop, RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
+    calibration_totals_vec <- c(
+        tipohog_pop,
+        RENTAB = RBpop * sum(weights(pre_subsample)),
+        RENTAD = RNpop * sum(weights(pre_subsample))
+    )
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
@@ -42,7 +44,10 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         bounds.const = TRUE
     )
 
+    # Extract dataframe of variables and overwrite weights
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
+
+    # Export the survey dataframe including recalibrated weights
     return(dt)
 }
