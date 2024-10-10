@@ -66,9 +66,9 @@ gross_vals <- data.table(
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
 
 # Print sample sizes and weight summary
-print("Sample size original:")
+print("Implied Pop. size:")
 sum(pre_subsample$variables[, "FACTORCAL"]) %>% print()
-print("Sample size Reweighted:")
+print("Implied Pop. size Reweighted:")
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
 print("Summary of calibrated weights")
 summary(weights(subsample)) %>% print()
