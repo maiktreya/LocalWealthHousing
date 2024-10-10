@@ -1,7 +1,7 @@
 
 # Resultados de Calibraciones Alternativas
 
-Para realizar una recalibración personalizada de los pesos y evaluar su robustez para inferencias representativas a nivel geográfico provincial, utilizamos el script `representativity.R`, que permite un análisis unificado. Puede ejecutarse con `$HOME/AEAT/src/tests/representativity.R` asumiendo que `getwd() == $HOME`:
+Para realizar una recalibración personalizada de los pesos y evaluar su robustez para inferencias representativas a nivel geográfico provincial o municipal, utilizamos el script `representativity.R`, que permite un análisis unificado. Puede ejecutarse con `$HOME/AEAT/src/tests/representativity.R` asumiendo que `getwd() == $HOME`:
 
 ```r
 source("$HOME/AEAT/src/tests/representativity.R", encoding = "UTF-8")
@@ -31,8 +31,8 @@ dt <- get_wave(
 dt_sv <- svydesign(
     ids = ~IDENHOG, # Identificador del hogar para la PSU base
     strata = ~ CCAA + TIPOHOG + TRAMO, # Región, tipo de hogar y cuantil de ingresos
-    data = dt,
-    weights = dt$FACTORCAL,
+    data = dt, # matriz previamente preparada con las observaciones individuales de las variables de interes
+    weights = dt$FACTORCAL, # Pesos muestrales originales (rep. a nivel CCAA)
     nest = TRUE # Los hogares están anidados dentro de IDENPER y múltiples REFCAT
 )
 ```

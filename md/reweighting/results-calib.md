@@ -1,6 +1,6 @@
 # Results from Alternative Calibrations
 
-To perform custom recalibration of weights and evaluate their robustness for representative inference at the provincial geographic level, we use the script `representativity.R`, which enables a unified analysis. It can be executed with `$HOME/AEAT/src/tests/representativity.R` assuming `getwd() == $HOME`:
+To perform custom recalibration of weights and evaluate their robustness for representative inference at the province/city geographic level, we use the script `representativity.R`, which enables a unified analysis. It can be executed with `$HOME/AEAT/src/tests/representativity.R` assuming `getwd() == $HOME`:
 
 ```r
 source("$HOME/AEAT/src/tests/representativity.R", encoding = "UTF-8")
@@ -30,8 +30,8 @@ dt <- get_wave(
 dt_sv <- svydesign(
     ids = ~IDENHOG, # Household identifier for base PSU
     strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
-    data = dt,
-    weights = dt$FACTORCAL,
+    data = dt, # already prepared matrix with individual variables of interest
+    weights = dt$FACTORCAL, # original sampling weights (rep. for CCAA level)
     nest = TRUE # Households are nested within IDENPER and multiple REFCAT
 )
 ```
