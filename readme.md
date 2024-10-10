@@ -16,7 +16,7 @@ Para ver los resultados de un caso práctico de recalibración efectivo echa un 
 
 ---
 
-## 🎯 Objetivo: riqueza y propiedad en blos municipios de España
+## 🎯 Objetivo: riqueza y propiedad en los municipios de España
 
 En pocas palabras, este proyecto busca facilitar una metodología para realizar inferencia estadística robusta a nivel municipal mostrando el estudio de caso de segovia como ejemplo práctico.
 
