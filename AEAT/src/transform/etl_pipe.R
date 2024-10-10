@@ -63,7 +63,8 @@ get_wave <- function(
     # STEP 1: Summarize information about real estate properties
     dt <- dt[, .(
         MIEMBROS = uniqueN(IDENPER), # Number of unique family members
-        NPROP_ALQ = uniqueN(REFCAT), # Number of unique rental properties
+        NPROP = uniqueN(REFCAT), # Number of unique rental properties
+        NPROP_ALQ = uniqueN(PAR150i),
         IDENHOG = mean(IDENHOG), # household identifier
         TIPOHOG = first(TIPOHOG),
         SEXO = mean(SEXO), # sex (1 = Male, 2 = Female)
@@ -85,6 +86,7 @@ get_wave <- function(
     # STEP 2: Filter and tidy data for the specified reference unit
     dt <- dt[eval(parse(text = represet)), .(
         MIEMBROS = mean(MIEMBROS),
+        NPROP = mean(NPROP),
         NPROP_ALQ = mean(NPROP_ALQ),
         IDENHOG = mean(IDENHOG),
         TIPOHOG = first(TIPOHOG),
