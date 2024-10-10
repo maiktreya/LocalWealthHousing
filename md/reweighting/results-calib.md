@@ -24,7 +24,6 @@ dt <- get_wave(
     ref_unit = ref_unit, # Reference PSU (either household or individual)
     represet = represet, # Reference universe/population (whole population or tax payers)
     calibrated = TRUE, # Requires auxiliary population data on mean RENTAD for the chosen city
-    raked = rake_mode # Requires auxiliary population age and sex frequencies for the chosen city
 )
 
 # Integrate AEAT structure into svydesign
@@ -75,8 +74,7 @@ results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
     round(3) %>%
     print()
 
-# Print sample sizes
-sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
+# Print population size
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
 ```
 

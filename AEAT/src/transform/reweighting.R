@@ -8,6 +8,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     library(survey, quietly = TRUE)
 
     # import external population values
+    pop_stats <- fread("AEAT/data/pop-stats.csv")
     RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
     city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
@@ -26,8 +27,14 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         weights = dt$FACTORCAL,
         nest = TRUE
     )
+
+    # Subset for the geo-unit of interest
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+
+    # Set limits to get the same range for weights after calibration
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+
+    # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
         tipohog_pop,
         RENTAB = RBpop * sum(weights(pre_subsample)),
@@ -44,10 +51,12 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         bounds.const = TRUE
     )
 
-    # Extract dataframe of variables and overwrite weights
+    # Extract dataframe of variables and
     dt <- subsample$variables
+
+    # Overwrite the column storing original weights with the ones obtained after calibraition
     dt[, FACTORCAL := weights(subsample)]
 
-    # Export the survey dataframe including recalibrated weights
+    # Return the survey dataframe including updated weights
     return(dt)
 }
