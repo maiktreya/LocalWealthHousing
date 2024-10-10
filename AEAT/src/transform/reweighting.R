@@ -2,7 +2,7 @@
 
 # STEP 1: Iterative reweighting given known frequencies of sex and age groups
 
-calibrate_data <- function(dt = dt, sel_year = sel_year, city = city) {
+calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
