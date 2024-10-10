@@ -1,34 +1,33 @@
-# Results from alternative calibrations
+# Results from Alternative Calibrations
 
-Para realizar recalibración customizada de pesos y evaluar su robustez para realizar inferencia representativa sobre una unidad geográfica de nivel provincial disponemos del script `representativity.R` que permite un análisis unificado. Puede ejecutarse con `$HOME/AEAT/src/tests/representativity.R` asumiendo que `getwd() == $HOME`:
+To perform custom recalibration of weights and evaluate their robustness for representative inference at the provincial geographic level, we use the script `representativity.R`, which enables a unified analysis. It can be executed with `$HOME/AEAT/src/tests/representativity.R` assuming `getwd() == $HOME`:
 
 ```r
-source"$HOME/AEAT/src/tests/representativity.R", encoding = "UTF-8")
+source("$HOME/AEAT/src/tests/representativity.R", encoding = "UTF-8")
 ```
 
-## Functions needed to reweight subsamples from AEAT from levels below CCAA
+## Functions Needed to Reweight Subsamples from AEAT for Levels Below CCAA
 
-La función `get_wave`, que es utilizada por otros scripts para establecer tanto la población objetivo como el ejercicio de análisis.
+The `get_wave` function is used by other scripts to establish both the target population and the analysis context.
 
-- El parametro `city` representa la ciudad objetivo sobre la que se quieren recalcular los pesos muestrales con representatividad.
-- El parametro `sel_year` refleja el año a analizar.
-- El parametro `represet` permite elegir el universo de referencia, con opciones como la población total o los declarantes como unidad de referencia.
-- El parametro `ref_unit` fija el nivel base de identificación (a elegir entre personas y hogares).
-- El parametro `calibrate` (boolean) permite calibrar la encuesta reescalando sobre variables categoricas (TIPOHOG) y continuas  (RENTAB y RENTAD) cuyos totales poblacionales son conocidos como referencia.
-
+- The parameter `city` specifies the target city for recalculating sample weights for representativeness.
+- The parameter `sel_year` indicates the year to be analyzed.
+- The parameter `represet` lets you choose the reference universe, with options like total population or tax filers as the reference unit.
+- The parameter `ref_unit` sets the base identification level (choose between individuals and households).
+- The parameter `calibrate` (boolean) allows for survey calibration by scaling against categorical variables (TIPOHOG) and continuous variables (RENTAB and RENTAD) for which population totals are known.
 
 ```r
-# get a sample weighted for a given city
+# Get a sample weighted for a given city
 dt <- get_wave(
-    city = city, # subregional unit
-    sel_year = sel_year, # wave
-    ref_unit = ref_unit, # reference PSU (either household or individual)
-    represet = represet, # reference universe/population (whole pop. or tax payers)
-    calibrated = TRUE, # Requieres auxiliary pop. data on mean RENTAD for the choosen city
-    raked = rake_mode # Requieres auxiliary pop. age and sex frequencies for the choosen city
+    city = city, # Subregional unit
+    sel_year = sel_year, # Wave
+    ref_unit = ref_unit, # Reference PSU (either household or individual)
+    represet = represet, # Reference universe/population (whole population or tax payers)
+    calibrated = TRUE, # Requires auxiliary population data on mean RENTAD for the chosen city
+    raked = rake_mode # Requires auxiliary population age and sex frequencies for the chosen city
 )
 
-# define survey for the subsample of interest
+# Define survey for the subsample of interest
 subsample <- svydesign(
     ids = ~1,
     data = subset(dt, MUESTRA == city_index),
@@ -36,10 +35,10 @@ subsample <- svydesign(
 )
 ```
 
-Once our reweighted survey is available we run the following operations in order to test the robustness of our inference on key variables (income):
+Once our reweighted survey is available, we perform the following operations to test the robustness of our inference on key variables (income):
 
 ```r
-# calculate sample means
+# Calculate sample means
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
@@ -47,7 +46,7 @@ RBmean <- svymean(~RENTAB, subsample)
 test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
 test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
 
-# Calculate p-values using two-tailed test over t-statistics
+# Calculate p-values using a two-tailed test over t-statistics
 p_val1 <- 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean))))
 p_val2 <- 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean))))
 
@@ -70,35 +69,34 @@ gross_vals <- data.table(
 )
 
 # Combine and print the results
-results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
-    round(3) %>%
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% 
+    round(3) %>% 
     print()
 
 # Print sample sizes
 sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
-
 ```
 
-## Gross uncalibrated statistics
+## Gross Uncalibrated Statistics
 
-To achieve representativeness at the city scale we need to adjust sample weights. To do this properly, given AEAT panel de renta structure:
+To achieve representativeness at the city scale, we need to adjust sample weights. Proper adjustment, given the AEAT panel structure:
 
 ```r
-# AEAT structure integrated into svydesign
-    dt_sv <- svydesign(
-        ids = ~IDENHOG, # household identifier for base PSU
-        strata = ~ CCAA + TIPOHOG + TRAMO, # region, type of household and income quantile
-        data = dt,
-        weights = dt$FACTORCAL,
-        nest = TRUE # households are nested inside IDENPER and multiple REFCAT
-    )
+# Integrate AEAT structure into svydesign
+dt_sv <- svydesign(
+    ids = ~IDENHOG, # Household identifier for base PSU
+    strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
+    data = dt,
+    weights = dt$FACTORCAL,
+    nest = TRUE # Households are nested within IDENPER and multiple REFCAT
+)
 ```
 
-We have to adjust the CCAA level adjusted "FACTORCAL". Otherwise, estimated statistics for key variables would be biased as shown with this example performed on Madrid city: (1: RENTAD, 2: RENTAB)
+CCAA-level adjusted "FACTORCAL" is necessary to avoid bias in key variable estimates, as shown in this example for Madrid city:
 
 ```r
-## MADRID 2021: no raking or calibration
+## MADRID 2021: No raking or calibration
 |--------------------------------------------------|
 |==================================================|
      pop     mean     stat      se.    dif  p-value
@@ -106,31 +104,18 @@ We have to adjust the CCAA level adjusted "FACTORCAL". Otherwise, estimated stat
 1: 43953 46373.09 2420.088   393.486 -0.055  0.000
 2: 56453 59046.65 2593.646   546.964 -0.046  0.000
 [1] 1301048
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
-  0.0018   1.1474   3.8811  16.7129  24.5950 600.7309
-
-
-  ## MADRID 2016: no raking or calibration
-|--------------------------------------------------|
-|==================================================|
-     pop     mean     stat      se.    dif  p-value
-   <num>    <num>   <num>     <num>  <num>  <num>
-1: 39613 40537.71 924.713   286.155 -0.023  0.001
-2: 49831 50683.07 852.066   381.496 -0.017  0.026
-[1] 1254462
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  1.111   2.847   6.400  25.483  31.442 575.520
+   Min. 1st Qu.   Median     Mean  3rd Qu.     Max.
+ 0.0018   1.1474   3.8811  16.7129  24.5950 600.7309
 ```
 
+## Iteratively Calibrated Statistics on Proportions and Totals
 
-## Iteratively calibrated statistics on proportions and total values
+We must apply a 2-step procedure to improve weights over the initial object (`dt_sv`):
 
-For that reason We must apply a 2step procedure to improve weights over that initial object (dt_sv):
+1. **Step 1**: Reweight through iterative proportional fitting (IPS) on strata data.
+2. **Step 2**: Calibrate on known total income (RENTAD).
 
-* STEP1: reweighting through iterative proportional fitting (IPS) on strata data
-* STEP2: calibrate on known total income (RENTAD)
-
-Using R survey package it would imply using calibrate after defining our original surveydesign objecto:
+Using R's survey package, the process involves using `calibrate` after defining our initial `svydesign` object:
 
 ```r
 # Prepare survey object
@@ -145,7 +130,7 @@ pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 calibration_totals_vec <- c(tipohog_pop, RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
 
-# Apply calibration with the new named vector
+# Apply calibration with the named vector
 subsample <- calibrate(
     design = pre_subsample,
     formula = ~ -1 + TIPOHOG + RENTAB + RENTAD,
@@ -158,40 +143,22 @@ subsample <- calibrate(
 dt <- subsample$variables
 dt[, FACTORCAL := weights(subsample)]
 ```
-Afterwards, we get the following updated results:
+
+The resulting updated statistics are as follows:
 
 ```r
-## MADRID 2021: calibrated
+## MADRID 2021: Calibrated
 |--------------------------------------------------|
 |==================================================|
      pop     mean     stat      se.    dif  p-value
    <num>    <num>    <num>     <num>  <num>  <num>
-     pop     mean     stat      se  dif% p_value
-   <num>    <num>    <num>   <num> <num>   <num>
 1: 43953 43730.03 -222.972 654.210 0.005   0.733
 2: 56453 56166.62 -286.384 359.646 0.005   0.426
-[1] "Implied Pop. size original:"
-[1] 1307682
-[1] "Implied Pop. size Reweighted:"
-[1] 1307682
-[1] "Summary of calibrated weights"
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
-  0.0018   1.1541   3.5063  16.7981  18.6821 581.8978
-
-## MADRID 2016: calibrated
-|--------------------------------------------------|
-|==================================================|
-     pop     mean      stat       se  dif%  p_value
-   <num>    <num>     <num>    <num> <num>    <num>
-1: 39613 39611.40 -1.599000 365.9960 0e+00 0.997000
-2: 49831 49828.99 -2.012039 547.7889 4e-05 0.997069
-[1] "Implied Pop. size original:"
-[1] 1254513
-[1] "Sample size Reweighted:"
-[1] 1254513
-[1] "Implied Pop. size weights"
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  1.111   2.253   6.920  25.484  32.906 575.520
+[1] "Implied Population Size Original:" 1307682
+[1] "Implied Population Size Reweighted:" 1307682
+[1] "Summary of Calibrated Weights"
+   Min. 1st Qu.   Median     Mean  3rd Qu.     Max.
+ 0.0018   1.1541   3.5063  16.7981  18.6821 581.8978
 ```
 
-As a result mean differences (represented by "stat") greatly diminished and, for a standard 95% confidence level, we could not reject the null hypothesis of the difference between the true population mean and our prediction being 0 (as reflected by "p-value" greater than 0.05 in all cases, both for RENTAD and RENTAB).
+As a result, mean differences (represented by "stat") are greatly reduced. For a standard 95% confidence level, we cannot reject the null hypothesis that the difference between the true population mean and our estimate is zero (as shown by p-values greater than 0.05 for both RENTAD and RENTAB).

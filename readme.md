@@ -12,6 +12,7 @@ La muestra se caracteriza por su gran tamaño de aproximadamente el 5% del censo
 
 Este gran tamaño permite que, aunque el diseño original considere representatividad a escala de las CCAA, poder realizar inferencia para unidades de inferior tamaño hasta un limite sobre los 5000 habitantes por CCAA para obtener resultados robustos.
 
+Para ver los resultados de un caso práctico de recalibración efectivo echa un vistazo a este ejemplo [Estimando nuevos pesos muestrales iterativamente para Madrid capital](md/reweighting/results-calib.md)
 ---
 
 ## 🎯 Objetivo: riqueza y propiedad en blos municipios de España
