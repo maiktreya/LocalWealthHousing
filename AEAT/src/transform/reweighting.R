@@ -2,7 +2,7 @@
 
 # STEP 1: Iterative reweighting given known frequencies of sex and age groups
 
-rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
+rake_data_old <- function(dt = dt, sel_year = sel_year, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -22,11 +22,11 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
 
     # Prepare survey object
     dt_sv <- svydesign(
-        ids = ~IDENHOG, # household identifier for base PSU
-        strata = ~ CCAA + TIPOHOG + TRAMO, # region, type of household and income quantile
+        ids = ~IDENHOG,
+        strata = ~ CCAA + TIPOHOG + TRAMO,
         data = dt,
         weights = dt$FACTORCAL,
-        nest = TRUE # households are nested inside IDENPER and multiple REFCAT
+        nest = TRUE
     )
     pre_subsample <- subset(dt_sv, MUESTRA == city_index)
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
@@ -37,9 +37,52 @@ rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
         formula = ~ -1 + TIPOHOG + TRAMO,
         population = calibration_totals_vec
     )
+    dt <- subsample$variables
+    dt[, FACTORCAL := weights(subsample)]
     return(dt)
 }
 
+rake_data <- function(dt = dt, sel_year = sel_year, city = city) {
+    # function dependencies
+    library(data.table, quietly = TRUE)
+    library(survey, quietly = TRUE)
+
+    # import external population values
+    city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
+    tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+    calibration_totals_vec <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+    # coerce needed variables
+    dt <- dt[!is.na(FACTORCAL)]
+    dt[, TIPOHOG := as.factor(TIPOHOG)]
+
+    # Prepare survey object
+    dt_sv <- svydesign(
+        ids = ~IDENHOG, # household identifier for base PSU
+        strata = ~ CCAA + TIPOHOG + TRAMO, # region, type of household and income quantile
+        data = dt,
+        weights = dt$FACTORCAL,
+        nest = TRUE # households are nested inside IDENPER and multiple REFCAT
+    )
+    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+    limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+    calibration_totals_vec <- c(calibration_totals_vec, RENTAD = RNpop * sum(weights(pre_subsample)))
+
+    # Apply calibration with the new named vector
+    subsample <- calibrate(
+        design = pre_subsample,
+        formula = ~ -1 + TIPOHOG + RENTAD,
+        population = calibration_totals_vec,
+        calfun = "raking",
+        bounds = limits,
+        bounds.const = TRUE
+    )
+
+    # Update weights after calibration
+    dt <- subsample$variables
+    dt[, FACTORCAL := weights(subsample)]
+
+    return(dt)
+}
 # STEP 2: Calibrate for mean income or other known population parameter
 
 calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
@@ -61,6 +104,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     )
     calibration_target <- c(RENTAD = RNpop * sum(weights(pre_subsample)))
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+    # pre_subsample <- trimWeights(pre_subsample, limits = limits)
     subsample <- calibrate(pre_subsample, ~ -1 + RENTAD, calibration_target, calfun = "raking")
     dt <- subsample$variables
     dt[, FACTORCAL := weights(subsample)]
