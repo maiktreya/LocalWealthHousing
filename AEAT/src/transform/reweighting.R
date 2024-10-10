@@ -47,4 +47,3 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, city = city) {
     dt[, FACTORCAL := weights(subsample)]
     return(dt)
 }
-
