@@ -4,7 +4,7 @@
 
 Para realizar recalibración customizada de pesos y evaluar su robustez para realizar inferencia representativa sobre una unidad geográfica de nivel provincial disponemos del script `representativity.R` que permite un análisis unificado. Puede ejecutarse con `$HOME/AEAT/src/tests/representativity.R` asumiendo que `getwd() == $HOME`:
 
-```{r}
+```r
 source"$HOME/AEAT/src/tests/representativity.R", encoding = "UTF-8")
 ```
 
@@ -16,11 +16,10 @@ La función `get_wave`, que es utilizada por otros scripts para establecer tanto
 - El parametro `sel_year` refleja el año a analizar.
 - El parametro `represet` permite elegir el universo de referencia, con opciones como la población total o los declarantes como unidad de referencia.
 - El parametro `ref_unit` fija el nivel base de identificación (a elegir entre personas y hogares).
-- El parametro `calibrate` (boolean) permite calibrar la encuesta reescalando para el ingreso bruto (RENTAB) como referencia.
+- El parametro `calibrate` (boolean) permite calibrar la encuesta reescalando sobre variables categoricas (TIPOHOG) y continuas  (RENTAB y RENTAD) cuyos totales poblacionales son conocidos como referencia.
 
-- El parametro `rake` (logical) permite realizar "Iterative Proportional Fitting" (IPS) to adjust for known population proportions (age group and gender)
 
-```{r}
+```r
 # get a sample weighted for a given city
 dt <- get_wave(
     city = city, # subregional unit
@@ -41,7 +40,7 @@ subsample <- svydesign(
 
 Once our reweighted survey is available we run the following operations in order to test the robustness of our inference on key variables (income):
 
-```{r}
+```r
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
@@ -72,11 +71,6 @@ gross_vals <- data.table(
     p_value = p_val2
 )
 
-```
-
-Finalmente podemos mostrar los resultados para su análisis:
-
-```{r}
 # Combine and print the results
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
     round(3) %>%
@@ -85,6 +79,12 @@ results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
 # Print sample sizes
 sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
+
+```
+
+Finalmente podemos mostrar los resultados para su análisis:
+
+```{r}
 
 
 #### Results for 2016 calibrated on RENTAD not raked

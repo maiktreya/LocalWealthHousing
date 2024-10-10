@@ -15,6 +15,7 @@
 #'   for only declarants: 'TIPODEC %in% c("T1", "T21") & !is.na(FACTORCAL)'.
 #'   for whole population: '!is.na(FACTORCAL)'.
 #' - sel_cols: Chosen columns to coerce to numeric types.
+#' - calibrated: Defines an intermediate calibration step
 #'
 #' Outputs a data.table with aggregated and processed information.
 
@@ -31,9 +32,7 @@ get_wave <- function(
     #' @param sel_cols Chosen columns to coerce to numeric types.
     sel_cols = c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i"),
     #' @param calibrated Set an intermediate step to calibrate for a subsample. Boolean. Default is false.
-    calibrated = FALSE,
-    #' @param raked Set an intermediate step to rake for a subsample. Boolean. Default is false.
-    raked = FALSE) {
+    calibrated = FALSE) {
     # Load the data.table library for efficient data manipulation.
     library(data.table, quietly = TRUE)
     source("AEAT/src/transform/reweighting.R")
@@ -112,19 +111,14 @@ get_wave <- function(
         setnames(dt, "reference", as.character(ref_unit)) # Rename reference column
     }
 
-    # Define new categorical variables based on sample identifiers
-
     # Define ownership status variables
     dt[, TENENCIA := fifelse(PAR150 > 0, "CASERO", fifelse(PATINMO > 0, "PROPIETARIO", "INQUILINA"))]
     dt[, CASERO := factor(fifelse(PAR150 > 0, 1, 0))] # 1 if "CASERO", else 0
     dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))] # 1 if "PROPIETARIO", else 0
     dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))] # 1 if "INQUILINO", else 0
 
-    # Calculate remaining rental income
+    # Calculate remaining income without rental rents
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
-
-    # Apply raking if requested (Iterative Proportional fitting / GREG)
-    if (raked) dt <- rake_data(dt, sel_year, city)
 
     # finally calibrate if needed
     if (calibrated) dt <- calibrate_data(dt, sel_year, ref_unit, city)

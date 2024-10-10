@@ -1,5 +1,85 @@
 # Results from alternative calibrations
 
+Para realizar recalibración customizada de pesos y evaluar su robustez para realizar inferencia representativa sobre una unidad geográfica de nivel provincial disponemos del script `representativity.R` que permite un análisis unificado. Puede ejecutarse con `$HOME/AEAT/src/tests/representativity.R` asumiendo que `getwd() == $HOME`:
+
+```r
+source"$HOME/AEAT/src/tests/representativity.R", encoding = "UTF-8")
+```
+
+## Functions needed to reweight subsamples from AEAT from levels below CCAA
+
+La función `get_wave`, que es utilizada por otros scripts para establecer tanto la población objetivo como el ejercicio de análisis.
+
+- El parametro `city` representa la ciudad objetivo sobre la que se quieren recalcular los pesos muestrales con representatividad.
+- El parametro `sel_year` refleja el año a analizar.
+- El parametro `represet` permite elegir el universo de referencia, con opciones como la población total o los declarantes como unidad de referencia.
+- El parametro `ref_unit` fija el nivel base de identificación (a elegir entre personas y hogares).
+- El parametro `calibrate` (boolean) permite calibrar la encuesta reescalando sobre variables categoricas (TIPOHOG) y continuas  (RENTAB y RENTAD) cuyos totales poblacionales son conocidos como referencia.
+
+
+```r
+# get a sample weighted for a given city
+dt <- get_wave(
+    city = city, # subregional unit
+    sel_year = sel_year, # wave
+    ref_unit = ref_unit, # reference PSU (either household or individual)
+    represet = represet, # reference universe/population (whole pop. or tax payers)
+    calibrated = TRUE, # Requieres auxiliary pop. data on mean RENTAD for the choosen city
+    raked = rake_mode # Requieres auxiliary pop. age and sex frequencies for the choosen city
+)
+
+# define survey for the subsample of interest
+subsample <- svydesign(
+    ids = ~1,
+    data = subset(dt, MUESTRA == city_index),
+    weights = dt$FACTORCAL
+)
+```
+
+Once our reweighted survey is available we run the following operations in order to test the robustness of our inference on key variables (income):
+
+```r
+# calculate sample means
+RNmean <- svymean(~RENTAD, subsample)
+RBmean <- svymean(~RENTAB, subsample)
+
+# Test if the survey means are equal to the population means
+test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
+test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
+
+# Calculate p-values using two-tailed test over t-statistics
+p_val1 <- 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean))))
+p_val2 <- 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean))))
+
+# Prepare the results table with p-values
+net_vals <- data.table(
+    pop = RNpop,
+    mean = coef(RNmean),
+    stat = test_rep1,
+    se = SE(RNmean),
+    dif = (RNpop - coef(RNmean)) / RNpop,
+    p_value = p_val1
+)
+gross_vals <- data.table(
+    pop = RBpop,
+    mean = coef(RBmean),
+    stat = test_rep2,
+    se = SE(RBmean),
+    dif = (RBpop - coef(RBmean)) / RBpop,
+    p_value = p_val2
+)
+
+# Combine and print the results
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
+    round(3) %>%
+    print()
+
+# Print sample sizes
+sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
+sum(subsample$variables[, "FACTORCAL"]) %>% print()
+
+```
+
 ## Gross uncalibrated statistics
 
 To achieve representativeness at the city scale we need to adjust sample weights. To do this properly, given AEAT panel de renta structure:
@@ -90,9 +170,9 @@ Afterwards, we get the following updated results:
    <num>    <num>    <num>   <num> <num>   <num>
 1: 43953 43730.03 -222.972 654.210 0.005   0.733
 2: 56453 56166.62 -286.384 359.646 0.005   0.426
-[1] "Sample size original:"
+[1] "Implied Pop. size original:"
 [1] 1307682
-[1] "Sample size Reweighted:"
+[1] "Implied Pop. size Reweighted:"
 [1] 1307682
 [1] "Summary of calibrated weights"
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
@@ -105,11 +185,11 @@ Afterwards, we get the following updated results:
    <num>    <num>     <num>    <num> <num>    <num>
 1: 39613 39611.40 -1.599000 365.9960 0e+00 0.997000
 2: 49831 49828.99 -2.012039 547.7889 4e-05 0.997069
-[1] "Sample size original:"
+[1] "Implied Pop. size original:"
 [1] 1254513
 [1] "Sample size Reweighted:"
 [1] 1254513
-[1] "Summary of calibrated weights"
+[1] "Implied Pop. size weights"
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
   1.111   2.253   6.920  25.484  32.906 575.520
 ```

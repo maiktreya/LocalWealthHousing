@@ -12,7 +12,6 @@ city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
-rake_mode <- TRUE
 calib_mode <- FALSE
 city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -25,7 +24,6 @@ dt <- get_wave(
     ref_unit = ref_unit, # reference PSU (either household or individual)
     represet = represet, # reference universe/population (whole pop. or tax payers)
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
-    raked = rake_mode # Iterative resampling (TRUE, FALSE, INTERACTION) Requieres auxiliary freq. data
 )
 dt <- subset(dt, MUESTRA == city_index)
 
@@ -72,7 +70,6 @@ print("Implied Pop. size Reweighted:")
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
 print("Summary of calibrated weights")
 summary(weights(subsample)) %>% print()
-
 
 # Export the final reweighted subsample if needed
 if (export_object) fwrite(subsample$variables, paste0("AEAT/out/", city, ref_unit, sel_year, rake_mode, ".gz"))
