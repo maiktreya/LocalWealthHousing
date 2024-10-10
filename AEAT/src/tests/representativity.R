@@ -65,9 +65,14 @@ gross_vals <- data.table(
 # Combine and print the results
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
 
-# Print sample sizes
+# Print sample sizes and weight summary
+print("Sample size original:")
+sum(pre_subsample$variables[, "FACTORCAL"]) %>% print()
+print("Sample size Reweighted:")
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
+print("Summary of calibrated weights")
 summary(weights(subsample)) %>% print()
+
 
 # Export the final reweighted subsample if needed
 if (export_object) fwrite(subsample$variables, paste0("AEAT/out/", city, ref_unit, sel_year, rake_mode, ".gz"))

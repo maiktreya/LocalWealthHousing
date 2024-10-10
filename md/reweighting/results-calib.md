@@ -50,32 +50,68 @@ For that reason We must apply a 2step procedure to improve weights over that ini
 * STEP1: reweighting through iterative proportional fitting (IPS) on strata data
 * STEP2: calibrate on known total income (RENTAD)
 
-Afterwards, we get the following results
+Using R survey package it would imply using calibrate after defining our original surveydesign objecto:
 
 ```r
-## MADRID 2021: rake on TRAMO + TIPOHOG 1st and then calib on RENTAD (method raking)
+# Prepare survey object
+dt_sv <- svydesign(
+    ids = ~IDENHOG,
+    strata = ~ CCAA + TIPOHOG + TRAMO,
+    data = dt,
+    weights = dt$FACTORCAL,
+    nest = TRUE
+)
+pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+calibration_totals_vec <- c(tipohog_pop, RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
+
+# Apply calibration with the new named vector
+subsample <- calibrate(
+    design = pre_subsample,
+    formula = ~ -1 + TIPOHOG + RENTAB + RENTAD,
+    population = calibration_totals_vec,
+    calfun = "raking",
+    bounds = limits,
+    bounds.const = TRUE
+)
+
+dt <- subsample$variables
+dt[, FACTORCAL := weights(subsample)]
+```
+Afterwards, we get the following updated results:
+
+```r
+## MADRID 2021: calibrated
 |--------------------------------------------------|
 |==================================================|
      pop     mean     stat      se.    dif  p-value
    <num>    <num>    <num>     <num>  <num>  <num>
-1: 43953 44454.10  501.099   267.156 -0.011  0.061
-2: 56453 56312.41 -140.591   371.188  0.002  0.705
+     pop     mean     stat      se  dif% p_value
+   <num>    <num>    <num>   <num> <num>   <num>
+1: 43953 43730.03 -222.972 654.210 0.005   0.733
+2: 56453 56166.62 -286.384 359.646 0.005   0.426
+[1] "Sample size original:"
+[1] 1307682
+[1] "Sample size Reweighted:"
+[1] 1307682
+[1] "Summary of calibrated weights"
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+  0.0018   1.1541   3.5063  16.7981  18.6821 581.8978
 
-[1] 1286382
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  0.000   1.129   3.865  16.524  24.281 599.279
-
-## MADRID 2016: rake on TRAMO + TIPOHOG 1st and then calib on RENTAD (method raking)
+## MADRID 2016: calibrated
 |--------------------------------------------------|
 |==================================================|
-     pop     mean     stat      se.    dif  p-value
-   <num>    <num>    <num>     <num>  <num>  <num>
-1: 39613 39737.09  124.089   250.699 -0.003  0.621
-2: 49831 49597.09 -233.906   335.383  0.005  0.486
-
-[1] 1250545
+     pop     mean      stat       se  dif%  p_value
+   <num>    <num>     <num>    <num> <num>    <num>
+1: 39613 39611.40 -1.599000 365.9960 0e+00 0.997000
+2: 49831 49828.99 -2.012039 547.7889 4e-05 0.997069
+[1] "Sample size original:"
+[1] 1254513
+[1] "Sample size Reweighted:"
+[1] 1254513
+[1] "Summary of calibrated weights"
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-  0.007   2.846   6.397  25.403  31.301 575.250
+  1.111   2.253   6.920  25.484  32.906 575.520
 ```
 
 As a result mean differences (represented by "stat") greatly diminished and, for a standard 95% confidence level, we could not reject the null hypothesis of the difference between the true population mean and our prediction being 0 (as reflected by "p-value" greater than 0.05 in all cases, both for RENTAD and RENTAB).

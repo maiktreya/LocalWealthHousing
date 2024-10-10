@@ -7,13 +7,13 @@ library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
-for (i in c("madridCCAA")) {
+for (i in c("madrid")) {
     city <- i
     for (j in c(2016, 2021)) {
         sel_year <- j
         for (k in c("IDENHOG")) {
             # define city subsample and variables to analyze
-            rake_mode <- FALSE
+            rake_mode <- TRUE
             calib_mode <- FALSE
             ref_unit <- k # reference PSU (either household or individual)
             represet <- "!is.na(FACTORCAL)" #  universe, households (default) or tax payers
