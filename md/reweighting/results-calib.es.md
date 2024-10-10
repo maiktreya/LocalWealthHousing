@@ -152,8 +152,6 @@ Las estadísticas actualizadas resultantes son las siguientes:
 ## MADRID 2021: calibrated
 |--------------------------------------------------|
 |==================================================|
-     pop     mean     stat      se.    dif  p-value
-   <num>    <num>    <num>     <num>  <num>  <num>
      pop     mean     stat      se  dif% p_value
    <num>    <num>    <num>   <num> <num>   <num>
 1: 43953 43730.03 -222.972 654.210 0.005   0.733
