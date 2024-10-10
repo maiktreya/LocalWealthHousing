@@ -19,7 +19,6 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, city = city) {
     # coerce needed variables
     dt <- dt[!is.na(FACTORCAL)]
     dt[, TIPOHOG := as.factor(TIPOHOG)]
-    dt[, TRAMO := as.factor(TRAMO)]
 
     # Prepare survey object
     dt_sv <- svydesign(
