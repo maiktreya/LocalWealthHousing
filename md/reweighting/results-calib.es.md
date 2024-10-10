@@ -25,7 +25,6 @@ dt <- get_wave(
     ref_unit = ref_unit, # PSU de referencia (ya sea hogar o individuo)
     represet = represet, # Universo/población de referencia (población total o contribuyentes)
     calibrated = TRUE, # Requiere datos auxiliares de población sobre la media de RENTAD para la ciudad elegida
-    raked = rake_mode # Requiere frecuencias auxiliares de población por edad y sexo para la ciudad elegida
 )
 
 # Integrar la estructura AEAT en svydesign
