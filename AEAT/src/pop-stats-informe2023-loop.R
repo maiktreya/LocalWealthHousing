@@ -13,7 +13,6 @@ for (i in c("madrid")) {
         sel_year <- j
         for (k in c("IDENHOG")) {
             # define city subsample and variables to analyze
-            rake_mode <- TRUE
             calib_mode <- FALSE
             ref_unit <- k # reference PSU (either household or individual)
             represet <- "!is.na(FACTORCAL)" #  universe, households (default) or tax payers
@@ -25,9 +24,7 @@ for (i in c("madrid")) {
                 city = city, # subregional unit
                 sel_year = sel_year, # wave
                 ref_unit = ref_unit, # reference PSU (either household or individual)
-                represet = represet, # reference universe/population (whole pop. or tax payers)
                 calibrated = calib_mode, # Weight calib. (TRUE, FALSE) Requieres auxiliary total/mean data
-                raked = rake_mode # Iterative resampling (TRUE, FALSE) Requieres auxiliary freq. data
             )
 
             # Prepare survey object from dt and set income cuts for quantiles dynamically

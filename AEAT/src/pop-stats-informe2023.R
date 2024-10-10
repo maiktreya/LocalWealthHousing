@@ -22,7 +22,6 @@ dt <- get_wave(
     ref_unit = ref_unit,
     represet = represet,
     calibrated = TRUE,
-    raked = TRUE # Working just for Madrid & Segovia cities
 )
 
 # Prepare survey object from dt and set income cuts for quantiles dynamically
