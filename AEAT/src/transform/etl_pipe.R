@@ -59,11 +59,12 @@ get_wave <- function(
 
     # Calculate rental income & id for rental properties
     dt[, RENTA_ALQ2 := fifelse(PAR150i > 0, INCALQ, 0)]
+    dt[, ID_PROP := 0][REFCAT > 0, ID_PROP := 1]
     dt[, ID_PROP_ALQ := 0][PAR150i > 0, ID_PROP_ALQ := 1]
 
     # STEP 1: Summarize information about real estate properties
     dt <- dt[, .(
-        NPROP = uniqueN(REFCAT), # Number of real estate properties
+        NPROP = sum(ID_PROP), # Number of real estate properties
         NPROP_ALQ = sum(ID_PROP_ALQ), # Number of urban real estate properties generating rental income
         IDENHOG = mean(IDENHOG), # household identifier
         TIPOHOG = first(TIPOHOG), # type of household (10 categories)
