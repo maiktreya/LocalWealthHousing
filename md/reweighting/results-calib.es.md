@@ -90,8 +90,8 @@ sum(subsample$variables[, "FACTORCAL"]) %>% print()
 |==================================================|
      pop     mean     stat      se.    dif  p-value
    <num>    <num>    <num>     <num>  <num>  <num>
-1: 43953 46373.09 2420.088   393.486 -0.055  0.000
-2: 56453 59046.65 2593.646   546.964 -0.046  0.000
+1: 43953 46373.09 2420.088   393.486 -0.055  0.000  (RENTAD)
+2: 56453 59046.65 2593.646   546.964 -0.046  0.000  (RENTAB)
 [1] 1301048
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
   0.0018   1.1474   3.8811  16.7129  24.5950 600.7309
@@ -102,8 +102,8 @@ sum(subsample$variables[, "FACTORCAL"]) %>% print()
 |==================================================|
      pop     mean     stat      se.    dif  p-value
    <num>    <num>   <num>     <num>  <num>  <num>
-1: 39613 40537.71 924.713   286.155 -0.023  0.001
-2: 49831 50683.07 852.066   381.496 -0.017  0.026
+1: 39613 40537.71 924.713   286.155 -0.023  0.001   (RENTAD)
+2: 49831 50683.07 852.066   381.496 -0.017  0.026   (RENTAB)
 [1] 1254462
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
   1.111   2.847   6.400  25.483  31.442 575.520
@@ -152,10 +152,10 @@ Las estadísticas actualizadas resultantes son las siguientes:
 ## MADRID 2021: calibrated
 |--------------------------------------------------|
 |==================================================|
-     pop     mean     stat      se  dif% p_value
-   <num>    <num>    <num>   <num> <num>   <num>
-1: 43953 43730.03 -222.972 654.210 0.005   0.733
-2: 56453 56166.62 -286.384 359.646 0.005   0.426
+     pop     mean     stat    se     dif% p_value
+   <num>    <num>     <num>   <num>  <num>   <num>
+1: 43953  43730.03  -222.97  654.21  0.005   0.733 (RENTAD)
+2: 56453  56166.62  -286.38  359.64  0.005   0.426 (RENTAB)
 [1] "Implied Pop. size original:"
 [1] 1307682
 [1] "Implied Pop. size Reweighted:"
@@ -167,10 +167,10 @@ Las estadísticas actualizadas resultantes son las siguientes:
 ## MADRID 2016: calibrated
 |--------------------------------------------------|
 |==================================================|
-     pop     mean      stat       se  dif%  p_value
-   <num>    <num>     <num>    <num> <num>    <num>
-1: 39613 39611.40 -1.599000 365.9960 0e+00 0.997000
-2: 49831 49828.99 -2.012039 547.7889 4e-05 0.997069
+     pop     mean      stat    se    dif%  p_value
+   <num>    <num>     <num>  <num>   <num>    <num>
+1: 39613   39611.40  -1.59  365.99  0e+00   0.997000 (RENTAD)
+2: 49831   49828.99  -2.01  547.78  4e-05   0.997069 (RENTAB)
 [1] "Implied Pop. size original:"
 [1] 1254513
 [1] "Sample size Reweighted:"
