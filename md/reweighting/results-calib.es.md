@@ -13,7 +13,7 @@ La función `get_wave` es utilizada por otros scripts para establecer tanto la p
 
 - El parámetro `city` especifica la ciudad objetivo para recalcular los pesos de la muestra para representatividad.
 - El parámetro `sel_year` indica el año a analizar.
-- El parámetro `represet` permite elegir el universo de referencia, con opciones como la población total o los declarantes de impuestos como unidad de referencia.
+- El parámetro `represet` permite elegir el universo de referencia, o bien la población total o los declarantes de IRPF como unidad de referencia.
 - El parámetro `ref_unit` establece el nivel base de identificación (elige entre individuos y hogares).
 - El parámetro `calibrate` (booleano) permite la calibración de la encuesta ajustando contra variables categóricas (TIPOHOG) y variables continuas (RENTAB y RENTAD) para las cuales se conocen los totales de población.
 
