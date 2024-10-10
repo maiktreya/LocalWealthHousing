@@ -21,11 +21,11 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # Prepare survey object
     dt_sv <- svydesign(
-        ids = ~IDENHOG,
-        strata = ~ CCAA + TIPOHOG + TRAMO,
-        data = dt,
-        weights = dt$FACTORCAL,
-        nest = TRUE
+        ids = ~IDENHOG, # Household identifier for base PSU
+        strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
+        data = dt, # already prepared matrix with individual variables of interest
+        weights = dt$FACTORCAL, # original sampling weights (rep. for CCAA level)
+        nest = TRUE # Households are nested within IDENPER and multiple REFCAT
     )
 
     # Subset for the geo-unit of interest
@@ -51,7 +51,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         bounds.const = TRUE
     )
 
-    # Extract dataframe of variables and
+    # Extract dataframe of variables and weights from the survey object
     dt <- subsample$variables
 
     # Overwrite the column storing original weights with the ones obtained after calibraition
