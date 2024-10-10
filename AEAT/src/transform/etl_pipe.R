@@ -57,21 +57,22 @@ get_wave <- function(
         default = 0
     )]
 
-    # Calculate rental income
+    # Calculate rental income & id for rental properties
     dt[, RENTA_ALQ2 := fifelse(PAR150i > 0, INCALQ, 0)]
+    dt[, ID_PROP_ALQ := 0][PAR150i > 0, ID_PROP_ALQ := 1]
 
     # STEP 1: Summarize information about real estate properties
     dt <- dt[, .(
         MIEMBROS = uniqueN(IDENPER), # Number of unique family members
-        NPROP = uniqueN(REFCAT), # Number of unique rental properties
-        NPROP_ALQ = uniqueN(PAR150i),
+        NPROP = uniqueN(REFCAT), # Number of urban real estate properties
+        NPROP_ALQ = sum(ID_PROP_ALQ), # Number of real estate properties generating rental income
         IDENHOG = mean(IDENHOG), # household identifier
-        TIPOHOG = first(TIPOHOG),
+        TIPOHOG = first(TIPOHOG), # type of household (10 categories)
         SEXO = mean(SEXO), # sex (1 = Male, 2 = Female)
         AGE = (sel_year) - mean(ANONAC), # Calculate average age
         RENTAB = mean(RENTAB), # rental income
         RENTAD = mean(RENTAD), # declared income
-        TRAMO = mean(TRAMO), # TRAMO
+        TRAMO = mean(TRAMO), # TRAMO (income quantiles, 8 categories + 1 for missing)
         RENTA_ALQ = mean(RENTA_ALQ), # rental income
         RENTA_ALQ2 = mean(RENTA_ALQ2), # calculated rental income
         PAR150 = sum(PAR150i), # Total number of properties owned
@@ -87,7 +88,7 @@ get_wave <- function(
     dt <- dt[eval(parse(text = represet)), .(
         MIEMBROS = mean(MIEMBROS),
         NPROP = mean(NPROP),
-        NPROP_ALQ = mean(NPROP_ALQ),
+        NPROP_ALQ = sum(NPROP_ALQ),
         IDENHOG = mean(IDENHOG),
         TIPOHOG = first(TIPOHOG),
         SEXO = mean(SEXO),
