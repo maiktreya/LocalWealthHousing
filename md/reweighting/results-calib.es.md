@@ -1,56 +1,59 @@
-# Resultados de calibraciones alternativas
 
-Para realizar una recalibración personalizada de los pesos y evaluar su robustez para la inferencia representativa sobre una unidad geográfica a nivel provincial, utilizamos el script `representativity.R`, que permite un análisis unificado. Puede ejecutarse con `$HOME/AEAT/src/tests/representativity.R` asumiendo que `getwd() == $HOME`:
+# Resultados de Calibraciones Alternativas
+
+Para realizar una recalibración personalizada de los pesos y evaluar su robustez para inferencias representativas a nivel geográfico provincial, utilizamos el script `representativity.R`, que permite un análisis unificado. Puede ejecutarse con `$HOME/AEAT/src/tests/representativity.R` asumiendo que `getwd() == $HOME`:
 
 ```r
 source("$HOME/AEAT/src/tests/representativity.R", encoding = "UTF-8")
 ```
 
-## Funciones necesarias para reponderar submuestras de AEAT por debajo del nivel de CCAA
+## Funciones Necesarias para Reponderar Submuestras de AEAT para Niveles Inferiores a CCAA
 
 La función `get_wave` es utilizada por otros scripts para establecer tanto la población objetivo como el contexto de análisis.
 
-- El parámetro `city` especifica la ciudad objetivo para recalcular los pesos muestrales con representatividad.
+- El parámetro `city` especifica la ciudad objetivo para recalcular los pesos de la muestra para representatividad.
 - El parámetro `sel_year` indica el año a analizar.
-- El parámetro `represet` permite elegir el universo de referencia, con opciones como la población total o los declarantes de impuestos.
-- El parámetro `ref_unit` define el nivel base de identificación (a elegir entre individuos y hogares).
-- El parámetro `calibrate` (booleano) permite calibrar la encuesta reescalando sobre variables categóricas (TIPOHOG) y continuas (RENTAB y RENTAD) cuyos totales poblacionales son conocidos.
+- El parámetro `represet` permite elegir el universo de referencia, con opciones como la población total o los declarantes de impuestos como unidad de referencia.
+- El parámetro `ref_unit` establece el nivel base de identificación (elige entre individuos y hogares).
+- El parámetro `calibrate` (booleano) permite la calibración de la encuesta ajustando contra variables categóricas (TIPOHOG) y variables continuas (RENTAB y RENTAD) para las cuales se conocen los totales de población.
 
 ```r
 # Obtener una muestra ponderada para una ciudad específica
 dt <- get_wave(
     city = city, # Unidad subregional
-    sel_year = sel_year, # Ola de análisis
-    ref_unit = ref_unit, # Unidad primaria de muestreo (hogar o individuo)
-    represet = represet, # Universo/población de referencia (total o declarantes de impuestos)
-    calibrated = TRUE, # Requiere datos auxiliares poblacionales sobre la renta media (RENTAD) para la ciudad elegida
-    raked = rake_mode # Requiere frecuencias auxiliares de edad y sexo para la ciudad elegida
+    sel_year = sel_year, # Año de la ola
+    ref_unit = ref_unit, # PSU de referencia (ya sea hogar o individuo)
+    represet = represet, # Universo/población de referencia (población total o contribuyentes)
+    calibrated = TRUE, # Requiere datos auxiliares de población sobre la media de RENTAD para la ciudad elegida
+    raked = rake_mode # Requiere frecuencias auxiliares de población por edad y sexo para la ciudad elegida
 )
 
-# Definir la encuesta para la submuestra de interés
-subsample <- svydesign(
-    ids = ~1,
-    data = subset(dt, MUESTRA == city_index),
-    weights = dt$FACTORCAL
+# Integrar la estructura AEAT en svydesign
+dt_sv <- svydesign(
+    ids = ~IDENHOG, # Identificador del hogar para la PSU base
+    strata = ~ CCAA + TIPOHOG + TRAMO, # Región, tipo de hogar y cuantil de ingresos
+    data = dt,
+    weights = dt$FACTORCAL,
+    nest = TRUE # Los hogares están anidados dentro de IDENPER y múltiples REFCAT
 )
 ```
 
-Una vez que nuestra encuesta reponderada está disponible, realizamos las siguientes operaciones para probar la robustez de nuestra inferencia en variables clave (renta):
+Una vez que nuestra encuesta está disponible, realizamos las siguientes operaciones para probar la robustez de nuestra inferencia en variables clave (ingreso):
 
 ```r
-# Calcular las medias muestrales
+# Calcular las medias de la muestra
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
-# Probar si las medias muestrales son iguales a las medias poblacionales
+# Probar si las medias de la encuesta son iguales a las medias de la población
 test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
 test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
 
-# Calcular los p-valores usando una prueba bilateral sobre estadísticas t
+# Calcular valores p usando una prueba de dos colas sobre estadísticos t
 p_val1 <- 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean))))
 p_val2 <- 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean))))
 
-# Preparar la tabla de resultados con los p-valores
+# Preparar la tabla de resultados con valores p
 net_vals <- data.table(
     pop = RNpop,
     mean = coef(RNmean),
@@ -69,34 +72,21 @@ gross_vals <- data.table(
 )
 
 # Combinar e imprimir los resultados
-results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% 
-    round(3) %>% 
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
+    round(3) %>%
     print()
 
-# Imprimir los tamaños de muestra
+# Imprimir tamaños de muestra
 sum(1 / subsample$variables[, "FACTORCAL"]) %>% print()
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
 ```
 
-## Estadísticas brutas sin calibrar
+## Estadísticas Brutas No Calibradas
 
-Para lograr representatividad a nivel de ciudad, es necesario ajustar los pesos muestrales. El ajuste adecuado, dado el panel de AEAT:
-
-```r
-# Integrar la estructura de AEAT en svydesign
-dt_sv <- svydesign(
-    ids = ~IDENHOG, # Identificador del hogar como unidad primaria de muestreo
-    strata = ~ CCAA + TIPOHOG + TRAMO, # Comunidad autónoma, tipo de hogar y cuantil de ingresos
-    data = dt,
-    weights = dt$FACTORCAL,
-    nest = TRUE # Los hogares están anidados dentro de IDENPER y múltiples REFCAT
-)
-```
-
-Es necesario ajustar el "FACTORCAL" a nivel de CCAA para evitar sesgos en las estimaciones de variables clave, como se muestra en este ejemplo de la ciudad de Madrid:
+"FACTORCAL" está ajustado para el nivel CCAA, así que sin otros ajustes, nuestra submuestra conduce a resultados sesgados:
 
 ```r
-## MADRID 2021: no raking or calibration
+## MADRID 2021: sin calibración o raking
 |--------------------------------------------------|
 |==================================================|
      pop     mean     stat      se.    dif  p-value
@@ -108,7 +98,7 @@ Es necesario ajustar el "FACTORCAL" a nivel de CCAA para evitar sesgos en las es
   0.0018   1.1474   3.8811  16.7129  24.5950 600.7309
 
 
-  ## MADRID 2016: no raking or calibration
+  ## MADRID 2016: sin calibración o raking
 |--------------------------------------------------|
 |==================================================|
      pop     mean     stat      se.    dif  p-value
@@ -120,14 +110,15 @@ Es necesario ajustar el "FACTORCAL" a nivel de CCAA para evitar sesgos en las es
   1.111   2.847   6.400  25.483  31.442 575.520
 ```
 
-## Estadísticas calibradas iterativamente sobre proporciones y totales
+## Estadísticas Calibradas Iterativamente en Proporciones y Totales
 
-Debemos aplicar un procedimiento en 2 pasos para mejorar los pesos sobre el objeto inicial (`dt_sv`):
+Para lograr representatividad a nivel de ciudad, necesitamos ajustar los pesos de la muestra. Usando el paquete survey de R, el proceso implica utilizar `calibrate` después de definir nuestro objeto inicial `svydesign` basado en la estructura del panel AEAT.
 
-1. **Paso 1**: Reponderar mediante ajuste proporcional iterativo (IPS) sobre los datos de estratos.
-2. **Paso 2**: Calibrar sobre el ingreso total conocido (RENTAD).
+Realizamos el ajuste teniendo en cuenta la estructura poblacional de 1/3 de las variables de estratificación a través de TIPOHOG (10 tipos de hogar).
 
-Usando el paquete survey de R, el proceso implica usar `calibrate` después de definir nuestro objeto inicial `svydesign`:
+Las otras dos no son útiles para este nivel de submuestra (CCAA) o son desconocidas para la unidad regional dada (TRAMO para frecuencias de 9 cuantiles de ingresos). Sin embargo, dado que este procedimiento de calibración permite tanto variables categóricas como continuas, incluimos también el monto total conocido de ingresos brutos (RENTAB) y netos (RENTAD).
+
+En código R:
 
 ```r
 # Preparar el objeto de encuesta
@@ -156,7 +147,7 @@ dt <- subsample$variables
 dt[, FACTORCAL := weights(subsample)]
 ```
 
-Los resultados actualizados obtenidos son los siguientes:
+Las estadísticas actualizadas resultantes son las siguientes:
 
 ```r
 ## MADRID 2021: calibrated
@@ -192,4 +183,4 @@ Los resultados actualizados obtenidos son los siguientes:
   1.111   2.253   6.920  25.484  32.906 575.520
 ```
 
-Como resultado, las diferencias medias (representadas por "stat") disminuyen notablemente. Para un nivel de confianza estándar del 95%, no podemos rechazar la hipótesis nula de que la diferencia entre la media poblacional verdadera y nuestra estimación sea cero (como se refleja en los p-valores mayores a 0.05 en todos los casos, tanto para RENTAD como para RENTAB).
+Como resultado, las diferencias de medias (representadas por "stat") entre los valores reales (pop) y estimados (mean) se reducen considerablemente. Para un nivel de confianza estándar del 95%, no podemos rechazar la hipótesis nula de que la diferencia entre la media verdadera de la población y nuestra estimación es cero (como se muestra en los valores p mayores a 0.05 para tanto RENTAD como RENTAB).

@@ -27,15 +27,17 @@ dt <- get_wave(
     raked = rake_mode # Requires auxiliary population age and sex frequencies for the chosen city
 )
 
-# Define survey for the subsample of interest
-subsample <- svydesign(
-    ids = ~1,
-    data = subset(dt, MUESTRA == city_index),
-    weights = dt$FACTORCAL
+# Integrate AEAT structure into svydesign
+dt_sv <- svydesign(
+    ids = ~IDENHOG, # Household identifier for base PSU
+    strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
+    data = dt,
+    weights = dt$FACTORCAL,
+    nest = TRUE # Households are nested within IDENPER and multiple REFCAT
 )
 ```
 
-Once our reweighted survey is available, we perform the following operations to test the robustness of our inference on key variables (income):
+Once our survey is available, we perform the following operations to test the robustness of our inference on key variables (income):
 
 ```r
 # Calculate sample means
@@ -69,8 +71,8 @@ gross_vals <- data.table(
 )
 
 # Combine and print the results
-results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% 
-    round(3) %>% 
+results <- rbind(net_vals, gross_vals, use.names = FALSE) %>%
+    round(3) %>%
     print()
 
 # Print sample sizes
@@ -80,20 +82,9 @@ sum(subsample$variables[, "FACTORCAL"]) %>% print()
 
 ## Gross Uncalibrated Statistics
 
-To achieve representativeness at the city scale, we need to adjust sample weights. Proper adjustment, given the AEAT panel structure:
-
-```r
-# Integrate AEAT structure into svydesign
-dt_sv <- svydesign(
-    ids = ~IDENHOG, # Household identifier for base PSU
-    strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
-    data = dt,
-    weights = dt$FACTORCAL,
-    nest = TRUE # Households are nested within IDENPER and multiple REFCAT
-)
 ```
 
-CCAA-level adjusted "FACTORCAL" is necessary to avoid bias in key variable estimates, as shown in this example for Madrid city:
+ "FACTORCAL" is adjusted for the CCAA level so without other adjustments our subsample leads to biased results:
 
 ```r
 ## MADRID 2021: no raking or calibration
@@ -122,12 +113,13 @@ CCAA-level adjusted "FACTORCAL" is necessary to avoid bias in key variable estim
 
 ## Iteratively Calibrated Statistics on Proportions and Totals
 
-We must apply a 2-step procedure to improve weights over the initial object (`dt_sv`):
+To achieve representativeness at the city scale, we need to adjust sample weights. Using R's survey package, the process involves using `calibrate` after defining our initial `svydesign` object  based on the AEAT panel structure.
 
-1. **Step 1**: Reweight through iterative proportional fitting (IPS) on strata data.
-2. **Step 2**: Calibrate on known total income (RENTAD).
+We perform the adjustment taking into account the population structure of 1/3 of the stratification variables through TIPOHOG (10 types of household).
 
-Using R's survey package, the process involves using `calibrate` after defining our initial `svydesign` object:
+The other two are either not useful for this scale of subsample (CCAA) or unknown for the given regional unit (TRAMO for 9 income quantiles frequencies). Nonetheless, as this calibration procedure allows both categorial and continuous variables, we include as well the known total ammount of both gross (RENTAB) and net (RENTAD) income.
+
+In R code:
 
 ```r
 # Prepare survey object
@@ -192,4 +184,4 @@ The resulting updated statistics are as follows:
   1.111   2.253   6.920  25.484  32.906 575.520
 ```
 
-As a result, mean differences (represented by "stat") are greatly reduced. For a standard 95% confidence level, we cannot reject the null hypothesis that the difference between the true population mean and our estimate is zero (as shown by p-values greater than 0.05 for both RENTAD and RENTAB).
+As a result, mean differences (represented by "stat") between true (pop) and estimated (mean) values  are greatly reduced. For a standard 95% confidence level, we cannot reject the null hypothesis that the difference between the true population mean and our estimate is zero (as shown by p-values greater than 0.05 for both RENTAD and RENTAB).
