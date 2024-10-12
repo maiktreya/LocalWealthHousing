@@ -40,8 +40,7 @@ conc_caseros <- svyby(~RENTA_ALQ2, ~TIPO_PROP, subset(dt_sv, NPROP_ALQ > 0), svy
 rent_prop <- svymean(~RENTA_ALQ2, subset(dt_sv, RENTA_ALQ2 > 0)) %>%
     round(3) %>%
     print()
-props <- svymean(~NPROP, subset(dt_sv, NPROP > 0)) %>%
-    round(3) %>%
+med_rent_prop <- svyquantile(~RENTA_ALQ2, subset(dt_sv, NPROP > 0), quantiles = .5) %>%
     print()
 props_alq <- svymean(~NPROP_ALQ, subset(dt_sv, NPROP_ALQ > 0)) %>%
     print()
