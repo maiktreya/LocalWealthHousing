@@ -4,9 +4,26 @@ library(data.table)
 library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
-sel_year <- 2016
 pop_stats <- fread("AEAT/data/pop-stats.csv")
-dt <- fread(paste0("AEAT/data/madridIDENHOG", sel_year, ".gz"))
+
+# define city subsample and variables to analyze
+city <- "madrid"
+represet <- "!is.na(FACTORCAL)"
+sel_year <- 2016
+ref_unit <- "IDENHOG"
+calibrated <- TRUE
+
+# get a sample weighted for a given city
+dt <- get_wave(
+    city = city, # subregional unit
+    sel_year = sel_year, # wave
+    ref_unit = ref_unit, # reference PSU (either household or individual)
+    represet = represet, # reference universe/population (whole pop. or tax payers)
+    calibrated = calibrated, # Weight calib. (TRUE/FALS)E Requieres auxiliary  data
+)
+
+# ensure subsample of interest is selected in case calibration is not applied
+dt <- subset(dt, MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
 ###### New variables definitions
 dt[, TIPO_PROP := fcase(
