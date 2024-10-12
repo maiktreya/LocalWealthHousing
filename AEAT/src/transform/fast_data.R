@@ -25,4 +25,7 @@ dt <- get_wave(
     represet = represet, # reference universe/population (whole pop. or tax payers)
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
 )
-# dt <- subset(dt, MUESTRA == city_index)
+dt <- subset(dt, MUESTRA == city_index)
+
+# export reduced recalibrated matrix
+fwrite(dt, paste0(fwrite(dt, "AEAT/data/", city, ref_unit, sel_year, ".gz")))
