@@ -74,7 +74,7 @@ get_wave <- function(
         RENTAD = mean(RENTAD), # declared income
         TRAMO = mean(TRAMO), # TRAMO (income quantiles, 8 categories + 1 for missing)
         RENTA_ALQ = mean(RENTA_ALQ), # rental income
-        RENTA_ALQ2 = mean(RENTA_ALQ2), # calculated rental income
+        RENTA_ALQ2 = sum(RENTA_ALQ2), # calculated rental income
         PAR150 = sum(PAR150i), # Total number of properties owned
         PATINMO = mean(PATINMO), # property value
         FACTORCAL = mean(FACTORCAL), # calculation factor
