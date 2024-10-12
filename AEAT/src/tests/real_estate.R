@@ -4,8 +4,9 @@ library(data.table)
 library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
+sel_year <- 2021
 pop_stats <- fread("AEAT/data/pop-stats.csv")
-dt <- fread("AEAT/data/madridIDENHOG2016.gz")
+dt <- fread(paste0("AEAT/data/madridIDENHOG", sel_year, ".gz"))
 
 ###### New variables definitions
 dt[, TIPO_PROP := fcase(
@@ -45,12 +46,9 @@ ave_income_per_prop <- svyby(~INC_PER_PROP, ~TIPO_PROP, subset(dt_sv, RENTA_ALQ2
 caseros_total <- svyquantile(~NPROP_ALQ, subset(dt_sv, NPROP_ALQ > 0), quantiles = c(seq(.5, .95, by = 0.05), .99))$NPROP_ALQ[, 1] %>%
     print()
 rent_prop <- svymean(~RENTA_ALQ2, subset(dt_sv, RENTA_ALQ2 > 0))[1] %>%
-    round(3) %>%
-    print()
-med_rent_prop <- svyquantile(~RENTA_ALQ2, subset(dt_sv, RENTA_ALQ2 > 0), quantiles = .5)$RENTA_ALQ2[, 1] %>%
-    print()
-props_alq <- svymean(~NPROP_ALQ, subset(dt_sv, NPROP_ALQ > 0))[1] %>%
-    print()
+    round(3)
+med_rent_prop <- svyquantile(~RENTA_ALQ2, subset(dt_sv, RENTA_ALQ2 > 0), quantiles = .5)$RENTA_ALQ2[, 1]
+props_alq <- svymean(~NPROP_ALQ, subset(dt_sv, NPROP_ALQ > 0))[1]
 
 results <- cbind(prop_caseros[-1], conc_rentistas, conc_caseros, ave_income, ave_income_per_prop)
 pob_inq <- data.table(TIPO_PROP = "no_caseros", N = prop_caseros$N[1], NPROP_ALQ = 0, RENTA_ALQ2 = 0, RENTA_ALQ2 = 0, INC_PER_PROP = 0)
@@ -59,9 +57,10 @@ results <- rbind(results, pob_inq)
 colnames(results) <- c(
     "Nº propiedades alquiladas",
     "% total de hogares",
-    "% total de viviendas",
+    "% total de viviendas alquiladas",
     "% total rentas del alquiler",
     "ingresos_medios alquiler",
     "ingresos medios por inmueble"
 )
 print(results)
+fwrite(results, paste0("AEAT/out/madrid/madrid-", sel_year, "IDENHOG.real_estate.csv"))
