@@ -53,7 +53,7 @@ get_wave <- function(
         CCAA == "7" & PROV == "40" & MUNI == "906", 3, # San Cristobal
         CCAA == "7" & PROV == "40" & MUNI == "155", 4, # Palazuelos
         CCAA == "13" & PROV == "28" & MUNI == "79", 5, # Madrid
-        CCAA == "13" & PROV == "28", 6, # MadridCCCAA
+        CCAA == "13" & PROV == "28", 6, # MadridCCAA
         default = 0
     )]
 
