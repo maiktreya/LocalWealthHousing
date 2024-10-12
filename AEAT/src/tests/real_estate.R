@@ -4,7 +4,7 @@ library(data.table)
 library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
-sel_year <- 2021
+sel_year <- 2016
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 dt <- fread(paste0("AEAT/data/madridIDENHOG", sel_year, ".gz"))
 
@@ -43,7 +43,7 @@ ave_income_per_prop <- svyby(~INC_PER_PROP, ~TIPO_PROP, subset(dt_sv, RENTA_ALQ2
     round(3) %>%
     print()
 
-caseros_total <- svyquantile(~NPROP_ALQ, subset(dt_sv, NPROP_ALQ > 0), quantiles = c(seq(.5, .95, by = 0.05), .99))$NPROP_ALQ[, 1] %>%
+caseros_total <- svyquantile(~NPROP_ALQ, subset(dt_sv, NPROP_ALQ > 0), quantiles = c(seq(.5, .95, by = .05), .99))$NPROP_ALQ[, 1] %>%
     print()
 rent_prop <- svymean(~RENTA_ALQ2, subset(dt_sv, RENTA_ALQ2 > 0))[1] %>%
     round(3)
@@ -59,7 +59,7 @@ colnames(results) <- c(
     "% total de hogares",
     "% total de viviendas alquiladas",
     "% total rentas del alquiler",
-    "ingresos_medios alquiler",
+    "ingresos medios alquiler",
     "ingresos medios por inmueble"
 )
 print(results)
