@@ -59,8 +59,9 @@ get_wave <- function(
 
     # Calculate rental income & id for rental properties
     dt[, RENTA_ALQ2 := fifelse(PAR150i > 0, INCALQ, 0)]
-    dt[, ID_PROP := 0][REFCAT > 0, ID_PROP := 1]
-    dt[, ID_PROP_ALQ := 0][PAR150i > 0, ID_PROP_ALQ := 1]
+    dt[, ID_PROP := fifelse(RENTA_ALQ2 > 0, 1, 0)]
+    dt[, ID_PROP_ALQ := fifelse(PAR150i > 0, 1, 0)]
+
 
     # STEP 1: Summarize information about real estate properties
     dt <- dt[, .(
