@@ -22,14 +22,6 @@
 
 assign("flag_num", 0, envir = .GlobalEnv)
 
-atencion <- function(mensaje) {
-  cat(mensaje)
-  assign("flag_num", 1, envir = .GlobalEnv)
-}
-if (!"XLConnect" %in% installed.packages()) {
-  install.packages("XLConnect")
-}
-
 library("XLConnect")
 
 ####################    Asignaci�n de par�metros    #######################
@@ -115,3 +107,6 @@ if (tiempo < 60) {
     cat(paste("\n Tiempo transcurrido:", format(round(tiempo / 3600, 2), nsmall = 2), "horas"))
   }
 }
+
+dt <- data.table::data.table(fichero_salida)
+data.table::fwrite(dt, "INE/ECH.2017.gz")
