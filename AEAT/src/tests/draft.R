@@ -3,98 +3,110 @@ rm(list = ls())
 library(data.table)
 library(survey)
 library(magrittr)
+source("AEAT/src/transform/reweighting.R")
+pop_stats <- fread("AEAT/data/pop-stats.csv")
+
+# define city subsample and variables to analyze
+export_object <- FALSE
 city <- "madrid"
+represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
-pop_stats <- fread("AEAT/data/pop-stats.csv")
+calib_mode <- TRUE
+sel_cols <- c("RENTAD", "RENTAB", "RENTA_ALQ", "PATINMO", "REFCAT", "INCALQ", "PAR150i")
+city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
-dt <- fread(paste0("AEAT/data/madridIDENHOG", sel_year, ".gz"))
 
-# import external population values
-city_index <- fread("AEAT/data/pop-stats.csv")[muni == city & year == sel_year, index]
-tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
-tramo_pop <- fread(paste0("AEAT/data/base_hogar/", city, sel_year, "_tramo.csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
-tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
-tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
+# Load data from the specified year
+dt <- fread(paste0("AEAT/data/IEF-", sel_year, "-new.gz"))
 
-# coerce needed variables
-dt <- dt[!is.na(FACTORCAL)]
-dt[, TIPOHOG := as.factor(TIPOHOG)]
-dt[, TRAMO := as.factor(TRAMO)]
+# Replace NA values with 0 in selected columns
+setnafill(dt, type = "const", fill = 0, cols = sel_cols)
 
-# Prepare survey object
-dt_sv <- svydesign(
-    ids = ~IDENHOG,
-    strata = ~ CCAA + TIPOHOG + TRAMO,
-    data = dt,
-    weights = dt$FACTORCAL,
-    nest = TRUE
-)
-pre_subsample <- subset(dt_sv, MUESTRA == city_index)
-limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
-calibration_totals_vec <- c(tipohog_pop, RENTAB = RBpop * sum(weights(pre_subsample)), RENTAD = RNpop * sum(weights(pre_subsample)))
+# Coerce TRAMO to numeric, treating "N" as 8
+dt[TRAMO == "N", TRAMO := -1][, TRAMO := as.numeric(TRAMO) + 1]
 
-# Apply calibration with the new named vector
-subsample <- calibrate(
-    design = pre_subsample,
-    formula = ~ -1 + TIPOHOG + RENTAB + RENTAD,
-    population = calibration_totals_vec,
-    calfun = "raking",
-    bounds = limits,
-    bounds.const = TRUE
-)
+# Assign sample identifier (MUESTRA) based on geographical identifiers
+dt[, MUESTRA := fcase(
+    CCAA == "7" & PROV == "40" & MUNI == "194", 1, # Segovia
+    CCAA == "7" & PROV == "40" & MUNI == "112", 2, # Lastrilla
+    CCAA == "7" & PROV == "40" & MUNI == "906", 3, # San Cristobal
+    CCAA == "7" & PROV == "40" & MUNI == "155", 4, # Palazuelos
+    CCAA == "13" & PROV == "28" & MUNI == "79", 5, # Madrid
+    CCAA == "13" & PROV == "28", 6, # MadridCCAA
+    default = 0
+)]
 
-dt <- subsample$variables
-dt[, FACTORCAL := weights(subsample)]
-
-### -------------------------------------------------------
+# Calculate rental income & id for rental properties
+dt[, RENTA_ALQ2 := fifelse(PAR150i > 0, INCALQ, 0)]
+dt[, ID_PROP := fifelse(RENTA_ALQ2 > 0, 1, 0)]
+dt[, ID_PROP_ALQ := fifelse(PAR150i > 0, 1, 0)]
 
 
-dt <- subset(dt, MUESTRA == city_index)
+# STEP 1: Summarize information about real estate properties
+dt <- dt[, .(
+    NPROP = sum(ID_PROP), # Number of real estate properties
+    NPROP_ALQ = sum(ID_PROP_ALQ), # Number of urban real estate properties generating rental income
+    IDENHOG = mean(IDENHOG), # household identifier
+    TIPOHOG = first(TIPOHOG), # type of household (10 categories)
+    SEXO = mean(SEXO), # sex (1 = Male, 2 = Female)
+    AGE = (sel_year) - mean(ANONAC), # Calculate average age
+    RENTAB = mean(RENTAB), # rental income
+    RENTAD = mean(RENTAD), # declared income
+    TRAMO = mean(TRAMO), # TRAMO (income quantiles, 8 categories + 1 for missing)
+    RENTA_ALQ = mean(RENTA_ALQ), # rental income
+    RENTA_ALQ2 = sum(RENTA_ALQ2), # calculated rental income
+    PAR150 = sum(PAR150i), # Total number of properties owned
+    PATINMO = mean(PATINMO), # property value
+    FACTORCAL = mean(FACTORCAL), # calculation factor
+    CCAA = mean(CCAA), # Autonomous Community
+    PROV = mean(PROV), # Province
+    MUNI = mean(MUNI), # Municipality
+    MUESTRA = mean(MUESTRA) # City identifiers (CCAA+PROV+MUNI)
+), by = .(IDENPER)]
 
-# define survey for the subsample of interest
-subsample <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
-# calculate sample means
-RNmean <- svymean(~RENTAD, subsample)
-RBmean <- svymean(~RENTAB, subsample)
+# STEP 2: Before grouping into households, we set dummys for underage and retired people
+dt[, RETIRED := 0][AGE > 65, RETIRED := 1]
+dt[, UNDERAGE := 0][AGE < 18, UNDERAGE := 1]
 
-# Test if the survey means are equal to the population means
-test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
-test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
+# STEP 3: Filter and tidy data for the specified reference unit
+dt <- dt[eval(parse(text = represet)), .(
+    MIEMBROS = uniqueN(IDENPER), # Number of unique family members
+    UNDERAGE = sum(UNDERAGE),
+    RETIRED = sum(RETIRED),
+    NPROP = sum(NPROP),
+    NPROP_ALQ = sum(NPROP_ALQ),
+    IDENHOG = mean(IDENHOG),
+    TIPOHOG = first(TIPOHOG),
+    SEXO = mean(SEXO),
+    AGE = mean(AGE),
+    RENTAB = sum(RENTAB),
+    RENTAD = sum(RENTAD),
+    TRAMO = mean(TRAMO),
+    RENTA_ALQ = sum(RENTA_ALQ),
+    RENTA_ALQ2 = sum(RENTA_ALQ2),
+    PAR150 = sum(PAR150),
+    PATINMO = sum(PATINMO),
+    FACTORCAL = mean(FACTORCAL),
+    CCAA = mean(CCAA),
+    PROV = mean(PROV),
+    MUNI = mean(MUNI),
+    MUESTRA = mean(MUESTRA)
+), by = .(reference = get(ref_unit))]
 
-# Calculate p-values using two-tailed test over t-statistics
-p_val1 <- 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean))))
-p_val2 <- 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean))))
+# Rename column based on reference unit
+if (ref_unit == "IDENHOG") {
+    dt[, reference := NULL] # Remove reference column if using IDENHOG
+} else {
+    setnames(dt, "reference", as.character(ref_unit)) # Rename reference column
+}
 
-# Prepare the results table with p-values for gross and net income
-net_vals <- data.table(
-    pop = RNpop,
-    mean = coef(RNmean),
-    stat = test_rep1,
-    se = SE(RNmean),
-    dif = (RNpop - coef(RNmean)) / RNpop,
-    p_value = p_val1
-) %>% round(3)
-gross_vals <- data.table(
-    pop = RBpop,
-    mean = coef(RBmean),
-    stat = test_rep2,
-    se = SE(RBmean),
-    dif = (RBpop - coef(RBmean)) / RBpop,
-    p_value = p_val2
-) %>% round(3)
+# Define ownership status variables
+dt[, TENENCIA := fifelse(PAR150 > 0, "CASERO", fifelse(PATINMO > 0, "PROPIETARIO", "INQUILINA"))]
+dt[, CASERO := factor(fifelse(PAR150 > 0, 1, 0))] # 1 if "CASERO", else 0
+dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))] # 1 if "PROPIETARIO", else 0
+dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))] # 1 if "INQUILINO", else 0
 
-# Combine and print the results
-
-results <- rbind(net_vals, gross_vals, use.names = FALSE)
-colnames(results) <- c("pop", "mean", "stat", "se", "dif%", "p_value")
-results %>% print()
-
-# Print sample sizes and weight summary
-print("Sample size original:")
-sum(pre_subsample$variables[, "FACTORCAL"]) %>% print()
-print("Sample size Reweighted:")
-sum(subsample$variables[, "FACTORCAL"]) %>% print()
-print("Summary of calibrated weights")
-summary(weights(subsample)) %>% print()
+# Calculate remaining income without rental rents
+dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]

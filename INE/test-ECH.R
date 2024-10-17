@@ -28,9 +28,9 @@ dt[, FACCAL := weights(dt_sv)]
 dt[TIPOHO == 1, TIPOHOGAR_AEAT := "uniparental_menos65"]
 dt[TIPOHO == 2, TIPOHOGAR_AEAT := "uniparental_mas65"]
 dt[TIPOHO %in% c(3, 4), TIPOHOGAR_AEAT := "un_solo_adulto"]
-dt[TAMTOHO == 4]
 dt[TIPOHO %in% c(12), TIPOHOGAR_AEAT := "dos_adultos"]
 dt[TIPOHO %in% c(5, 13, 15), TIPOHOGAR_AEAT := "dos_adultos"]
+dt[TAMTOHO == 4]
 
 
 # 1.1.1 Hogar unipersonal -65

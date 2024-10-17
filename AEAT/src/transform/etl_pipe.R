@@ -85,9 +85,15 @@ get_wave <- function(
         MUESTRA = mean(MUESTRA) # City identifiers (CCAA+PROV+MUNI)
     ), by = .(IDENPER)]
 
-    # STEP 2: Filter and tidy data for the specified reference unit
+    # STEP 2: Before grouping into households, we set dummys for underage and retired people
+    dt[, RETIRED := 0][AGE > 65, RETIRED := 1]
+    dt[, UNDERAGE := 0][AGE < 18, UNDERAGE := 1]
+
+    # STEP 3: Filter and tidy data for the specified reference unit
     dt <- dt[eval(parse(text = represet)), .(
         MIEMBROS = uniqueN(IDENPER), # Number of unique family members
+        UNDERAGE = sum(UNDERAGE),
+        RETIRED = sum(RETIRED),
         NPROP = sum(NPROP),
         NPROP_ALQ = sum(NPROP_ALQ),
         IDENHOG = mean(IDENHOG),
@@ -107,6 +113,7 @@ get_wave <- function(
         MUNI = mean(MUNI),
         MUESTRA = mean(MUESTRA)
     ), by = .(reference = get(ref_unit))]
+
 
     # Rename column based on reference unit
     if (ref_unit == "IDENHOG") {
