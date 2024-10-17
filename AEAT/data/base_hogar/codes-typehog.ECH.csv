@@ -1,0 +1,17 @@
+code,name
+1,Persona sola menor de 65 años                                                                         
+2,Persona sola de 65 años o más                                                                         
+3,Madre/padre solo con algún hijo menor de 25 años                                                      
+4,Madre/padre solo con algún hijo todos mayores de 24 años                                              
+5,Pareja sin hijos que convivan en el hogar                                                             
+6,Pareja con hijos de ambos miembros que conviven en el hogar alguno menor de 25 años                   
+7,Pareja con hijos de ambos miembros que conviven en el hogar todos mayores de 24 años                  
+8,Pareja con algún hijo de un solo miembro y además alguno de los hijos menor de 25 años (4.2.1)        
+9,Pareja con algún hijo de un solo miembro que conviven en el hogar todos mayores de 25 años (4.2.2)    
+10,Pareja con algún hijo menor de 25 años y otras personas                                              
+11,Madre/padre con algún hijo menor de 25 años y otras personas                                         
+12,Pareja o Madre/padre con algún hijo todos mayores de 24 años y otras personas.                       
+13,Pareja sin hijos y otros familiares                                                                  
+14,Pareja sin hijos y otras personas alguna de ellas no tiene relación de parentesco con la pareja      
+15,Personas que no forman pareja y si tienen parentesco es distinto de padre e hijo                     
+16,Otros (más de un núcleo)                                                                             
