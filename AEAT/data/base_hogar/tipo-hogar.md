@@ -60,7 +60,7 @@ Código	Descripción
 # - 14	Pareja sin hijos y otras personas alguna de ellas no tiene relación de parentesco con la pareja      		
 - 15	Personas que no forman pareja y si tienen parentesco es distinto de padre e hijo                     		
 - 16	Otros (más de un núcleo)                                                                             		
-    No aplicable		
+		
 
 
 
