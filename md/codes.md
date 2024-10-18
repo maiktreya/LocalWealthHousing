@@ -1,6 +1,20 @@
 ## Categorias from Encuesta Continua de Hogares 2017
 
+
 unique(dt$TYPE1)
+code	desc	
+ 1 "Hogar unipersonal -65"
+ 2 "Hogar unipersonal +65"
+ 3 "Hogar con un solo +18"
+ 4 "2+ Adultos y 1 menor"
+ 5 "2+ Adultos y 2 menor"
+ 6 "2+ Adultos y 3+ menor"
+ 7 "2adultos (sin menores y alguno +65)"
+ 8 "3+ adultos (sin menores y alguno +65)"
+ 9 "2 adultos"
+10 "3+ adultos"
+
+unique(dt$TYPE2)
 code	desc		
  1 "Hogar con una mujer sola menor de 65 años"                                                    
  2 "Hogar con un hombre solo menor de 65 años"                                                    
@@ -13,18 +27,6 @@ code	desc
  9 "Hogar formado por pareja con hijos en donde algún hijo es menor de 25 años"                   
 10 "Hogar formado por pareja con hijos en donde todos los hijos de 25 años o más"                 
 11 "Hogar formado por pareja o un solo progenitor que convive con algún hijo menor de 25 años y otra(s) persona(a)"
-
-unique(dt$TYPE2)
-code	desc		
-1 "Hogar unipersonal"
-2 "Hogar de una familia sin otras personas adicionales y sólo un núcleo"
-3 "Hogar multipersonal pero que no forma familia"
-4 "Hogar de una familia sin otras personas adicionales y ningún núcleo"
-5 "Hogar de una familia sin otras personas adicionales y un núcleo y otras personas"
-6 "Hogar de una familia, con otras personas no emparentadas"
-7 "Hogar de una familia sin otras personas adicionales y dos núcleos o más"
-8 "Hogar de dos o más familias"
-
 
 unique(dt$TYPE3)
 code	desc		
@@ -45,3 +47,15 @@ code	desc
  15 "Personas que no forman pareja y si tienen parentesco es distinto de padre e hijo"                     		
  16 "Otros (más de un núcleo)"                                                                             		
 		
+
+
+unique(dt$TYPE4)
+code	desc		
+1 "Hogar unipersonal"
+2 "Hogar de una familia sin otras personas adicionales y sólo un núcleo"
+3 "Hogar multipersonal pero que no forma familia"
+4 "Hogar de una familia sin otras personas adicionales y ningún núcleo"
+5 "Hogar de una familia sin otras personas adicionales y un núcleo y otras personas"
+6 "Hogar de una familia, con otras personas no emparentadas"
+7 "Hogar de una familia sin otras personas adicionales y dos núcleos o más"
+8 "Hogar de dos o más familias"
