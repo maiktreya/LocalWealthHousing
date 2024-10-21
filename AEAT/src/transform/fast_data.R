@@ -7,6 +7,7 @@ source("AEAT/src/transform/etl_pipe.R")
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 
 # define city subsample and variables to analyze
+export <- "FALSE"
 city <- "madridCCAA"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
@@ -26,4 +27,4 @@ dt <- get_wave(
 dt <- subset(dt, MUESTRA == 6)
 
 # export reduced recalibrated matrix
-fwrite(dt, paste0("AEAT/data/", city, ref_unit, sel_year, ".gz"))
+if (export == TRUE) fwrite(dt, paste0("AEAT/data/", city, ref_unit, sel_year, ".gz"))
