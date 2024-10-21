@@ -9,7 +9,7 @@ code	desc
  4 "2+ Adultos y 1 menor"
  5 "2+ Adultos y 2 menor"
  6 "2+ Adultos y 3+ menor"
- 7 "2adultos (sin menores y alguno +65)"
+ 7 "2 adultos (sin menores y alguno +65)"
  8 "3+ adultos (sin menores y alguno +65)"
  9 "2 adultos"
 10 "3+ adultos"
