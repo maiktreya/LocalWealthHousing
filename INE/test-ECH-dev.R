@@ -20,5 +20,5 @@ dt[, TIPOHOG := 0][, TIPOHOG := fcase(
 
 dt_sv <- svydesign(~1, data = dt, weights = dt$FACCAL)
 
-prop_hogs <- svytable( ~ TIPOHOG, dt_sv)
+prop_hogs <- svytable(~TIPOHOG, dt_sv)
 prop_hogs <- data.table(prop.table(prop_hogs), prop_hogs) %>% print()
