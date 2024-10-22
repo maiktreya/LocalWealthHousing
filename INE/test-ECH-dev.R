@@ -53,4 +53,6 @@ prop_tramo2 <- svytotal(~TRAMO2, dt_sv2) %>% data.table()
 prop_tramo2 <- data.table(FREQ = prop.table(prop_tramo2)[, 1], TOTAL = prop_tramo2) %>% print()
 
 
-summary(dt2$TRAMO2) / sum(summary(dt2$TRAMO2)) %>% print()
+(summary(dt2$TRAMO2) / sum(summary(dt2$TRAMO2))) %>% print()
+
+svytotal(~TRAMO, dt_sv2) %>% data.table()
