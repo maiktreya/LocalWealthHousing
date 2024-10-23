@@ -79,6 +79,7 @@ get_wave <- function(
         PAR150 = sum(PAR150i), # Total number of properties owned
         PATINMO = mean(PATINMO), # property value
         FACTORCAL = mean(FACTORCAL), # calculation factor
+        FACTORDIS = mean(FACTORDIS), # calculation factor
         CCAA = mean(CCAA), # Autonomous Community
         PROV = mean(PROV), # Province
         MUNI = mean(MUNI), # Municipality
@@ -108,6 +109,7 @@ get_wave <- function(
         PAR150 = sum(PAR150),
         PATINMO = sum(PATINMO),
         FACTORCAL = mean(FACTORCAL),
+        FACTORDIS = mean(FACTORDIS), # calculation factor
         CCAA = mean(CCAA),
         PROV = mean(PROV),
         MUNI = mean(MUNI),
