@@ -13,7 +13,7 @@ for (i in c("madrid")) {
         sel_year <- j
         for (k in c("IDENHOG")) {
             # define city subsample and variables to analyze
-            calib_mode <- FALSE
+            calib_mode <- TRUE
             ref_unit <- k # reference PSU (either household or individual)
             represet <- "!is.na(FACTORCAL)" #  universe, households (default) or tax payers
             ref_pop <- fread(paste0("AEAT/data/base/", city, "-sex.csv"))[year == sel_year, total]
