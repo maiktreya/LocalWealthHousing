@@ -26,3 +26,14 @@ dt <- get_wave(
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
 )
 dt <- subset(dt, MUESTRA == pop_stats[muni == city & year == sel_year, index])
+
+# Calculate proportion of households by type
+prop_hogs <- svytotal(~TIPOHOG, dt_sv) %>% data.table()
+
+# Calculate frequencies and total
+prop_hogs <- data.table(
+    FREQ = prop.table(prop_hogs)[, 1],
+    TOTAL = prop_hogs
+)
+prop_hogs <- cbind(tipos_cat, prop_hogs)
+colnames(prop_hogs) <- c("Desc", "Tipohog", "index", "Freq.", "Total")
