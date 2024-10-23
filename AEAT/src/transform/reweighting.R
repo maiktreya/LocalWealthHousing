@@ -50,7 +50,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         bounds = limits,
         bounds.const = TRUE,
         maxit = 2000,
-        epsilon = 1
+        epsilon = 2
     )
 
     # Extract dataframe of variables and weights from the survey object
