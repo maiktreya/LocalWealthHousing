@@ -21,10 +21,7 @@ dt <- get_wave(
     ref_unit = ref_unit, # reference PSU (either household or individual)
     represet = represet, # reference universe/population (whole pop. or tax payers)
     calibrated = calibrated, # Weight calib. (TRUE/FALS)E Requieres auxiliary  data
-)
-
-# ensure subsample of interest is selected in case calibration is not applied
-# dt <- subset(dt, MUESTRA == 6)
+)  %>% subset(dt, MUESTRA == 6) # ensure subsample of interest is selected in case calibration is not applied
 
 # export reduced recalibrated matrix
 if (export == TRUE) fwrite(dt, paste0("AEAT/data/", city, ref_unit, sel_year, ".gz"))

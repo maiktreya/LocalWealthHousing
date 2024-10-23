@@ -6,8 +6,8 @@ library(data.table)
 library(survey)
 
 # Import original households and persons base files
-dt_hog <- fread("ECEH-2021/ECHHogares_2016.csv")
-dt_per <- fread("ECEH-2021/ECHPersonas_2016.csv")
+dt_hog <- fread("AEAT/data/ine/ECHHogares_2016.csv")
+dt_per <- fread("AEAT/data/ine/ECHPersonas_2016.csv")
 
 # Merge files and rename columns for clarity
 dt <- merge(dt_per, dt_hog, by = c("ID_VIV", "FACCAL", "IDQ_PV", "CA", "TAMANO"))
@@ -24,7 +24,6 @@ dt[, TAM_MUNI := as.numeric(TAM_MUNI)]
 
 # Group persons by households
 dt <- dt[, .(
-    IDEN = mean(IDEN, na.rm = TRUE),
     MEMBERS_ALT = uniqueN(NPV),
     MEMBERS = mean(TAMTOHO, na.rm = TRUE),
     FACTOR = mean(FACTOR, na.rm = TRUE),
@@ -39,13 +38,10 @@ dt <- dt[, .(
     NADUL = sum(adul, na.rm = TRUE)
 ), by = IDEN]
 
-# Replace NA values with a more appropriate method if needed (e.g., imputation)
-dt[is.na(dt)] <- 0
-
 # Group households by type
 dt[, TIPOHOG := fcase(
-    MEMBERS == 1 & NADUL == 1 & NADUL65 != 0, 1,
-    MEMBERS == 1 & NADUL == 1 & NADUL65 == 0, 2,
+    MEMBERS == 1 &  NADUL65 != 0, 1,
+    MEMBERS == 1 &  NADUL65 == 0, 2,
     MEMBERS > 1 & NADUL == 1, 3,
     NADUL >= 2 & HIJOS_NUCLEO_MENORES == 1, 4,
     NADUL >= 2 & HIJOS_NUCLEO_MENORES == 2, 5,
