@@ -1,5 +1,5 @@
 # Clear the workspace (consider removing this in production)
-# rm(list = ls())
+rm(list = ls())
 
 # Load necessary libraries
 library(data.table)
@@ -15,7 +15,7 @@ setnames(dt,
          old = c("EDAD", "ID_VIV", "TAMTOHO", "FACCAL", "IDQ_PV", "CA",
                   "NHIJO", "NHIJOMENOR", "TIPOHO", "TAMANO"),
          new = c("EDAD", "IDEN", "TAMTOHO", "FACTOR", "IDQ_PV", "IDQ_MUN",
-                  "HIJOS_NUCLEO", "HIJOS_NUCLEO_MENORES", "TIPOHOGAR", "TAM_MUNI"))
+                  "HIJOS", "HIJOS_MENORES", "TIPOHOGAR", "TAM_MUNI"))
 
 # Generate control dummies
 dt[, adul_65 := fifelse(EDAD >= 65, 1, 0)]
@@ -30,8 +30,8 @@ dt <- dt[, .(
     IDQ_PV = mean(IDQ_PV, na.rm = TRUE),
     IDQ_MUN = mean(IDQ_MUN, na.rm = TRUE),
     EDAD = first(EDAD),  # Ensure order is appropriate
-    HIJOS_NUCLEO_MENORES = first(HIJOS_NUCLEO_MENORES),
-    HIJOS_NUCLEO = first(HIJOS_NUCLEO),
+    HIJOS_MENORES = first(HIJOS_MENORES),
+    HIJOS = first(HIJOS),
     TIPOHOGAR = first(TIPOHOGAR),
     TAM_MUNI = first(TAM_MUNI),
     NADUL65 = sum(adul_65, na.rm = TRUE),
@@ -43,16 +43,15 @@ dt[, TIPOHOG := fcase(
     MEMBERS == 1 &  NADUL65 != 0, 1,
     MEMBERS == 1 &  NADUL65 == 0, 2,
     MEMBERS > 1 & NADUL == 1, 3,
-    NADUL >= 2 & HIJOS_NUCLEO_MENORES == 1, 4,
-    NADUL >= 2 & HIJOS_NUCLEO_MENORES == 2, 5,
-    NADUL >= 2 & HIJOS_NUCLEO_MENORES >= 3, 6,
-    NADUL >= 2 & HIJOS_NUCLEO_MENORES == 0 & NADUL65 != 0 & MEMBERS == 2, 7,
-    NADUL >= 2 & HIJOS_NUCLEO_MENORES == 0 & NADUL65 != 0 & MEMBERS > 2, 8,
+    NADUL >= 2 & HIJOS_MENORES == 1, 4,
+    NADUL >= 2 & HIJOS_MENORES == 2, 5,
+    NADUL >= 2 & HIJOS_MENORES >= 3, 6,
+    NADUL >= 2 & HIJOS_MENORES == 0 & NADUL65 != 0 & MEMBERS == 2, 7,
+    NADUL >= 2 & HIJOS_MENORES == 0 & NADUL65 != 0 & MEMBERS > 2, 8,
     MEMBERS > 2, 10,
     MEMBERS == 2, 9,
-    default = 0  # Clear default case
-)]
-dt[, TIPOHOG := as.factor(TIPOHOG)]
+    default = NA  # Clear default case
+)][, TIPOHOG := as.factor(TIPOHOG)]
 
 # Define weights and create survey object
 dt_sv <- svydesign(
@@ -73,8 +72,3 @@ prop_hogs <- data.table(
 # Validate results
 total_freq <- sum(prop_hogs[, FREQ]) %>% print()
 weight_difference <- sum(weights(dt_sv)) - sum(prop_hogs[, TOTAL..]) %>% print()
-
-# Consider adding checks for data integrity
-if (weight_difference != 0) {
-    warning("Weight discrepancy detected!")
-}
