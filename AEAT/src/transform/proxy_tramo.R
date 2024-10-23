@@ -1,6 +1,5 @@
 # clean enviroment and import dependencies
 rm(list = ls())
-gc(full = TRUE, verbose = TRUE)
 library(data.table)
 library(survey)
 library(magrittr)
@@ -11,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 export <- "TRUE"
 city <- ""
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calibrated <- FALSE
 
@@ -29,7 +28,7 @@ dt_sv <- svydesign(
     ~1,
     data = dt,
     weights = dt$FACTORCAL
-) %>% subset(., CCAA == "7") # ensure subsample of interest is selected in case calibration is not applied
+) %>% subset(., pop_stats[muni == city & year == sel_year, index]) # ensure subsample of interest is selected in case calibration is not applied
 
 # Calculate proportion of households by type
 prop_tramo <- svytotal(~TRAMO, dt_sv) %>% data.table()
@@ -41,5 +40,4 @@ prop_tramo <- data.table(
 )
 prop_tramo[, index := .I]
 colnames(prop_tramo) <- c("Freq.", "Total", "index")
-
-fwrite(prop_tramo, paste0("AEAT/data/tramos-segovia-", sel_year, ".csv"))
+prop_tramo2 <- fread(paste0("AEAT/data/tramos-segovia-", sel_year, ".csv"))
