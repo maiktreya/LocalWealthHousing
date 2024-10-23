@@ -7,8 +7,8 @@ library(survey)
 library(magrittr)
 
 # Import original households and persons base files
-dt_hog <- fread("AEAT/data/ine/ECHHogares_2016.csv")
-dt_per <- fread("AEAT/data/ine/ECHPersonas_2016.csv")
+dt_hog <- fread("AEAT/data/ine/ECHHogares_2017.csv")
+dt_per <- fread("AEAT/data/ine/ECHPersonas_2017.csv")
 tipos_cat <- fread("AEAT/data/tipohog-madrid-2016.csv")[, .(Desc, Tipohog, index)]
 
 # Merge files and rename columns for clarity
@@ -83,4 +83,4 @@ print(prop_hogs)
 total_freq <- sum(prop_hogs[, Freq.]) %>% print()
 weight_difference <- sum(weights(dt_sv)) - sum(prop_hogs[, Total]) %>% print()
 
-fwrite(prop_hogs, "AEAT/data/tipohog-segovia-2016.csv")
+fwrite(prop_hogs, "AEAT/data/tipohog-segovia-2017.csv")
