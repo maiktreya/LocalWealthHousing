@@ -41,13 +41,14 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     )
 
     # Apply calibration with the new named vector
+    subsample <- postStratify
     subsample <- calibrate(
         design = pre_subsample,
         formula = ~ -1 + TIPOHOG + RENTAB,
         population = calibration_totals_vec,
         calfun = "linear",
-         bounds = limits,
-         bounds.const = TRUE,
+        bounds = limits,
+        bounds.const = TRUE,
         maxit = 2000
     )
 

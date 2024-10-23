@@ -16,7 +16,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
 
     # coerce needed variables
-    dt <- dt[!is.na(FACTORDIS)]
+    dt <- dt[!is.na(FACTORCAL)]
     dt[, TIPOHOG := as.factor(TIPOHOG)]
 
     # Prepare survey object
@@ -24,7 +24,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         ids = ~IDENHOG, # Household identifier for base PSU
         strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
         data = dt, # already prepared matrix with individual variables of interest
-        weights = dt$FACTORDIS, # original sampling weights (rep. for CCAA level)
+        weights = dt$FACTORCAL, # original sampling weights (rep. for CCAA level)
         nest = TRUE # Households are nested within IDENPER and multiple REFCAT
     )
 
@@ -37,17 +37,18 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
         tipohog_pop,
-        RENTAB = RBpop * sum(weights(pre_subsample))
+        RENTAB = RBpop * sum(weights(pre_subsample)),
+        RENTAD = RNpop * sum(weights(pre_subsample))
     )
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + TIPOHOG + RENTAB,
+        formula = ~ -1 + TIPOHOG + RENTAB + RENTAD,
         population = calibration_totals_vec,
-        calfun = "linear",
-         bounds = limits,
-         bounds.const = TRUE,
+        calfun = "raking",
+        bounds = limits,
+        bounds.const = TRUE,
         maxit = 2000
     )
 
