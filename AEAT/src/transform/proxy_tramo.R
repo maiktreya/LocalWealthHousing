@@ -40,5 +40,5 @@ prop_tramo <- data.table(
 )
 prop_tramo[, index := .I]
 colnames(prop_tramo) <- c("Freq.", "Total", "index")
-prop_tramo2 <- fread(paste0("AEAT/data/tramos-segovia-", sel_year, ".csv")) %>% as.factor()
-cbind(prop_tramo$Freq., prop_tramo2$Freq.) %>% print()
+prop_tramo2 <- fread(paste0("AEAT/data/tramos-segovia-", sel_year, ".csv"))
+cbind(segovia = prop_tramo$Freq., cyl = prop_tramo2$Freq. diff = prop_tramo$Total - prop_tramo2$Total) %>% print()
