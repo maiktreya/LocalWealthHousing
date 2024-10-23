@@ -34,23 +34,24 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # Set limits to get the same range for weights after calibration
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 
+
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
         tipohog_pop,
         RENTAB = RBpop * sum(weights(pre_subsample))
-
     )
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + TIPOHOG + RENTAB ,
+        formula = ~ -1 + TIPOHOG + RENTAB,
         population = calibration_totals_vec,
         calfun = "raking",
         # bounds = limits,
         # bounds.const = TRUE,
         maxit = 2000,
-        epsilon = 2
+        epsilon = 1e-10,
+        verbose = TRUE
     )
 
     # Extract dataframe of variables and weights from the survey object
