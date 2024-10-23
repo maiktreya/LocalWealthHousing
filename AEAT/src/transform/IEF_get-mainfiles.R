@@ -13,11 +13,11 @@ sel_year <- 2016
 
 # IDENTIFICADORES Y PESOS fichero 1_IDEN.txt
 
-start_iden <- c(1, 12, 23, 25, 27, 30, 35, 36, 76, 132) # Starting positions references
-end_iden <- c(11, 22, 24, 26, 29, 34, 35, 55, 95, 141) # Ending positions references
+start_iden <- c(1, 12, 23, 25, 27, 30, 35, 36, 76, 116, 132) # Starting positions references
+end_iden <- c(11, 22, 24, 26, 29, 34, 35, 55, 95, 118, 141) # Ending positions references
 col_iden <- fwf_positions(start = start_iden, end = end_iden) # Use fwf_positions to define column positions
 iden <- read_fwf(paste0("AEAT/data/original/1_IDEN", sel_year, ".txt"), col_positions = col_iden) %>% data.table()
-colnames(iden) <- c("IDENPER", "IDENHOG", "CCAA", "PROV", "MUNI", "TIPOHOG", "TRAMO", "FACTORCAL", "FACTORDIS", "SECCION")
+colnames(iden) <- c("IDENPER", "IDENHOG", "CCAA", "PROV", "MUNI", "TIPOHOG", "TRAMO", "FACTORCAL", "FACTORDIS", "NACIO", "SECCION")
 
 # RENTA VARIABLES
 if (sel_year == 2021) {

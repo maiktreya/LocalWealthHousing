@@ -4,7 +4,8 @@ library(magrittr)
 library(survey)
 
 # Import original sample
-dt <- fread("ECEH-2021/ECEPOVhogar_2021.csv")
+dt <- fread("AEAT/data/ine/ECEPOVhogar_2021.csv")
+tipos_cat <- fread("AEAT/data/tipohog-madrid-2021.csv")[, .(Desc, Tipohog, index)]
 
 # Generate control dummies
 dt[, adul_65 := 0][SITUHOGAR != 5 & EDAD >= 65, adul_65 := 1]
@@ -13,7 +14,6 @@ dt[, TIPONUCLEO := as.numeric(TIPONUCLEO)]
 
 # group persons by households
 dt <- dt[, .(
-    IDEN = mean(IDEN),
     MEMBERS_ALT = uniqueN(NPV),
     MEMBERS = max(NPV),
     FACTOR = mean(FACTOR),
@@ -32,13 +32,10 @@ dt <- dt[, .(
 by = IDEN
 ]
 
-# avoid na values for computations
-dt[is.na(dt)] <- 0
-
 # group households by type
 dt[, TIPOHOG := 0][, TIPOHOG := fcase(
-    MEMBERS == 1 & NADUL == 1 & NADUL65 != 0, 1,
-    MEMBERS == 1 & NADUL == 1 & NADUL65 == 0, 2,
+    MEMBERS == 1  & NADUL65 != 0, 1,
+    MEMBERS == 1  & NADUL65 == 0, 2,
     MEMBERS > 1 & NADUL == 1, 3,
     NADUL >= 2 & HIJOS_NUCLEO_MENORES == 1, 4,
     NADUL >= 2 & HIJOS_NUCLEO_MENORES == 2, 5,
@@ -65,8 +62,13 @@ prop_hogs <- svytotal(
 prop_hogs <- data.table(
     FREQ = prop.table(prop_hogs)[, 1],
     TOTAL = prop_hogs
-) %>% print()
+)
+prop_hogs <- cbind(tipos_cat, prop_hogs)
+colnames(prop_hogs) <- c("Desc", "Tipohog", "index", "Freq.", "Total")
 
-# check that frequencies and totals are correct
-sum(prop_hogs[, 1]) %>% print()
-(sum(weights(dt_sv)) - sum(prop_hogs[, 2])) %>% print()
+# Validate results
+print(prop_hogs)
+total_freq <- sum(prop_hogs[, Freq.]) %>% print()
+weight_difference <- sum(weights(dt_sv)) - sum(prop_hogs[, Total]) %>% print()
+
+fwrite(prop_hogs, "AEAT/data/tipohog-segovia-2021.csv")
