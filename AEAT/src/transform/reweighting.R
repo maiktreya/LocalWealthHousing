@@ -37,8 +37,8 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
-        RENTAB = RBpop * sum(weights(pre_subsample)),
-        tipohog_pop
+        tipohog_pop,
+                RENTAB = RBpop * sum(weights(pre_subsample))
     )
 
     # Apply calibration with the new named vector
@@ -47,10 +47,10 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         formula = ~ -1 + TIPOHOG + RENTAB,
         population = calibration_totals_vec,
         calfun = "linear",
-        # bounds = limits,
-        # bounds.const = TRUE,
-         maxit = 2000,
-        epsilon = 1e-10,
+        bounds = limits,
+        bounds.const = TRUE,
+        maxit = 2000,
+        epsilon = 0.1,
         verbose = TRUE
     )
 
