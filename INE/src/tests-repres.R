@@ -6,6 +6,7 @@ library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 pop_stats <- fread("AEAT/data/pop-stats.csv")
+tipos_cat <- fread("AEAT/data/tipohog-madrid-2016.csv")[, .(Desc, Tipohog, index)]
 
 # define city subsample and variables to analyze
 export_object <- FALSE
@@ -25,7 +26,7 @@ dt <- get_wave(
     represet = represet, # reference universe/population (whole pop. or tax payers)
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
 )
-dt <- subset(dt, MUESTRA == pop_stats[muni == city & year == sel_year, index])
+dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
 # Calculate proportion of households by type
 prop_hogs <- svytotal(~TIPOHOG, dt_sv) %>% data.table()
