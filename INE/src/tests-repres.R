@@ -41,3 +41,4 @@ colnames(prop_hogs) <- c("Desc", "Tipohog", "index", "Freq.", "Total")
 prop_hogs2 <- fread("AEAT/data/tipohog-segovia-2021.csv")
 
 chisq.test(prop_hogs$Total, prop_hogs2$Total) %>% print()
+
