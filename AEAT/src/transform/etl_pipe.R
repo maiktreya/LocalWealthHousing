@@ -129,6 +129,7 @@ get_wave <- function(
     dt[, CASERO := factor(fifelse(PAR150 > 0, 1, 0))] # 1 if "CASERO", else 0
     dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))] # 1 if "PROPIETARIO", else 0
     dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))] # 1 if "INQUILINO", else 0
+    dt[, TRAMO := as.factor(TRAMO)]
 
     # Calculate remaining income without rental rents
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]

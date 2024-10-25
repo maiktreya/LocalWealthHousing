@@ -14,6 +14,8 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     city_index <- pop_stats[muni == city & year == sel_year, index]
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
     tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+    tramo_pop <- fread(paste0("AEAT/data/tramos-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
+    tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
 
     # coerce needed variables
     dt <- dt[!is.na(FACTORDIS)]
@@ -37,20 +39,19 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
-        tipohog_pop,
-                RENTAB = RBpop * sum(weights(pre_subsample))
+        tipohog_pop
     )
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + TIPOHOG + RENTAB,
+        formula = ~ -1 + TIPOHOG,
         population = calibration_totals_vec,
         calfun = "linear",
         bounds = limits,
         bounds.const = TRUE,
         maxit = 2000,
-        epsilon = 0.1,
+        epsilon = 0.00001,
         verbose = TRUE
     )
 
