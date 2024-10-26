@@ -11,7 +11,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 export_object <- FALSE
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calib_mode <- TRUE
 city_index <- pop_stats[muni == city & year == sel_year, index]

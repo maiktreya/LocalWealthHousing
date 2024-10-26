@@ -8,7 +8,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 
 # define city subsample and variables to analyze
 export_object <- FALSE
-city <- "madrid"
+city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
@@ -60,6 +60,7 @@ dt <- dt[, .(
     PAR150 = sum(PAR150i), # Total number of properties owned
     PATINMO = mean(PATINMO), # property value
     FACTORCAL = mean(FACTORCAL), # calculation factor
+    FACTORDIS = mean(FACTORDIS), # calculation factor
     CCAA = mean(CCAA), # Autonomous Community
     PROV = mean(PROV), # Province
     MUNI = mean(MUNI), # Municipality
@@ -89,11 +90,13 @@ dt <- dt[eval(parse(text = represet)), .(
     PAR150 = sum(PAR150),
     PATINMO = sum(PATINMO),
     FACTORCAL = mean(FACTORCAL),
+    FACTORDIS = mean(FACTORDIS), # calculation factor
     CCAA = mean(CCAA),
     PROV = mean(PROV),
     MUNI = mean(MUNI),
     MUESTRA = mean(MUESTRA)
 ), by = .(reference = get(ref_unit))]
+
 
 # Rename column based on reference unit
 if (ref_unit == "IDENHOG") {
@@ -107,6 +110,70 @@ dt[, TENENCIA := fifelse(PAR150 > 0, "CASERO", fifelse(PATINMO > 0, "PROPIETARIO
 dt[, CASERO := factor(fifelse(PAR150 > 0, 1, 0))] # 1 if "CASERO", else 0
 dt[, PROPIETARIO := factor(fifelse(PATINMO > 0 & CASERO == 0, 1, 0))] # 1 if "PROPIETARIO", else 0
 dt[, INQUILINO := factor(fifelse(PROPIETARIO == 1 | CASERO == 1, 0, 1))] # 1 if "INQUILINO", else 0
+dt[, TRAMO := as.factor(TRAMO)]
 
 # Calculate remaining income without rental rents
 dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
+
+# import external population values
+pop_stats <- fread("AEAT/data/pop-stats.csv")
+RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
+RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
+city_index <- pop_stats[muni == city & year == sel_year, index]
+tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+tipohog_red <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, "-reduced.csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+tipohog_red <- setNames(tipohog_red$Total, paste0("TIPOHOG1", tipohog_red$Tipohog))
+tramo_pop <- fread(paste0("AEAT/data/tramos-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
+tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
+
+# coerce needed variables
+dt <- dt[!is.na(FACTORDIS)]
+dt[, TIPOHOG := as.factor(TIPOHOG)]
+dt[, TIPOHOG1 := fcase(
+    TIPOHOG == 1, 1,
+    TIPOHOG == 2, 2,
+    TIPOHOG %in% c(3, 4, 5, 6), 3,
+    TIPOHOG %in% c(7, 8), 4,
+    TIPOHOG %in% c(9, 10), 5,
+    default = NA
+)][, TIPOHOG1 := as.factor(TIPOHOG1)]
+
+# Prepare survey object
+dt_sv <- svydesign(
+    ids = ~IDENHOG, # Household identifier for base PSU
+    strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
+    data = dt, # already prepared matrix with individual variables of interest
+    weights = dt$FACTORDIS, # original sampling weights (rep. for CCAA level)
+    nest = TRUE # Households are nested within IDENPER and multiple REFCAT
+)
+
+# Subset for the geo-unit of interest
+pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+
+# Set limits to get the same range for weights after calibration
+limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+
+# set a named vector with the population values of reference for each variable
+calibration_totals_vec <- c(
+    tipohog_red
+)
+
+# Apply calibration with the new named vector
+subsample <- calibrate(
+    design = pre_subsample,
+    formula = ~ -1 + TIPOHOG1,
+    population = calibration_totals_vec,
+    calfun = "linear",
+    bounds = limits,
+    bounds.const = TRUE,
+    maxit = 3000,
+    # epsilon = 0.1,
+    verbose = TRUE
+)
+
+# Extract dataframe of variables and weights from the survey object
+dt <- subsample$variables
+
+# Overwrite the column storing original weights with the ones obtained after calibraition
+dt[, FACTORCAL := weights(subsample)]
