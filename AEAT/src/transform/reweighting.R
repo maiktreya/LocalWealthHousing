@@ -23,12 +23,12 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     dt <- dt[!is.na(FACTORDIS)]
     dt[, TIPOHOG := as.factor(TIPOHOG)]
     dt[, TIPOHOG1 := fcase(
-        default = NA,
-        TIPOHOG == 1, 1,
-        TIPOHOG == 2, 2,
-        TIPOHOG %in% c(3, 4, 5, 6), 3,
-        TIPOHOG %in% c(7, 8), 4,
-        TIPOHOG %in% c(9, 10), 5
+        TIPOHOG == "1.1.1", 1,
+        TIPOHOG == "1.1.2", 2,
+        TIPOHOG %in% c("1.2", "2.1.1", "2.1.2", "2.1.3"), 3,
+        TIPOHOG %in% c("2.2.1", "2.2.2"), 4,
+        TIPOHOG %in% c("2.3.1", "2.3.2"), 5,
+        default = NA
     )][, TIPOHOG1 := as.factor(TIPOHOG1)]
 
     # Prepare survey object
