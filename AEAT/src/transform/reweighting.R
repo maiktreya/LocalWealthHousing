@@ -40,19 +40,19 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
         tipohog_pop,
-        tramo_pop
+        RENTAB = RBpop * sum(weights(pre_subsample))
     )
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + TIPOHOG + TRAMO,
+        formula = ~ -1 + TIPOHOG + RENTAB,
         population = calibration_totals_vec,
         calfun = "linear",
         bounds = limits,
         bounds.const = TRUE,
-        maxit = 2000,
-        epsilon = 0.00001,
+        maxit = 1,
+        epsilon = 1,
         verbose = TRUE
     )
 
