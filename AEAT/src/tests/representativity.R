@@ -14,7 +14,6 @@ represet <- "!is.na(FACTORCAL)"
 sel_year <- 2016
 ref_unit <- "IDENHOG"
 calib_mode <- TRUE
-city_index <- pop_stats[muni == city & year == sel_year, index]
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 
@@ -26,10 +25,13 @@ dt <- get_wave(
     represet = represet, # reference universe/population (whole pop. or tax payers)
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
 )
-dt <- subset(dt, MUESTRA == city_index)
 
 # define survey for the subsample of interest
-subsample <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL)
+subsample <- svydesign(
+    ids = ~IDENHOG,
+    data = dt,
+    weights = dt$FACTORCAL
+) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)

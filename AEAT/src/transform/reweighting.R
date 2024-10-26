@@ -59,8 +59,8 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         calfun = "linear",
         bounds = limits,
         bounds.const = TRUE,
-        maxit = 3000,
-        # epsilon = 0.1,
+        maxit = 2000,
+        epsilon = 1e-7,
         verbose = TRUE
     )
 
