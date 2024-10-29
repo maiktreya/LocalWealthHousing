@@ -10,9 +10,9 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 export <- "TRUE"
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENHOG"
-calibrated <- FALSE
+calib_mode <- FALSE
 
 # get a sample weighted for a given city
 dt <- get_wave(
@@ -23,7 +23,7 @@ dt <- get_wave(
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
 ) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
-if (calib_mode == FALSE) dt$FACTORCAL <- (21034 / sum(dt$factorcal)) * dt$FACTORCAL
+dt$FACTORCAL <- (21034 / sum(dt$FACTORCAL)) * dt$FACTORCAL
 # define survey for the subsample of interest
 dt_sv <- svydesign(
     ids = ~IDENHOG,
@@ -31,16 +31,21 @@ dt_sv <- svydesign(
     weights = dt$FACTORCAL
 )
 
+
 original <- fread("AEAT/data/tipohog-segovia-2021.csv")
-estimated <- svytotal(~TIPOHOG, dt_sv)
+estimated <- svytotal(~TIPOHOG, dt_sv, na.rm = TRUE) %>% as.numeric()
+
+frequencies <- data.frame(TIPOHOG = original$Tipohog, Freq = original$Total)
 
 # Combine the two vectors into a matrix
-data_matrix <- rbind(original, estimated)
+data_matrix <- rbind(original$Total, estimated)
 
 # Plot the bars
-barplot(data_matrix, beside = TRUE, col = c("blue", "red"), 
-        names.arg = paste("Category", seq_along(original)),
-        main = "Overlay of original and estimated",
-        xlab = "Categories",
-        ylab = "Values",
-        legend.text = c("original", "estimated"))
+barplot(data_matrix,
+    beside = TRUE, col = c("blue", "red"),
+    names.arg = paste("Category", seq_along(original)),
+    main = "Overlay of original and estimated",
+    xlab = "Categories",
+    ylab = "Values",
+    legend.text = c("original", "estimated")
+)

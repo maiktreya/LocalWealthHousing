@@ -12,14 +12,24 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
     city_index <- pop_stats[muni == city & year == sel_year, index]
-    tipohog_pop <- fread("AEAT/data/tipohog-segovia-2021.csv")
-    tipohog_pop <- data.frame(TIPOHOG = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
+    tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+    tipohog_pop <- setNames(tipohog_pop$Total, paste0("TIPOHOG", tipohog_pop$Tipohog))
+    tipohog_red <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, "-reduced.csv"), encoding = "UTF-8")[, .(Tipohog = as.factor(Tipohog), Total)]
+    tipohog_red <- setNames(tipohog_red$Total, paste0("TIPOHOG1", tipohog_red$Tipohog))
     tramo_pop <- fread(paste0("AEAT/data/tramos-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
     tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
 
     # coerce needed variables
     dt <- dt[!is.na(FACTORDIS)]
     dt[, TIPOHOG := as.factor(TIPOHOG)]
+    dt[, TIPOHOG1 := fcase(
+        TIPOHOG == "1.1.1", 1,
+        TIPOHOG == "1.1.2", 2,
+        TIPOHOG %in% c("1.2", "2.1.1", "2.1.2", "2.1.3"), 3,
+        TIPOHOG %in% c("2.2.1", "2.2.2"), 4,
+        TIPOHOG %in% c("2.3.1", "2.3.2"), 5,
+        default = NA
+    )][, TIPOHOG1 := as.factor(TIPOHOG1)]
 
     # Prepare survey object
     dt_sv <- svydesign(
@@ -37,23 +47,24 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
 
     original <- fread("AEAT/data/tipohog-segovia-2021.csv")
-    frequencies <-
+    frequencies <- data.frame(TIPOHOG = original$Tipohog, Freq = original$Total)
     subsample <- postStratify(dt_sv, ~TIPOHOG, tipohog_pop)
 
     # set a named vector with the population values of reference for each variable
-     calibration_totals_vec <- c(
-         RENTAB = RBpop * sum(weights(pre_subsample))
-     )
-     # Apply calibration with the new named vector
-     subsample <- calibrate(
-         design = pre_subsample,
-         formula = ~ -1  + RENTAB,
-         population = calibration_totals_vec,
-         calfun = "raking",
-         bounds = limits,
-         bounds.const = TRUE,
-         maxit = 2000
-     )
+    # calibration_totals_vec <- c(
+    #     tipohog_pop,
+    #     RENTAD = RNpop * sum(weights(pre_subsample))
+    # )
+    # # Apply calibration with the new named vector
+    # subsample <- calibrate(
+    #     design = pre_subsample,
+    #     formula = ~ -1 + TIPOHOG  + RENTAD,
+    #     population = calibration_totals_vec,
+    #     calfun = "raking",
+    #     bounds = limits,
+    #     bounds.const = TRUE,
+    #     maxit = 2000
+    # )
 
     # Extract dataframe of variables and weights from the survey object
     dt <- subsample$variables
