@@ -40,7 +40,6 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         RENTAB = RBpop * sum(weights(pre_subsample)),
         RENTAD = RNpop * sum(weights(pre_subsample))
     )
-
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
