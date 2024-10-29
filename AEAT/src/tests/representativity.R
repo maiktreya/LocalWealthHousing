@@ -26,7 +26,7 @@ dt <- get_wave(
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
 ) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
-dt$FACTORCAL <- (21034 / sum(dt$FACTORCAL)) * dt$FACTORCAL
+# dt$FACTORCAL <- (21034 / sum(dt$FACTORCAL)) * dt$FACTORCAL
 
 # define survey for the subsample of interest
 subsample <- svydesign(
@@ -83,17 +83,12 @@ if (export_object) fwrite(subsample$variables, paste0("AEAT/out/", city, ref_uni
 # Calculate the weighted mean and standard error for RENTAB
 mean_rentab <- svymean(~RENTAB, subsample)
 
-# Extract mean and standard error
-mean_value <- coef(mean_rentab) # Weighted mean
-se_rentab <- SE(mean_rentab) # Standard error from svymean
-
 # Set confidence level and z-score
 confidence_level <- 0.95
 z <- qnorm(1 - (1 - confidence_level) / 2)
 
 # Calculate Margin of Error
-moe_rentab <- z * se_rentab
+moe_rentab <- z *  data.frame(mean_rentab)$RENTAB
 
 # Results
-mean_value %>% print ()# Weighted mean of RENTAB 
-moe_rentab %>% print ()# Margin of Error
+(moe_rentab / coef(mean_rentab)) %>% print ()# Margin of Error

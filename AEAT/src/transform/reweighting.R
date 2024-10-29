@@ -1,5 +1,7 @@
 # Functions needed to reweight subsamples from AEAT from levels below CCAA
 
+# STEP 1: Iterative reweighting given known frequencies of sex and age groups
+
 calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
     # function dependencies
     library(data.table, quietly = TRUE)
@@ -9,7 +11,8 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     pop_stats <- fread("AEAT/data/pop-stats.csv")
     RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
-    tipohog_pop <- fread("AEAT/data/tipohog-segovia-2021.csv")
+    city_index <- pop_stats[muni == city & year == sel_year, index]
+    tipohog_pop <- fread(paste0("AEAT/data/tipohog-segovia-",sel_year,".csv"))
     tipohog_pop <- data.frame(TIPOHOG = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
     tramo_pop <- fread(paste0("AEAT/data/tramos-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
     tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
@@ -25,28 +28,30 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         data = dt, # already prepared matrix with individual variables of interest
         weights = dt$FACTORDIS, # original sampling weights (rep. for CCAA level)
         nest = TRUE # Households are nested within IDENPER and multiple REFCAT
-    ) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
-
-    dt_sv <- postStratify(
-        design = dt_sv,
-        strata = ~TIPOHOG,
-        population = tipohog_pop
     )
+
+    # Subset for the geo-unit of interest
+    pre_subsample <- subset(dt_sv, MUESTRA == city_index)
+
+    # Set limits to get the same range for weights after calibration
+    limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+
+    subsample <- postStratify(pre_subsample, ~TIPOHOG, tipohog_pop)
 
     # set a named vector with the population values of reference for each variable
-    calibration_totals_vec <- c(
-        RENTAD = RNpop * sum(weights(dt_sv))
-    )
-
-    # Apply calibration with the new named vector
-    subsample <- calibrate(
-        design = dt_sv,
-        formula = ~ -1 +  RENTAD,
-        population = calibration_totals_vec,
-        calfun = "raking",
-        maxit = 2000,
-        epsilon = 1e-2
-    )
+     calibration_totals_vec <- c(
+         RENTAB = RBpop * sum(weights(pre_subsample))
+     )
+     # Apply calibration with the new named vector
+     subsample <- calibrate(
+         design = pre_subsample,
+         formula = ~ -1 + RENTAB,
+         population = calibration_totals_vec,
+         calfun = "raking",
+         bounds = limits,
+         bounds.const = TRUE,
+         maxit = 2000
+     )
 
     # Extract dataframe of variables and weights from the survey object
     dt <- subsample$variables
