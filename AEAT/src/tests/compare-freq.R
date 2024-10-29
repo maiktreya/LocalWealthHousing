@@ -142,10 +142,11 @@ dt_sv <- svydesign(
 # Subset for the geo-unit of interest
 pre_subsample <- subset(dt_sv, MUESTRA == city_index)
 
-# Set limits to get the same range for weights after calibration
-limits <- c(min(weights(pre_subsample)), max(weights(pre_subsample)))
+subsample <- postStratify(pre_subsample, ~TIPOHOG, tipohog_pop)
 
-subsample <- postStratify(dt_sv, ~TIPOHOG, tipohog_pop)
+
+# Set limits to get the same range for weights after calibration
+limits <- c(min(weights(subsample)), max(weights(subsample)))
 
 # set a named vector with the population values of reference for each variable
 # calibration_totals_vec <- c(
