@@ -168,7 +168,6 @@ subsample <- calibrate(
     bounds = limits,
     bounds.const = TRUE,
     maxit = 3000,
-    # epsilon = 0.1,
     verbose = TRUE
 )
 

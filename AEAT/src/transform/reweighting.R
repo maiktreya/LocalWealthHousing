@@ -58,10 +58,11 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         formula = ~ -1 + TIPOHOG + RENTAB + RENTAD,
         population = calibration_totals_vec,
         calfun = "raking",
-        # bounds = limits,
-        # bounds.const = TRUE,
+        bounds = limits,
+        bounds.const = TRUE,
         maxit = 2000
     )
+
 
     # Extract dataframe of variables and weights from the survey object
     dt <- subsample$variables

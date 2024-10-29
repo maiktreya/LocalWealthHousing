@@ -24,14 +24,16 @@ dt <- get_wave(
     ref_unit = ref_unit, # reference PSU (either household or individual)
     represet = represet, # reference universe/population (whole pop. or tax payers)
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
-)
+) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
+
+dt$FACTORCAL <- (21034 / sum(dt$FACTORCAL)) * dt$FACTORCAL
 
 # define survey for the subsample of interest
 subsample <- svydesign(
     ids = ~IDENHOG,
     data = dt,
     weights = dt$FACTORCAL
-) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
+)
 
 # calculate sample means
 RNmean <- svymean(~RENTAD, subsample)
