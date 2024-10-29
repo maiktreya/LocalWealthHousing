@@ -76,3 +76,24 @@ summary(weights(subsample)) %>% print()
 
 # Export the final reweighted subsample if needed
 if (export_object) fwrite(subsample$variables, paste0("AEAT/out/", city, ref_unit, sel_year, rake_mode, ".gz"))
+
+
+################################
+
+# Calculate the weighted mean and standard error for RENTAB
+mean_rentab <- svymean(~RENTAB, subsample)
+
+# Extract mean and standard error
+mean_value <- coef(mean_rentab) # Weighted mean
+se_rentab <- SE(mean_rentab) # Standard error from svymean
+
+# Set confidence level and z-score
+confidence_level <- 0.95
+z <- qnorm(1 - (1 - confidence_level) / 2)
+
+# Calculate Margin of Error
+moe_rentab <- z * se_rentab
+
+# Results
+mean_value %>% print ()# Weighted mean of RENTAB 
+moe_rentab %>% print ()# Margin of Error

@@ -35,16 +35,17 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
 
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
-        RENTAB = RBpop * sum(weights(dt_sv))
+        RENTAD = RNpop * sum(weights(dt_sv))
     )
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = dt_sv,
-        formula = ~ -1 + RENTAB,
+        formula = ~ -1 +  RENTAD,
         population = calibration_totals_vec,
         calfun = "raking",
-        maxit = 2000
+        maxit = 2000,
+        epsilon = 1e-2
     )
 
     # Extract dataframe of variables and weights from the survey object
