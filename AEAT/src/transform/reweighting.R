@@ -13,7 +13,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-segovia-", sel_year, ".csv"))
     tipohog_pop <- data.frame(TIPOHOG = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
-    tramo_pop <- fread(paste0("AEAT/data/tramos-", city, "-", sel_year, ".csv"), encoding = "UTF-8")[, .(Tramo = as.factor(Tramo), Total)]
+    tramo_pop <- fread(paste0("AEAT/data/tramos-", city, "-", sel_year, ".csv"))[, .(Tramo = as.factor(Tramo), Total)]
     tramo_pop <- setNames(tramo_pop$Total, paste0("TRAMO", tramo_pop$Tramo))
 
     # coerce needed variables
@@ -27,25 +27,24 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
         data = dt, # already prepared matrix with individual variables of interest
         weights = dt$FACTORDIS, # original sampling weights (rep. for CCAA level)
         nest = TRUE # Households are nested within IDENPER and multiple REFCAT
-    ) %>% subset( MUESTRA == pop_stats[muni == city & year == sel_year, index])
+    ) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
     subsample <- postStratify(dt_sv, ~TIPOHOG, tipohog_pop)
 
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
+        tramo_pop,
         RENTAB = RBpop * sum(weights(subsample))
     )
-
-    # Set limits to get the same range for weights after calibration
-    limits <- c(min(weights(subsample)), max(weights(subsample)))
 
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = subsample,
-        formula = ~ -1 + RENTAB,
-        population = calibration_totals_vec,
+        formula = ~ -1 + TRAMO + RENTAB,
+        bounds = c(min(weights(subsample)), max(weights(subsample))),
+        # bounds.const = TRUE,
+        # population = calibration_totals_vec,
         calfun = "linear",
-
         maxit = 2000
     )
 
@@ -55,6 +54,7 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # Overwrite the column storing original weights with the ones obtained after calibraition
     dt[, FACTORCAL := weights(subsample)]
 
+    dt$FACTORCAL <- (21034 / sum(dt$FACTORCAL)) * dt$FACTORCAL
     # Return the survey dataframe including updated weights
     return(dt)
 }

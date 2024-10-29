@@ -26,8 +26,6 @@ dt <- get_wave(
     calibrated = calib_mode, # Weight calib. (TRUE, FALSE, TWO-STEPS) Requieres auxiliary total/mean data
 ) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
-# dt$FACTORCAL <- (21034 / sum(dt$FACTORCAL)) * dt$FACTORCAL
-
 # define survey for the subsample of interest
 subsample <- svydesign(
     ids = ~IDENHOG,
