@@ -1,65 +1,70 @@
-# Functions needed to reweight subsamples from AEAT from levels below CCAA
+# Post-stratification & calibration function for AEAT data
 
-# STEP 1: Iterative reweighting given known frequencies of sex and age groups
+calibrate_data <- function(
+    dt = NULL,
+    sel_year = NULL,
+    ref_unit = "IDENHOG",
+    city = NULL,
+    pop_stats_file = "AEAT/data/pop-stats.csv",
+    tipohog_file_sufix = "-reduced") {
+    # Dependencies
+    library(data.table)
+    library(survey)
 
-calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, city = city) {
-    # function dependencies
-    library(data.table, quietly = TRUE)
-    library(survey, quietly = TRUE)
-
-    # import external population values
-    pop_stats <- fread("AEAT/data/pop-stats.csv")
+    # Import population values
+    pop_stats <- fread(pop_stats_file)
     RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
-    tipohog_pop <- fread(paste0("AEAT/data/tipohog-segovia-", sel_year, "-reduced.csv"))
+
+    # Check population values are available
+    if (is.na(RBpop) | is.na(RNpop)) stop("Population values for the specified year, unit, or city are missing.")
+
+    # Import household type data
+    tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, tipohog_file_sufix, ".csv"))
     tipohog_pop <- data.frame(TIPOHOG1 = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
 
-    # coerce needed variables
+    # Remove rows with missing FACTORDIS values
     dt <- dt[!is.na(FACTORDIS)]
-    dt[, TIPOHOG := as.factor(TIPOHOG)]
-    dt[, TIPOHOG1 := fcase(
-        TIPOHOG == "1.1.1", 1,
-        TIPOHOG == "1.1.2", 2,
-        TIPOHOG %in% c("1.2", "2.1.1", "2.1.2", "2.1.3"), 3,
-        TIPOHOG %in% c("2.2.1", "2.2.2"), 4,
-        TIPOHOG %in% c("2.3.1", "2.3.2"), 5,
-        default = NA
-    )][, TIPOHOG1 := as.factor(TIPOHOG1)]
 
-    # Prepare survey object
-    dt_sv <- svydesign(
-        ids = ~IDENHOG, # Household identifier for base PSU
-        strata = ~ CCAA + TIPOHOG + TRAMO, # Region, household type, and income quantile
-        data = dt, # already prepared matrix with individual variables of interest
-        weights = dt$FACTORDIS, # original sampling weights (rep. for CCAA level)
-        nest = TRUE # Households are nested within IDENPER and multiple REFCAT
+    # Define survey design
+    sv_design_base <- svydesign(
+        ids = ~IDENHOG,
+        strata = ~ CCAA + TIPOHOG + TRAMO,
+        data = dt,
+        weights = dt$FACTORDIS,
+        nest = TRUE
     ) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
-    dt_sv <- postStratify(dt_sv, ~TIPOHOG1, tipohog_pop)
+    # Post-stratify by household type
+    sv_design <- postStratify(
+        design = sv_design_base,
+        strata = ~TIPOHOG1,
+        population = tipohog_pop
+    )
 
-    # set a named vector with the population values of reference for each variable
+    # Calibration vector for income totals
     calibration_totals_vec <- c(
-        RENTAB = RBpop * sum(weights(dt_sv))
+        RENTAB = RBpop * sum(weights(sv_design)),
+        RENTAD = RNpop * sum(weights(sv_design))
     )
 
-    # Apply calibration with the new named vector
-    subsample <- calibrate(
-        design = dt_sv,
-        formula = ~ -1 + RENTAB,
-        # bounds = c(min(weights(dt_sv)), max(weights(dt_sv))),
-        # bounds.const = TRUE,
+    # Apply calibration
+    calibrated_design <- calibrate(
+        design = sv_design,
+        formula = ~ -1 + RENTAB + RENTAD,
+        bounds = c(min(weights(sv_design)), max(weights(sv_design))),
+        bounds.const = TRUE,
         population = calibration_totals_vec,
-        calfun = "raking",
-        maxit = 2000
+        calfun = "linear",
+        maxit = 20000
     )
 
-    # Extract dataframe of variables and weights from the survey object
-    dt <- subsample$variables
+    # Extract the data matrix
+    dt <- calibrated_design$variables
 
-    # Overwrite the column storing original weights with the ones obtained after calibraition
-    dt[, FACTORCAL := weights(subsample)]
+    # Update weights
+    dt[, FACTORCAL := weights(calibrated_design)]
+    dt[, FACTORCAL := (sum(weights(sv_design)) / sum(FACTORCAL)) * FACTORCAL]
 
-    dt$FACTORCAL <- (sum(weights(dt_sv)) / sum(dt$FACTORCAL)) * dt$FACTORCAL
-    # Return the survey dataframe including updated weights
     return(dt)
 }

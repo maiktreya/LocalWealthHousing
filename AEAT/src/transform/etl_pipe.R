@@ -133,7 +133,16 @@ get_wave <- function(
 
     # Calculate remaining income without rental rents
     dt[, RENTAD_NOAL := RENTAD - RENTA_ALQ2]
-
+    dt[, TIPOHOG := as.factor(TIPOHOG)]
+    dt[, TIPOHOG1 := fcase(
+        TIPOHOG == "1.1.1", 1,
+        TIPOHOG == "1.1.2", 2,
+        TIPOHOG %in% c("1.2", "2.1.1", "2.1.2", "2.1.3"), 3,
+        TIPOHOG %in% c("2.2.1", "2.2.2"), 4,
+        TIPOHOG %in% c("2.3.1", "2.3.2"), 5,
+        default = NA
+    )][, TIPOHOG1 := as.factor(TIPOHOG1)] # alternative compacted kind of household
+    
     # finally calibrate if needed
     if (calibrated) dt <- calibrate_data(dt, sel_year, ref_unit, city)
 

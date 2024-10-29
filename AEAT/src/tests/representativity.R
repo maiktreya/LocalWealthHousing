@@ -13,7 +13,7 @@ city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
-calib_mode <- TRUE
+calib_mode <- FALSE
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 
@@ -83,7 +83,7 @@ mean_rentab <- svymean(~RENTAB, subsample)
 
 # Set confidence level and z-score
 confidence_level <- 0.95
-z <- qnorm(1 - (1 - confidence_level) / 2)
+z <- qnorm(1 - (1 - confidence_level) / 2) # 1.96 for 95% confidence level
 
 # Calculate Margin of Error
 moe_rentab <- z *  data.frame(mean_rentab)$RENTAB
