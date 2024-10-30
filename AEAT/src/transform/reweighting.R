@@ -53,7 +53,7 @@ calibrate_data <- function(
         design = sv_design,
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
-        calfun = "raking",
+        calfun = "linear",
         maxit = 20000
     )
 

@@ -10,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calib_mode <- TRUE
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
