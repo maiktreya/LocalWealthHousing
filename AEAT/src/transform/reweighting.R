@@ -6,7 +6,7 @@ calibrate_data <- function(
     ref_unit = "IDENHOG",
     city = NULL,
     pop_stats_file = "AEAT/data/pop-stats.csv",
-    tipohog_file_sufix = "-reduced") {
+    tipohog_file_sufix = "") {
     # Dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -22,7 +22,7 @@ calibrate_data <- function(
 
     # Import household type data
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, tipohog_file_sufix, ".csv"))
-    tipohog_pop <- data.frame(TIPOHOG1 = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
+    tipohog_pop <- data.frame(TIPOHOG = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
 
     # Remove rows with missing FACTORDIS values
     dt <- dt[!is.na(FACTORDIS)]
@@ -39,22 +39,21 @@ calibrate_data <- function(
     # Post-stratify by household type
     sv_design <- postStratify(
         design = sv_design_base,
-        strata = ~TIPOHOG1,
+        strata = ~TIPOHOG,
         population = tipohog_pop
     )
 
     # Calibration vector for income totals
     calibration_totals_vec <- c(
-        RENTAB = RBpop * sum(weights(sv_design)),
-        RENTAD = RNpop * sum(weights(sv_design))
+        RENTAB = RBpop * sum(weights(sv_design))
     )
 
     # Apply calibration
     calibrated_design <- calibrate(
         design = sv_design,
-        formula = ~ -1 + RENTAB + RENTAD,
-        bounds = c(min(weights(sv_design)), max(weights(sv_design))),
-        bounds.const = TRUE,
+        formula = ~ -1 + RENTAB ,
+        # bounds = c(min(weights(sv_design)), max(weights(sv_design))),
+        # bounds.const = TRUE,
         population = calibration_totals_vec,
         calfun = "linear",
         maxit = 20000

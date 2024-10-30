@@ -10,7 +10,7 @@
 ## RENTHOG 2021 RAKED
 ---
 ```r
-```r     pop     mean     stat se.RENTAD   dif p_value.RENTAD
+   <num>    <num>    <num>     <num>  <num>          <num>    
 1: 30203 32228.05 2025.052  1200.869 -0.067          0.092    
 2: 35772 38142.16 2370.158  1531.492 -0.066          0.122    
 [1] "Implied Pop. size Reweighted:"
@@ -27,16 +27,7 @@
 ## RENTHOG 2016 RAKED
 ---
 ```r
-```r     pop     mean     stat se.RENTAD   dif p_value.RENTAD
-1: 34272 34986.00 714.001  1142.591 -0.021          0.532     
-2: 41235 41990.72 755.721  1490.123 -0.018          0.612     
-[1] "Implied Pop. size Reweighted:"
-[1] 21034
-[1] "Summary of calibrated weights"
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
-  0.1143   1.9976   6.1488  19.4759  24.0963 295.7183
-    RENTAB 
-0.06955314
+
 ```
 
 ---
