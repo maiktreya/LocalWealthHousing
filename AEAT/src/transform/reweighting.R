@@ -55,7 +55,7 @@ calibrate_data <- function(
         # bounds = c(min(weights(sv_design)), max(weights(sv_design))),
         # bounds.const = TRUE,
         population = calibration_totals_vec,
-        calfun = "linear",
+        calfun = "raking",
         maxit = 20000
     )
 
