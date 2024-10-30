@@ -10,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calib_mode <- TRUE
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -44,23 +44,32 @@ test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
 p_val1 <- 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean))))
 p_val2 <- 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean))))
 
+# Calculate Margins of Error
+moe_rentab <- 1.96 * data.frame(RBmean)$RENTAB
+moe_rentad <- 1.96 * data.frame(RNmean)$RENTAD
+
 # Prepare the results table with p-values for gross and net income
 net_vals <- data.table(
     pop = RNpop,
     mean = coef(RNmean),
     stat = test_rep1,
     se = SE(RNmean),
+    RSE = (SE(RNmean) / coef(RNmean)),
     dif = (RNpop - coef(RNmean)) / RNpop,
-    p_value = p_val1
+    p_value = p_val1,
+    MOE = (moe_rentad / coef(RNmean))
 ) %>% round(3)
 gross_vals <- data.table(
     pop = RBpop,
     mean = coef(RBmean),
     stat = test_rep2,
     se = SE(RBmean),
+    RSE = (SE(RNmean) / coef(RNmean)),
     dif = (RBpop - coef(RBmean)) / RBpop,
-    p_value = p_val2
+    p_value = p_val2,
+    MOE = (moe_rentab / coef(RBmean))
 ) %>% round(3)
+colnames(net_vals) <- colnames(gross_vals) <- c("pop", "mean", "stat", "se", "RSE", "dif", "pval", "MOE")
 
 # Combine and print the results
 results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
@@ -70,14 +79,3 @@ print("Implied Pop. size Reweighted:")
 sum(subsample$variables[, "FACTORCAL"]) %>% print()
 print("Summary of calibrated weights")
 summary(weights(subsample)) %>% print()
-
-# Calculate the weighted mean and standard error for RENTAB
-mean_rentab <- svymean(~RENTAB, subsample)
-
-# Set confidence level and z-score
-confidence_level <- 0.95
-z <- qnorm(1 - (1 - confidence_level) / 2) # 1.96 for 95% confidence level
-
-# Calculate Margin of Error
-moe_rentab <- z * data.frame(mean_rentab)$RENTAB
-(moe_rentab / coef(mean_rentab)) %>% print() # Margin of Error
