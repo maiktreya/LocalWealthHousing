@@ -10,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENHOG"
 calib_mode <- TRUE
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -79,5 +79,5 @@ confidence_level <- 0.95
 z <- qnorm(1 - (1 - confidence_level) / 2) # 1.96 for 95% confidence level
 
 # Calculate Margin of Error
-moe_rentab <- z *  data.frame(mean_rentab)$RENTAB
-(moe_rentab / coef(mean_rentab)) %>% print ()# Margin of Error
+moe_rentab <- z * data.frame(mean_rentab)$RENTAB
+(moe_rentab / coef(mean_rentab)) %>% print() # Margin of Error
