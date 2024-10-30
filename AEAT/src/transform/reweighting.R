@@ -8,8 +8,9 @@ calibrate_data <- function(
     pop_stats_file = "AEAT/data/pop-stats.csv",
     tipohog_file_sufix = "-reduced") {
     # Dependencies
-    library(data.table)
-    library(survey)
+    library(data.table, quietly = TRUE)
+    library(survey, quietly = TRUE)
+    library(magrittr, quietly = TRUE)
 
     # Import population values
     pop_stats <- fread(pop_stats_file)

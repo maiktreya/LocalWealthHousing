@@ -8,12 +8,11 @@ source("AEAT/src/transform/etl_pipe.R")
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 
 # define city subsample and variables to analyze
-export_object <- FALSE
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
-calib_mode <- FALSE
+calib_mode <- TRUE
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 RBpop <- pop_stats[muni == city & year == sel_year, get(paste0("RB_", tolower(ref_unit)))]
 
@@ -72,12 +71,6 @@ sum(subsample$variables[, "FACTORCAL"]) %>% print()
 print("Summary of calibrated weights")
 summary(weights(subsample)) %>% print()
 
-# Export the final reweighted subsample if needed
-if (export_object) fwrite(subsample$variables, paste0("AEAT/out/", city, ref_unit, sel_year, rake_mode, ".gz"))
-
-
-################################
-
 # Calculate the weighted mean and standard error for RENTAB
 mean_rentab <- svymean(~RENTAB, subsample)
 
@@ -87,6 +80,4 @@ z <- qnorm(1 - (1 - confidence_level) / 2) # 1.96 for 95% confidence level
 
 # Calculate Margin of Error
 moe_rentab <- z *  data.frame(mean_rentab)$RENTAB
-
-# Results
 (moe_rentab / coef(mean_rentab)) %>% print ()# Margin of Error
