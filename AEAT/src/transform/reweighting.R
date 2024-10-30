@@ -6,7 +6,7 @@ calibrate_data <- function(
     ref_unit = "IDENHOG",
     city = NULL,
     pop_stats_file = "AEAT/data/pop-stats.csv",
-    tipohog_file_sufix = "") {
+    tipohog_file_sufix = "-reduced") {
     # Dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -22,7 +22,7 @@ calibrate_data <- function(
 
     # Import household type data
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, tipohog_file_sufix, ".csv"))
-    tipohog_pop <- data.frame(TIPOHOG = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
+    tipohog_pop <- data.frame(TIPOHOG1 = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
 
     # Remove rows with missing FACTORDIS values
     dt <- dt[!is.na(FACTORDIS)]
@@ -39,7 +39,7 @@ calibrate_data <- function(
     # Post-stratify by household type
     sv_design <- postStratify(
         design = sv_design_base,
-        strata = ~TIPOHOG,
+        strata = ~TIPOHOG1,
         population = tipohog_pop
     )
 
