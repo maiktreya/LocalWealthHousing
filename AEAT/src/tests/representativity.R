@@ -36,17 +36,10 @@ subsample <- svydesign(
 RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
+# estimate t stats
+test_rep1 <- as.numeric(svycontrast(RNmean, quote(RENTAD - RNpop)))
+test_rep2 <- as.numeric(svycontrast(RBmean, quote(RENTAB - RBpop)))
 # Test if the survey means are equal to the population means
-test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
-test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
-
-# Calculate p-values using two-tailed test over t-statistics
-p_val1 <- 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean))))
-p_val2 <- 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean))))
-
-# Calculate Margins of Error
-moe_rentab <- 1.96 * data.frame(RBmean)$RENTAB
-moe_rentad <- 1.96 * data.frame(RNmean)$RENTAD
 
 # Prepare the results table with p-values for gross and net income
 net_vals <- data.table(
@@ -56,9 +49,10 @@ net_vals <- data.table(
     se = SE(RNmean),
     RSE = (SE(RNmean) / coef(RNmean)),
     dif = (RNpop - coef(RNmean)) / RNpop,
-    p_value = p_val1,
-    MOE = (moe_rentad / coef(RNmean))
+    p_value = 2 * (1 - pnorm(abs(test_rep1 / SE(RNmean)))),
+    MOE = (1.96 * data.frame(RNmean)$RENTAD / coef(RNmean))
 ) %>% round(3)
+net_vals <- cbind(var = "RENTAD", net_vals)
 gross_vals <- data.table(
     pop = RBpop,
     mean = coef(RBmean),
@@ -66,13 +60,15 @@ gross_vals <- data.table(
     se = SE(RBmean),
     RSE = (SE(RNmean) / coef(RNmean)),
     dif = (RBpop - coef(RBmean)) / RBpop,
-    p_value = p_val2,
-    MOE = (moe_rentab / coef(RBmean))
+    p_value = 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean)))),
+    MOE = (1.96 * data.frame(RBmean)$RENTAB / coef(RBmean))
 ) %>% round(3)
-colnames(net_vals) <- colnames(gross_vals) <- c("pop", "mean", "stat", "se", "RSE", "dif", "pval", "MOE")
+gross_vals <- cbind(var = "RENTAB", gross_vals)
+
+colnames(net_vals) <- colnames(gross_vals) <- c("var", "pop", "mean", "stat", "SE", "RSE", "dif", "pval", "MOE")
 
 # Combine and print the results
-results <- rbind(net_vals, gross_vals, use.names = FALSE) %>% print()
+results <- rbind(net_vals, gross_vals) %>% print()
 
 # Print implied population size and weights summary
 print("Implied Pop. size Reweighted:")
