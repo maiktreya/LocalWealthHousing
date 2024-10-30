@@ -1,4 +1,5 @@
 # clean enviroment and import dependencies
+
 rm(list = ls())
 gc(full = TRUE, verbose = TRUE)
 library(data.table)
@@ -37,8 +38,8 @@ RNmean <- svymean(~RENTAD, subsample)
 RBmean <- svymean(~RENTAB, subsample)
 
 # estimate t stats
-test_rep1 <- as.numeric(svycontrast(RNmean, quote(RENTAD - RNpop)))
-test_rep2 <- as.numeric(svycontrast(RBmean, quote(RENTAB - RBpop)))
+test_rep1 <- svycontrast(RNmean, quote(RENTAD - RNpop)) %>% as.numeric()
+test_rep2 <- svycontrast(RBmean, quote(RENTAB - RBpop)) %>% as.numeric()
 # Test if the survey means are equal to the population means
 
 # Prepare the results table with p-values for gross and net income
