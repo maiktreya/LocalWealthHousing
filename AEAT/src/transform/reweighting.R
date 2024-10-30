@@ -18,7 +18,7 @@ calibrate_data <- function(
     RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
 
     # Check population values are available
-    if (is.na(RBpop) | is.na(RNpop)) stop("Population values for the specified year, unit, or city are missing.")
+    if (is.na(RBpop) || is.na(RNpop)) stop("Population values for the specified year, unit, or city are missing.")
 
     # Import household type data
     tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, tipohog_file_sufix, ".csv"))
