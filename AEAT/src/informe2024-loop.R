@@ -65,17 +65,17 @@ for (i in c("segovia")) {
             )
 
             # TABLA 3: Calculate total frequencies by TENENCIA using svytable
-            tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv, Ntotal =  sum(weights(dt_sv))))
-            tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv, Ntotal =  sum(weights(dt_sv))))
+            tenencia_freq <- data.table(svytable(~TENENCIA, dt_sv, Ntotal = sum(weights(dt_sv))))
+            tenencia_prop <- prop.table(svytable(~TENENCIA, dt_sv, Ntotal = sum(weights(dt_sv))))
             tenencia_table <- cbind(tenencia_freq, tenencia_prop)
 
             # Check output
             list(final_table, renta_table, tenencia_freq) %>% print()
 
             # Export to AEAT/out folder our tables of results
-            fwrite(final_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
-            fwrite(renta_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "tabla-renta.csv"))
-            fwrite(tenencia_table, paste0("AEAT/out/", city, "-", sel_year, "-", ref_unit, "reg_tenencia.csv"))
+            fwrite(final_table, paste0("AEAT/out/", city, "/", city, "-", sel_year, "-", ref_unit, "tabla-quantiles.csv"))
+            fwrite(renta_table, paste0("AEAT/out/", city, "/", city, "-", sel_year, "-", ref_unit, "tabla-renta.csv"))
+            fwrite(tenencia_table, paste0("AEAT/out/", city, "/", city, "-", sel_year, "-", ref_unit, "reg_tenencia.csv"))
         }
     }
 }

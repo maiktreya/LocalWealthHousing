@@ -70,6 +70,7 @@ get_wave <- function(
         IDENHOG = mean(IDENHOG), # household identifier
         TIPOHOG = first(TIPOHOG), # type of household (10 categories)
         SEXO = mean(SEXO), # sex (1 = Male, 2 = Female)
+        NACIO = first(NACIO), # head of household nationality
         AGE = (sel_year) - mean(ANONAC), # Calculate average age
         RENTAB = mean(RENTAB), # rental income
         RENTAD = mean(RENTAD), # declared income
@@ -78,8 +79,8 @@ get_wave <- function(
         RENTA_ALQ2 = sum(RENTA_ALQ2), # calculated rental income
         PAR150 = sum(PAR150i), # Total number of properties owned
         PATINMO = mean(PATINMO), # property value
-        FACTORCAL = mean(FACTORCAL), # calculation factor
-        FACTORDIS = mean(FACTORDIS), # calculation factor
+        FACTORCAL = mean(FACTORCAL), # calibrated weights
+        FACTORDIS = mean(FACTORDIS), # design weights
         CCAA = mean(CCAA), # Autonomous Community
         PROV = mean(PROV), # Province
         MUNI = mean(MUNI), # Municipality
@@ -92,7 +93,7 @@ get_wave <- function(
 
     # STEP 3: Filter and tidy data for the specified reference unit
     dt <- dt[eval(parse(text = represet)), .(
-        MIEMBROS = uniqueN(IDENPER), # Number of unique family members
+        MIEMBROS = uniqueN(IDENPER),
         UNDERAGE = sum(UNDERAGE),
         RETIRED = sum(RETIRED),
         NPROP = sum(NPROP),
@@ -100,6 +101,7 @@ get_wave <- function(
         IDENHOG = mean(IDENHOG),
         TIPOHOG = first(TIPOHOG),
         SEXO = mean(SEXO),
+        NACIO = first(NACIO),
         AGE = mean(AGE),
         RENTAB = sum(RENTAB),
         RENTAD = sum(RENTAD),
@@ -109,7 +111,7 @@ get_wave <- function(
         PAR150 = sum(PAR150),
         PATINMO = sum(PATINMO),
         FACTORCAL = mean(FACTORCAL),
-        FACTORDIS = mean(FACTORDIS), # calculation factor
+        FACTORDIS = mean(FACTORDIS), 
         CCAA = mean(CCAA),
         PROV = mean(PROV),
         MUNI = mean(MUNI),
@@ -142,7 +144,7 @@ get_wave <- function(
         TIPOHOG %in% c("2.3.1", "2.3.2"), 5,
         default = NA
     )][, TIPOHOG1 := as.factor(TIPOHOG1)] # alternative compacted kind of household
-    
+
     # finally calibrate if needed
     if (calibrated) dt <- calibrate_data(dt, sel_year, ref_unit, city)
 
