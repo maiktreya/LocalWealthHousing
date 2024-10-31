@@ -9,7 +9,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calibrated <- TRUE
 
@@ -27,29 +27,32 @@ dt <- subset(dt, MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
 ###### New variables definitions
 dt[, TIPO_PROP := fcase(
+    default = NA,
     NPROP_ALQ == 1, "1",
-    NPROP_ALQ == 2, "2",
-    NPROP_ALQ == 3, "3",
-    NPROP_ALQ == 4, "4",
-    NPROP_ALQ > 4, "5+",
-    default = "0"
+    NPROP_ALQ %in% c(2, 3, 4), "2-4",
+    NPROP_ALQ > 4, "5+"
 )]
-dt[, INC_PER_PROP := 0][RENTA_ALQ2 > 0, INC_PER_PROP := RENTA_ALQ2 / NPROP_ALQ]
 dt[, NACIO := as.factor(NACIO)]
-dt[, MIGR := 0][NACIO == 108, MIGR := 1][, MIGR := as.factor(MIGR)]
-# Prepare data as survey object
+dt[, MIGR := 0][NACIO != 108, MIGR := 1][, MIGR := as.factor(MIGR)]
 
+# Prepare data as survey object
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
 
-tipo_prop <- svyby(~TIPO_PROP, ~MIGR, dt_sv, svymean)[2:3] %>%
-    round(2) %>%
-    print()
+# Compute summary statistics
 
-tenencia_migr <- svyby(~TENENCIA, ~MIGR, dt_sv, svymean)[2:3] %>%
-    round(2) %>%
-    print()
+renta_ten_mig <- coef(svyby(~RENTAD, ~TENENCIA, subset(dt_sv, MIGR == 1), svymean))
+renta_ten_nat <- coef(svyby(~RENTAD, ~TENENCIA, subset(dt_sv, MIGR == 0), svymean))
+tenencia_migr <- coef(svymean(~TENENCIA, subset(dt_sv, MIGR == 1)))
+tenencia_nacio <- coef(svymean(~TENENCIA, subset(dt_sv, MIGR == 0)))
 
-prop_migr <- svytotal(~MIGR, dt_sv) %>%
-    prop.table() %>%
-    round(2) %>%
-    print()
+tipo_prop <- coef(svyby(~TIPO_PROP, ~MIGR, dt_sv, svytotal, na.rm = TRUE))
+
+tipo_prop <- cbind(tipo_prop[c(1, 3, 5)], tipo_prop[c(2, 4, 6)]) %>% print()
+renta <- c(coef(svyby(~RENTAD, ~MIGR, dt_sv, svymean)), coef(svymean(~RENTAD, dt_sv))) %>% print()
+prop_migr <- c(coef(svymean(~MIGR, dt_sv)), tot = 1) %>% print()
+tenencia <- cbind(tenencia_migr, tenencia_nacio) %>% print()
+renta_tenencia <- cbind(renta_ten_mig, renta_ten_nat) %>% print()
+
+results <- cbind(tipo_prop, renta, prop_migr, tenencia, renta_tenencia)
+
+fwrite(results, paste0("AEAT/out/", city, "/", city, "-", sel_year, ref_unit, "-migr.csv"))
