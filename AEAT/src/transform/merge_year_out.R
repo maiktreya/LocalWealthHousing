@@ -1,12 +1,38 @@
-# clean enviroment and import dependencies
+# Clean environment and import dependencies
 rm(list = ls())
 library(data.table)
 library(survey)
 library(magrittr)
+library(openxlsx)
 
-dt1 <- fread("AEAT/out/segovia/segovia-2016-IDENHOGtabla-renta.csv")[, wave := 2016]
-dt2 <- fread("AEAT/out/segovia/segovia-2021-IDENHOGtabla-renta.csv")[, wave := 2021]
+# Read data
+migr <- fread("AEAT/out/segovia/final/segovia-migr.csv")
+real <- fread("AEAT/out/segovia/final/segovia-real_estate.csv")
+rent <- fread("AEAT/out/segovia/final/segovia-tabla-renta.csv")
+quan <- fread("AEAT/out/segovia/final/segovia-tabla-quantiles.csv")
+tena <- fread("AEAT/out/segovia/final/segovia-reg_tenencia.csv")
 
-dt <- rbind(dt1, dt2)
+# Define the output folder and file name
+output_folder <- "AEAT/out/segovia/final/"
+output_file <- paste0(output_folder, "segovia_data.xlsx")
 
-fwrite(dt, "AEAT/out/segovia/final/segovia-tabla-renta.csv")
+# Create a new workbook
+wb <- createWorkbook()
+
+# List of data.tables to export
+data_list <- list(
+  migr = migr,
+  real = real,
+  rent = rent,
+  quan = quan,
+  tena = tena
+)
+
+# Loop through the list and add each data.table to a new sheet
+for (name in names(data_list)) {
+  addWorksheet(wb, name)
+  writeData(wb, sheet = name, data_list[[name]], rowNames = FALSE)
+}
+
+# Save the workbook
+saveWorkbook(wb, file = output_file, overwrite = TRUE)
