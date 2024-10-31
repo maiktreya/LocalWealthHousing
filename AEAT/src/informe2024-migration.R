@@ -41,10 +41,16 @@ dt[, MIGR := 0][NACIO == 108, MIGR := 1][, MIGR := as.factor(MIGR)]
 
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
 
-svytotal(~NACIO, dt_sv) %>%
+svyby(~MIGR, ~TIPO_PROP, dt_sv, svytotal)[2] %>%
     prop.table() %>%
     round(2) %>%
     print()
+
+svyby(~MIGR, ~TENENCIA, dt_sv, svytotal)[2] %>%
+    prop.table() %>%
+    round(2) %>%
+    print()
+
 svytotal(~MIGR, dt_sv) %>%
     prop.table() %>%
     round(2) %>%
