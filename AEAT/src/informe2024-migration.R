@@ -35,8 +35,17 @@ dt[, TIPO_PROP := fcase(
     default = "0"
 )]
 dt[, INC_PER_PROP := 0][RENTA_ALQ2 > 0, INC_PER_PROP := RENTA_ALQ2 / NPROP_ALQ]
-
+dt[, NACIO := as.factor(NACIO)]
+dt[, MIGR := 0][NACIO == 108, MIGR := 1][, MIGR := as.factor(MIGR)]
 # Prepare data as survey object
 
 dt_sv <- svydesign(ids = ~1, data = dt, weights = dt$FACTORCAL)
 
+svytotal(~NACIO, dt_sv) %>%
+    prop.table() %>%
+    round(2) %>%
+    print()
+svytotal(~MIGR, dt_sv) %>%
+    prop.table() %>%
+    round(2) %>%
+    print()
