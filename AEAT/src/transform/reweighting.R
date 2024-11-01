@@ -26,6 +26,8 @@ calibrate_data <- function(
 
     # Remove rows with missing FACTORDIS values
     dt <- dt[!is.na(FACTORDIS)]
+
+    # Use base type of households if compacted categories are not needed
     if (file_suffix != "-reduced") dt[, TIPOHOG1 := TIPOHOG]
 
     # Define survey design
