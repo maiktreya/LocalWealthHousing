@@ -27,12 +27,9 @@ dt <- subset(dt, MUESTRA == pop_stats[muni == city & year == sel_year, index])
 
 ###### New variables definitions
 dt[, TIPO_PROP := fcase(
+    default = "0",
     NPROP_ALQ == 1, "1",
-    NPROP_ALQ == 2, "2",
-    NPROP_ALQ == 3, "3",
-    NPROP_ALQ == 4, "4",
-    NPROP_ALQ > 4, "5+",
-    default = "0"
+    NPROP_ALQ >= 2, "2+"
 )]
 dt[, INC_PER_PROP := 0][RENTA_ALQ2 > 0, INC_PER_PROP := RENTA_ALQ2 / NPROP_ALQ]
 
