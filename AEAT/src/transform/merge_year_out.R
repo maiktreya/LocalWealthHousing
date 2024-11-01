@@ -34,7 +34,7 @@ tena <- fread("AEAT/out/segovia/final/segovia-reg_tenencia.csv")
 
 # Define the output folder and file name
 output_folder <- "AEAT/out/segovia/final/"
-output_file <- paste0(output_folder, "segovia_data.new.xlsx")
+output_file <- paste0(output_folder, "segovia_data.xlsx")
 
 # Create a new workbook
 wb <- createWorkbook()
