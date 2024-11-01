@@ -69,3 +69,38 @@
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
   0.4633   4.3907   8.4599  23.0350  26.0675 800.8259
 ```
+
+
+
+## REDUCED BOUNDED LINEAR 2021
+
+---
+
+```r
+      var   pop     mean    stat       SE   RSE    dif  pval   MOE
+1: RENTAD 34272 34388.79 116.790 1068.487 0.031 -0.003 0.913 0.061
+2: RENTAB 41235 41584.82 349.821 1396.498 0.034 -0.008 0.802 0.066
+[1] "Implied Pop. size Reweighted:"
+[1] 21034
+[1] "Summary of calibrated weights"
+    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
+  0.1594   2.0303   8.0223  19.4759  22.7381 186.3632
+```
+
+
+
+## REDUCED BOUNDED LINEAR 2016
+
+---
+
+```r
+      var   pop     mean    stat       SE   RSE    dif  pval   MOE
+1: RENTAD 30203 30373.83 170.827 1312.863 0.043 -0.006 0.896 0.085
+2: RENTAB 35772 36167.92 395.919 1687.409 0.047 -0.011 0.814 0.091
+[1] "Implied Pop. size Reweighted:"
+[1] 19280.31
+[1] "Summary of calibrated weights"
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+  1.127   4.458   8.590  23.035  26.476 490.915
+```
+

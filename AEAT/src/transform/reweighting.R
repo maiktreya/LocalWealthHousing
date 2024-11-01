@@ -58,7 +58,7 @@ calibrate_data <- function(
         population = calibration_totals_vec,
         bounds = limits,
         bounds.const = TRUE,
-        calfun = "raking",
+        calfun = "linear",
         maxit = 20000
     )
 
