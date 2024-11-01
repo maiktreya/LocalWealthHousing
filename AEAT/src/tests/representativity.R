@@ -11,7 +11,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calib_mode <- TRUE
 RNpop <- pop_stats[muni == city & year == sel_year, get(paste0("RN_", tolower(ref_unit)))]
@@ -59,7 +59,7 @@ gross_vals <- data.table(
     mean = coef(RBmean),
     stat = test_rep2,
     se = SE(RBmean),
-    RSE = (SE(RNmean) / coef(RNmean)),
+    RSE = (SE(RBmean) / coef(RBmean)),
     dif = (RBpop - coef(RBmean)) / RBpop,
     p_value = 2 * (1 - pnorm(abs(test_rep2 / SE(RBmean)))),
     MOE = (1.96 * data.frame(RBmean)$RENTAB / coef(RBmean))

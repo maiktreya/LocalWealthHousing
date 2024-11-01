@@ -11,7 +11,7 @@
 ```r
      pop     mean     stat      se   RSE   dif  pval   MOE
 1: 34272 33543.58 -728.424 1168.07 0.035 0.021 0.533 0.068
-2: 41235 40446.35 -788.654 1538.07 0.035 0.019 0.608 0.075
+2: 41235 40446.35 -788.654 1538.07 0.038 0.019 0.608 0.075
 [1] "Implied Pop. size Reweighted:"
 [1] 21034
 [1] "Summary of calibrated weights"
@@ -28,7 +28,7 @@
 ```r
       var   pop     mean     stat       SE   RSE   dif  pval   MOE
 1: RENTAD 30203 29962.69 -240.307 1453.675 0.049 0.008 0.869 0.095
-2: RENTAB 35772 35624.68 -147.323 1861.863 0.049 0.004 0.937 0.102
+2: RENTAB 35772 35624.68 -147.323 1861.863 0.052 0.004 0.937 0.102
 [1] "Implied Pop. size Reweighted:"
 [1] 19280.31
 [1] "Summary of calibrated weights"
