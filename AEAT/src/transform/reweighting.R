@@ -48,11 +48,16 @@ calibrate_data <- function(
         RENTAB = RBpop * sum(weights(sv_design))
     )
 
+    # Set limits to get the same range for weights after calibration
+    limits <- c(min(weights(sv_design_base)), max(weights(sv_design_base)))
+
     # Apply calibration
     calibrated_design <- calibrate(
         design = sv_design,
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
+        bounds = limits,
+        bounds.const = TRUE,
         calfun = "raking",
         maxit = 20000
     )
