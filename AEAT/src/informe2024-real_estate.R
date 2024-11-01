@@ -9,7 +9,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calibrated <- TRUE
 
@@ -80,4 +80,4 @@ colnames(results) <- c(
     "ingresos medios por inmueble"
 )
 print(results)
-fwrite(results, paste0("AEAT/out/segovia/segovia-", sel_year, "IDENHOG.real_estate.csv"))
+fwrite(results, paste0("AEAT/out/segovia/segovia-", sel_year, "-IDENHOGreal_estate.csv"))

@@ -9,7 +9,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2016
+sel_year <- 2021
 ref_unit <- "IDENHOG"
 calibrated <- TRUE
 
@@ -55,4 +55,4 @@ renta_tenencia <- cbind(renta_ten_mig, renta_ten_nat) %>% print()
 
 results <- cbind(tipo_prop, renta, prop_migr, tenencia, renta_tenencia)
 
-fwrite(results, paste0("AEAT/out/", city, "/", city, "-", sel_year, ref_unit, "-migr.csv"))
+fwrite(results, paste0("AEAT/out/", city, "/", city, "-", sel_year, "-", ref_unit, "migr.csv"))
