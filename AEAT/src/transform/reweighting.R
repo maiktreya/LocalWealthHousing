@@ -6,7 +6,7 @@ calibrate_data <- function(
     ref_unit = "IDENHOG",
     city = NULL,
     pop_stats_file = "AEAT/data/pop-stats.csv",
-    file_suffix = "-reduced") {
+    file_suffix = "") {
     # Dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -21,7 +21,7 @@ calibrate_data <- function(
     if (is.na(RBpop) || is.na(RNpop)) stop("Population values for the specified year, unit, or city are missing.")
 
     # Import household type data
-    tipohog_pop <- fread(paste0("AEAT/data/tipohog-", city, "-", sel_year, file_suffix, ".csv"))
+    tipohog_pop <- paste0("AEAT/data/tipohog-", city, "-", sel_year, file_suffix, ".csv") %>% fread()
     tipohog_pop <- data.frame(TIPOHOG1 = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
 
     # Remove rows with missing FACTORDIS values
