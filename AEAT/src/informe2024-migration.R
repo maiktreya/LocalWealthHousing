@@ -9,7 +9,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calibrated <- TRUE
 
@@ -47,12 +47,18 @@ tenencia_nacio <- coef(svymean(~TENENCIA, subset(dt_sv, MIGR == 0)))
 
 tipo_prop <- coef(svyby(~TIPO_PROP, ~MIGR, dt_sv, svytotal, na.rm = TRUE))
 
+miembros <- c(
+    coef(svymean(~MIEMBROS, subset(dt_sv, MIGR == 0))),
+    coef(svymean(~MIEMBROS, subset(dt_sv, MIGR == 1))),
+    coef(svymean(~MIEMBROS, dt_sv))
+)
+
 tipo_prop <- cbind(tipo_prop[c(1, 3, 5)], tipo_prop[c(2, 4, 6)]) %>% print()
 renta <- c(coef(svyby(~RENTAD, ~MIGR, dt_sv, svymean)), coef(svymean(~RENTAD, dt_sv))) %>% print()
 prop_migr <- c(coef(svymean(~MIGR, dt_sv)), tot = 1) %>% print()
 tenencia <- cbind(tenencia_migr, tenencia_nacio) %>% print()
 renta_tenencia <- cbind(renta_ten_mig, renta_ten_nat) %>% print()
 
-results <- cbind(tipo_prop, renta, prop_migr, tenencia, renta_tenencia)
+results <- cbind(tipo_prop, renta, prop_migr, tenencia, renta_tenencia, miembros)
 
 fwrite(results, paste0("AEAT/out/", city, "/", city, "-", sel_year, "-", ref_unit, "migr.csv"))
