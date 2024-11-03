@@ -1,7 +1,8 @@
 # Obtain population statistics for AEAT subsample
 
-# Clean environment to avoid RAM bottlenecks and import dependencies
+# clean enviroment and import dependencies
 rm(list = ls())
+gc(full = TRUE, verbose = TRUE)
 library(data.table)
 library(survey)
 library(magrittr)
