@@ -37,3 +37,5 @@ dt[, TIPOHOG1 := fcase(
 
 
 dt_sv <- svydesign(ids = ~IDENHOG, data = dt, weights = dt$FACTORCAL) %>% subset(MUESTRA == pop_stats[muni == city & year == sel_year, index])
+
+svytotal(~TIPOHOG1, dt_sv) %>% data.table() %>% print()
