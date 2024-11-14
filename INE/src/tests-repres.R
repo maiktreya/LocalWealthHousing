@@ -10,7 +10,7 @@ tipos_cat <- fread("AEAT/data/tipohog-madrid-2016.csv")[, .(Desc, Tipohog, index
 
 # define city subsample and variables to analyze
 export_object <- FALSE
-city <- "segovia"
+city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
@@ -38,7 +38,7 @@ prop_hogs <- data.table(
 )
 prop_hogs <- cbind(tipos_cat, prop_hogs)
 colnames(prop_hogs) <- c("Desc", "Tipohog", "index", "Freq.", "Total")
-prop_hogs2 <- fread("AEAT/data/tipohog-segovia-2016.csv")
+prop_hogs2 <- fread("AEAT/data/tipohog-madrid-2016.csv")
 
 final_table <- data.table(as.numeric(prop_hogs$Total), as.numeric(prop_hogs2$Total))
 final_table %>% print()

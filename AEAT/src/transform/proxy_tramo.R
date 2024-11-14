@@ -8,7 +8,7 @@ source("AEAT/src/transform/etl_pipe.R")
 pop_stats <- fread("AEAT/data/pop-stats.csv")
 
 # define city subsample and variables to analyze
-city <- "segovia"
+city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
 sel_year <- 2021
 ref_unit <- "IDENHOG"
@@ -40,5 +40,5 @@ prop_tramo <- data.table(
 )
 prop_tramo[, index := .I]
 colnames(prop_tramo) <- c("Freq.", "Total", "index")
-prop_tramo2 <- fread(paste0("AEAT/data/tramos-segovia-", sel_year, ".csv"))
-cbind(segovia = prop_tramo$Freq., cyl = prop_tramo2$Freq., diff = prop_tramo$Total - prop_tramo2$Total) %>% print()
+prop_tramo2 <- fread(paste0("AEAT/data/tramos-madrid-", sel_year, ".csv"))
+cbind(madrid = prop_tramo$Freq., cyl = prop_tramo2$Freq., diff = prop_tramo$Total - prop_tramo2$Total) %>% print()

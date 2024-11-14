@@ -61,7 +61,7 @@ calibrate_data <- function(
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
         bounds = limits,
-        bounds.const = TRUE,
+        # bounds.const = TRUE,
         calfun = "linear",
         maxit = 20000
     )
