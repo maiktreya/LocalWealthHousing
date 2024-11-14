@@ -6,7 +6,7 @@ calibrate_data <- function(
     ref_unit = "IDENHOG",
     city = NULL,
     pop_stats_file = "AEAT/data/pop-stats.csv",
-    file_suffix = "") {
+    file_suffix = "reduced") {
     # Dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
