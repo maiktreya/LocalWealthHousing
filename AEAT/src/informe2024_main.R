@@ -2,6 +2,7 @@
 
 # Clean environment to avoid RAM bottlenecks and import dependencies
 rm(list = ls())
+gc(full = TRUE, verbose = TRUE)
 library(data.table)
 library(survey)
 library(magrittr)
