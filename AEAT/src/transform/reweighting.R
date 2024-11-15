@@ -21,8 +21,8 @@ calibrate_data <- function(
     if (is.na(RBpop) || is.na(RNpop)) stop("Population values for the specified year, unit, or city are missing.")
 
     # Import household type data
-    if (file_suffix != "") file_suffix <- paste0(file_suffix, "-") 
-    tipohog_pop <- paste0("AEAT/data/tipohog-", city, "-", sel_year,"-", file_suffix, ".csv") %>% fread()
+    if (file_suffix != "") file_suffix <- paste0("-", file_suffix) 
+    tipohog_pop <- paste0("AEAT/data/tipohog-", city, "-", sel_year, file_suffix, ".csv") %>% fread()
     tipohog_pop <- data.frame(TIPOHOG1 = tipohog_pop$Tipohog, Freq = tipohog_pop$Total)
 
     # Remove rows with missing FACTORDIS values
@@ -60,9 +60,10 @@ calibrate_data <- function(
         design = sv_design,
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
-        bounds = limits,
+        trim = limits,
+        # bounds = c(0, max(weights(sv_design_base))),
         # bounds.const = TRUE,
-        calfun = "linear",
+        calfun = "raking",
         maxit = 20000
     )
 
