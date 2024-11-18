@@ -8,7 +8,7 @@ library(survey)
 library(magrittr)
 source("AEAT/src/transform/etl_pipe.R")
 
-for (i in c("segovia")) {
+for (i in c("madrid")) {
     city <- i
     for (j in c(2016, 2021)) {
         sel_year <- j

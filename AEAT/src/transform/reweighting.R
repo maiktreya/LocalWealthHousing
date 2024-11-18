@@ -60,12 +60,12 @@ calibrate_data <- function(
         design = sv_design,
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
-        # trim = limits,
-        bounds = c(0.1, 2),
-        # bounds.const = TRUE,
+        bounds = c(0, limits[2]),
+        bounds.const = TRUE,
         calfun = "linear",
         maxit = 20000
     )
+
 
     # Extract the data matrix
     dt <- calibrated_design$variables
