@@ -6,7 +6,7 @@ calibrate_data <- function(
     ref_unit = "IDENHOG",
     city = NULL,
     pop_stats_file = "AEAT/data/pop-stats.csv",
-    file_suffix = "reduced") {
+    file_suffix = "") {
     # Dependencies
     library(data.table, quietly = TRUE)
     library(survey, quietly = TRUE)
@@ -60,10 +60,9 @@ calibrate_data <- function(
         design = sv_design,
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
-        # bounds = c(0, 10000),
-        # bounds.const = TRUE,
+        bounds = limits,
+        bounds.const = TRUE,
         calfun = "raking",
-        # epsilon = 0.01,
         maxit = 20000
     )
 
