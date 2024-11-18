@@ -54,14 +54,15 @@ calibrate_data <- function(
 
     # Set limits to get the same range for weights after calibration
     limits <- c(min(weights(sv_design_base)), max(weights(sv_design_base)))
-
-    # Apply calibration
+   
+    # Apply calibration with TIPOHOG1
     calibrated_design <- calibrate(
         design = sv_design,
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
-        bounds = c(0,limits[2]),
-        bounds.const = TRUE,
+        # trim = limits,
+        bounds = c(0.1, 2),
+        # bounds.const = TRUE,
         calfun = "linear",
         maxit = 20000
     )

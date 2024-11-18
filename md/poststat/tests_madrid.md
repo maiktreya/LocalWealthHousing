@@ -1,5 +1,3 @@
-#
-
 ---
 
 ## 2016
@@ -26,12 +24,21 @@
 ---
 
 ```r
-
+    calibrated_design <- calibrate(
+        design = sv_design,
+        formula = ~ -1 + RENTAB,
+        population = calibration_totals_vec,
+        bounds = c(0, limits[2]),
+        bounds.const = TRUE,
+        calfun = "linear",
+        maxit = 20000
+    )
 ```
 
 #--------------------------------------------------------------------------------------#
 
 ## UNCALIBRATED 2016
+
 ---
 
 ```r
@@ -46,8 +53,8 @@
   1.111   2.847   6.400  25.483  31.442 575.520
 ```
 
-
 ## UNCALIBRATED 2021
+
 ---
 
 ```r
