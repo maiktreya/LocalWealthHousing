@@ -54,7 +54,7 @@ calibrate_data <- function(
 
     # Set limits to get the same range for weights after calibration
     limits <- c(min(weights(sv_design_base)), max(weights(sv_design_base)))
-   
+
     # Apply calibration with TIPOHOG1
     calibrated_design <- calibrate(
         design = sv_design,
@@ -65,7 +65,6 @@ calibrate_data <- function(
         calfun = "linear",
         maxit = 20000
     )
-
 
     # Extract the data matrix
     dt <- calibrated_design$variables
