@@ -1,7 +1,4 @@
-NÂº propiedades alquiladas,% total de hogares,% total de viviendas alquiladas,% total rentas del alquiler,ingresos medios alquiler,ingresos medios por inmueble
-1,0.067,0.247,0.295,7490.104,7490.104
-2,0.038,0.281,0.255,11376.897,5688.448
-3,0.009,0.1,0.113,21415.723,7138.574
-4,0.009,0.128,0.11,21599.763,5399.941
-5+,0.009,0.245,0.227,43341.568,5877.551
-no_caseros,0.868,0,0,0,0
+Nº propiedades alquiladas,% total de hogares,% total de viviendas alquiladas,% total rentas del alquiler,ingresos medios alquiler,ingresos medios por inmueble
+1,0.07,0.288,0.332,7588.475,7588.475
+2+,0.06,0.712,0.668,17955.65,6138.964
+no_caseros,0.87,0,0,0,0
