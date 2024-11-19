@@ -4,75 +4,53 @@
 
 ---
 
-## REDUCED 2021 RAKED
+## NO CALIBRATION 2016
 
 ---
 
 ```r
-     pop     mean     stat      se   RSE   dif  pval   MOE
-1: 34272 33543.58 -728.424 1168.07 0.035 0.021 0.533 0.068
-2: 41235 40446.35 -788.654 1538.07 0.038 0.019 0.608 0.075
+     var   pop     mean     stat       SE   RSE    dif  pval   MOE
+1: RENTAD 30203 31327.17 1124.168 1173.057 0.037 -0.037 0.338 0.073
+2: RENTAB 35772 37273.46 1501.464 1506.509 0.040 -0.042 0.319 0.079
 [1] "Implied Pop. size Reweighted:"
-[1] 21034
+[1] 18792.28
 [1] "Summary of calibrated weights"
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-  0.1293   1.9517   7.7942  19.4759  22.0264 414.6269 
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.097   2.918   8.738  22.452  25.875 485.420 
 ```
 
 ---
 
-## REDUCED 2016 RAKED
+## NO CALIBRATION
 
 ---
 
 ```r
-      var   pop     mean     stat       SE   RSE   dif  pval   MOE
-1: RENTAD 30203 29962.69 -240.307 1453.675 0.049 0.008 0.869 0.095
-2: RENTAB 35772 35624.68 -147.323 1861.863 0.052 0.004 0.937 0.102
+      var   pop     mean    stat       SE   RSE    dif  pval   MOE
+1: RENTAD 34272 34593.02 321.021 1136.886 0.033 -0.009 0.778 0.064
+2: RENTAB 41235 41763.19 528.189 1488.342 0.036 -0.013 0.723 0.070
 [1] "Implied Pop. size Reweighted:"
-[1] 19280.31
+[1] 19236.38
 [1] "Summary of calibrated weights"
     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-  0.4634   4.3909   8.4602  23.0350  26.0674 800.8549 
-```
-
----
-
-## REDUCED 2021 LINEAR
-
----
-
-```r
-      var   pop     mean     stat       SE   RSE   dif  pval   MOE
-1: RENTAD 34272 33535.65 -736.349 1167.082 0.035 0.021 0.528 0.068
-2: RENTAB 41235 40434.05 -800.947 1536.620 0.035 0.019 0.602 0.074
-[1] "Implied Pop. size Reweighted:"
-[1] 21034
-[1] "Summary of calibrated weights"
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
-  0.1285   1.9498   7.7924  19.4759  22.0247 414.5978
-```
-
----
-
-## REDUCED 2016 LINEAR
-
----
-
-```r
-      var   pop     mean     stat       SE   RSE   dif  pval   MOE
-1: RENTAD 30203 29961.24 -241.759 1452.876 0.048 0.008 0.868 0.095
-2: RENTAB 35772 35622.72 -149.283 1860.794 0.048 0.004 0.936 0.102
-[1] "Implied Pop. size Reweighted:"
-[1] 19280.31
-[1] "Summary of calibrated weights"
-    Min.  1st Qu.   Median     Mean  3rd Qu.     Max.
-  0.4633   4.3907   8.4599  23.0350  26.0675 800.8259
+  0.1428   1.8405   6.2870  17.8115  24.7028 189.1128
 ```
 
 
 
 ## REDUCED BOUNDED LINEAR 2021
+
+```r
+    calibrated_design <- calibrate(
+        design = sv_design,
+        formula = ~ -1 + RENTAB,
+        population = calibration_totals_vec,
+        bounds = c(0, limits[2]),
+        bounds.const = TRUE,
+        calfun = "linear",
+        maxit = 20000
+    )
+```
 
 ---
 

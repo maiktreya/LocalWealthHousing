@@ -60,7 +60,7 @@ calibrate_data <- function(
         design = sv_design,
         formula = ~ -1 + RENTAB,
         population = calibration_totals_vec,
-        bounds = c(0, limits[2]),
+        bounds = limits,
         bounds.const = TRUE,
         calfun = "linear",
         maxit = 20000
