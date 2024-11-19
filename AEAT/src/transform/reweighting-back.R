@@ -37,13 +37,12 @@ calibrate_data <- function(dt = dt, sel_year = sel_year, ref_unit = ref_unit, ci
     # set a named vector with the population values of reference for each variable
     calibration_totals_vec <- c(
         tipohog_pop,
-        RENTAB = RBpop * sum(weights(pre_subsample)),
-        RENTAD = RNpop * sum(weights(pre_subsample))
+        RENTAB = RBpop * sum(weights(pre_subsample))
     )
     # Apply calibration with the new named vector
     subsample <- calibrate(
         design = pre_subsample,
-        formula = ~ -1 + TIPOHOG + RENTAB + RENTAD,
+        formula = ~ -1 + TIPOHOG + RENTAB,
         population = calibration_totals_vec,
         calfun = "raking",
         bounds = limits,
