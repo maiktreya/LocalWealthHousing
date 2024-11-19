@@ -10,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "madrid"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calibrated <- TRUE
 
@@ -54,7 +54,7 @@ miembros <- c(
     coef(svymean(~MIEMBROS, dt_sv))
 )
 
-tipo_prop <- cbind(tipo_prop[c(1, 3, 5)], tipo_prop[c(2, 4, 6)]) %>% print()
+tipo_prop <- cbind(nacional = tipo_prop[c(1, 3, 5)], migrante = tipo_prop[c(2, 4, 6)]) %>% print()
 renta <- c(coef(svyby(~RENTAD, ~MIGR, dt_sv, svymean)), coef(svymean(~RENTAD, dt_sv))) %>% print()
 prop_migr <- c(coef(svymean(~MIGR, dt_sv)), tot = 1) %>% print()
 tenencia <- cbind(tenencia_migr, tenencia_nacio) %>% print()
