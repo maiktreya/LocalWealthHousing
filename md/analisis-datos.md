@@ -1,0 +1,1 @@
+# Redacción preliminar extracción datos Segovia AEAT
