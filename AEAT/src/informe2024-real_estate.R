@@ -79,3 +79,15 @@ colnames(results) <- c(
 )
 print(results)
 fwrite(results, paste0("AEAT/out/segovia/segovia-", sel_year, "-IDENHOGreal_estate.csv"))
+
+
+
+
+dt[, casero := 0][NPROP_ALQ > 0, casero := 1]
+dt_sv$variables[, "casero"] <- dt$casero
+
+svytotal(~NPROP_ALQ, dt_sv) %>%
+    print()
+
+svytotal(~casero, dt_sv) %>%
+    print()
