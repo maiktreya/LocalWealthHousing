@@ -10,7 +10,7 @@ pop_stats <- fread("AEAT/data/pop-stats.csv")
 # define city subsample and variables to analyze
 city <- "segovia"
 represet <- "!is.na(FACTORCAL)"
-sel_year <- 2021
+sel_year <- 2016
 ref_unit <- "IDENHOG"
 calibrated <- TRUE
 
@@ -80,9 +80,6 @@ colnames(results) <- c(
 print(results)
 fwrite(results, paste0("AEAT/out/segovia/segovia-", sel_year, "-IDENHOGreal_estate.csv"))
 
-
-
-
 dt[, casero := 0][NPROP_ALQ > 0, casero := 1]
 dt_sv$variables[, "casero"] <- dt$casero
 
@@ -90,4 +87,7 @@ svytotal(~NPROP_ALQ, dt_sv) %>%
     print()
 
 svytotal(~casero, dt_sv) %>%
+    print()
+
+svytotal(~RENTA_ALQ2, dt_sv) %>%
     print()
