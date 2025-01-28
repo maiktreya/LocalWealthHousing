@@ -40,6 +40,7 @@ dt <- dt[, .(
     HIJOS_MENORES = first(HIJOS_MENORES),
     HIJOS = first(HIJOS),
     TIPOHOGAR = first(TIPOHOGAR),
+    REGVI = first(REGVI),
     TAM_MUNI = first(TAM_MUNI),
     NADUL65 = sum(adul_65, na.rm = TRUE),
     NADUL = sum(adul, na.rm = TRUE)
@@ -69,6 +70,8 @@ dt_sv <- svydesign(
 
 # Calculate proportion of households by type
 prop_hogs <- svytotal(~TIPOHOG, dt_sv) %>% data.table()
+regvi_pri <- svytable(~ as.factor(REGVI), dt_sv) %>% prop.table()
+regvi_pri <- c(prop = sum(regvi_pri[1:2]), alq = regvi_pri[3], otr = regvi_pri[4])
 
 # Calculate frequencies and total
 prop_hogs <- data.table(
@@ -83,4 +86,4 @@ print(prop_hogs)
 total_freq <- sum(prop_hogs[, Freq.]) %>% print()
 weight_difference <- sum(weights(dt_sv)) - sum(prop_hogs[, Total]) %>% print()
 
-fwrite(prop_hogs, "AEAT/data/tipohog-segovia-2016.csv")
+# fwrite(prop_hogs, "AEAT/data/tipohog-segovia-2016.csv")
