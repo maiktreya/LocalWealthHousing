@@ -78,16 +78,16 @@ colnames(results) <- c(
     "ingresos medios por inmueble"
 )
 print(results)
-fwrite(results, paste0("AEAT/out/segovia/segovia-", sel_year, "-IDENHOGreal_estate.csv"))
+# fwrite(results, paste0("AEAT/out/segovia/segovia-", sel_year, "-IDENHOGreal_estate.csv"))
 
-dt[, casero := 0][NPROP_ALQ > 0, casero := 1]
+dt[, casero := ifelse(RENTA_ALQ2 > 0, 1, 0)]
 dt_sv$variables[, "casero"] <- dt$casero
+dt[, gran_tenedor := ifelse(RENTA_ALQ2 > 9, 1, 0)]
+dt_sv$variables[, "gran_tenedor"] <- dt$gran_tenedor
 
-svytotal(~NPROP_ALQ, dt_sv) %>%
-    print()
+svytotal(~NPROP_ALQ, dt_sv) %>% print()
+svytotal(~casero, dt_sv) %>% print()
+svytotal(~gran_tenedor, dt_sv) %>% print()
+svytotal(~RENTA_ALQ2, dt_sv) %>% print()
 
-svytotal(~casero, dt_sv) %>%
-    print()
-
-svytotal(~RENTA_ALQ2, dt_sv) %>%
-    print()
+svytotal(~as.factor(gran_tenedor), dt_sv) %>% prop.table()
