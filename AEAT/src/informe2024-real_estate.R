@@ -82,7 +82,7 @@ print(results)
 
 dt[, casero := ifelse(RENTA_ALQ2 > 0, 1, 0)]
 dt_sv$variables[, "casero"] <- dt$casero
-dt[, gran_tenedor := ifelse(RENTA_ALQ2 > 9, 1, 0)]
+dt[, gran_tenedor := ifelse(NPROP_ALQ > 9, 1, 0)]
 dt_sv$variables[, "gran_tenedor"] <- dt$gran_tenedor
 
 svytotal(~NPROP_ALQ, dt_sv) %>% print()
@@ -90,4 +90,5 @@ svytotal(~casero, dt_sv) %>% print()
 svytotal(~gran_tenedor, dt_sv) %>% print()
 svytotal(~RENTA_ALQ2, dt_sv) %>% print()
 
-svytotal(~as.factor(gran_tenedor), dt_sv) %>% prop.table()
+svytotal(~as.factor(gran_tenedor), dt_sv) %>% print()
+svytotal(~as.factor(NPROP_ALQ), subset(dt_sv, gran_tenedor == 1)) %>% print()
