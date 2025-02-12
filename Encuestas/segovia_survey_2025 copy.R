@@ -4,8 +4,7 @@ library(magrittr) # pipes
 library(data.table) # data wrangling
 library(survey) # survey data
 library(readxl) # read excel files
-library(mice) # library for dealing with multiple imputations
-library(missRanger)
+library(mi) # library for dealing with multiple imputations
 
 # Prepare environment by cleaning any previous object in memory
 gc()
@@ -28,19 +27,31 @@ exclude_vars <- c("Start time", "End time", "ID")
 ie_clean <- ie_forms[, !exclude_vars, with = FALSE]
 uv_clean <- uv_forms[, !exclude_vars, with = FALSE]
 
-# https://cran.r-project.org/web/packages/missRanger/vignettes/multiple_imputation.html
+# Function to perform multiple imputation
+generate_imputations <- function(data, m = 5) {
+    # Convert data.table to data frame for mi package compatibility
+    data <- as.data.frame(data)
 
-ie_forms_NA1 <- generateNA(ie_forms, p = c(0, 0.1, 0.1, 0.1, 0.1))
-ie_forms_NA2 <- generateNA(ie_forms, p = c(0, 0.1, 0.1, 0.1, 0.1))
+    # Define missing data object
+    missing_data <- missing_data.frame(data)
 
-# Generate 20 complete data sets with relatively large pmm.k
-filled1 <- replicate(
-    20,
-    missRanger(ie_forms_NA1, verbose = 0, num.trees = 100, pmm.k = 10),
-    simplify = FALSE
-)
-filled2 <- replicate(
-    20,
-    missRanger(ie_forms_NA2, verbose = 0, num.trees = 100, pmm.k = 10),
-    simplify = FALSE
-)
+    # Perform multiple imputations
+    imputed_data <- mi(missing_data, n.iter = 30, n.chains = m) # 30 iterations, 5 imputations
+
+    # Convert imputations to a list of completed datasets
+    completed_datasets <- complete(imputed_data, m)
+
+    return(completed_datasets)
+}
+
+# Generate 5 multiple imputations for each form
+ie_imputations <- generate_imputations(ie_clean, m = 5)
+uv_imputations <- generate_imputations(uv_clean, m = 5)
+
+# Convert imputed datasets back to data.table format
+ie_imputations <- lapply(ie_imputations, data.table)
+uv_imputations <- lapply(uv_imputations, data.table)
+
+# Save imputed datasets for further analysis
+saveRDS(ie_imputations, "Imputed_Data/IE_Imputations.RDS")
+saveRDS(uv_imputations, "Imputed_Data/UVA_Imputations.RDS")
