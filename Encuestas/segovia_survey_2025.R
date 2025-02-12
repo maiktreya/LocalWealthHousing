@@ -44,3 +44,13 @@ filled2 <- replicate(
     missRanger(ie_forms_NA2, verbose = 0, num.trees = 100, pmm.k = 10),
     simplify = FALSE
 )
+
+# test differences in generations
+difs <- data.table()
+for (i in 1:20) {
+    aa <- filled1[[i]]$Age %>% as.numeric()
+    bb <- filled2[[i]]$Age %>% as.numeric()
+    dif <- aa - bb
+    difs <- cbind(difs, dif)
+}
+print(difs)
