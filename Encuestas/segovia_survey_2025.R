@@ -14,6 +14,7 @@ rm(list = ls())
 # Read original forms
 ie_forms <- read_excel("Encuestas/IE.2025.xlsx") %>% data.table()
 uv_forms <- read_excel("Encuestas/UVA.2025.xlsx") %>% data.table()
+ie_alt_forms <- read_excel("Encuestas/IE.2025.treated.xlsx", sheet = "Final") %>% data.table()
 
 # Convert 'Start time' to POSIXct format to avoid errors
 ie_forms[, `Start time` := as.POSIXct(`Start time`, format = "%Y-%m-%d %H:%M:%S", tz = "UTC")]
