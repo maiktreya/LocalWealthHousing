@@ -4,8 +4,8 @@ library(magrittr) # pipes
 library(data.table) # data wrangling
 library(survey) # survey data
 library(readxl) # read excel files
-library(mice) # library for dealing with multiple imputations
-library(missRanger)
+library(missRanger) # to impute values
+library(openxlsx) # for writing Excel files
 
 # Prepare environment by cleaning any previous object in memory
 gc()
@@ -68,5 +68,5 @@ merged_IE <- as.data.table(merged_IE)
 merged_UV <- as.data.table(merged_UV)
 
 # Save merged datasets if needed
-fwrite(merged_IE, "Encuestas/IE_merged_imputations.xlsx")
-fwrite(merged_UV, "Encuestas/UV_merged_imputations.xlsx")
+write.xlsx(merged_IE, "Encuestas/IE_merged_imputations.xlsx")
+write.xlsx(merged_UV, "Encuestas/UV_merged_imputations.xlsx")
