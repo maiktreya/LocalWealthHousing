@@ -52,6 +52,7 @@ dt[, TIPOHOG := fcase(
     MEMBERS == 1 & NADUL65 == 0, 2,
     MEMBERS > 1 & NADUL == 1, 3,
     NADUL >= 2 & HIJOS_MENORES == 1, 4,
+
     NADUL >= 2 & HIJOS_MENORES == 2, 5,
     NADUL >= 2 & HIJOS_MENORES >= 3, 6,
     NADUL >= 2 & HIJOS_MENORES == 0 & NADUL65 != 0 & MEMBERS == 2, 7,
@@ -60,7 +61,7 @@ dt[, TIPOHOG := fcase(
     MEMBERS == 2, 9,
     default = NA # Clear default case
 )][, TIPOHOG := as.factor(TIPOHOG)]
-
+svyby()
 # Define weights and create survey object
 dt_sv <- svydesign(
     ~1,
@@ -87,3 +88,20 @@ total_freq <- sum(prop_hogs[, Freq.]) %>% print()
 weight_difference <- sum(weights(dt_sv)) - sum(prop_hogs[, Total]) %>% print()
 
 # fwrite(prop_hogs, "AEAT/data/tipohog-segovia-2016.csv")
+
+
+
+
+tabla <- svyby(~TIPOHOG, ~REGVI, dt_sv, svytotal, keep.var = FALSE ) %>% prop.table() %>% data.table(
+
+
+
+dt[,HOGUNI := fifelse(TIPOHOG == 3, "uni", "no_uni")]
+
+
+dt_sv$variables[,"HOGUNI"] <- dt$HOGUNI
+
+tabla <- svyby(~REGVI, ~HOGUNI, dt_sv, svytotal, keep.var = FALSE ) %>% prop.table() 
+
+
+svytotal(~HOGUNI, )
