@@ -102,8 +102,6 @@ miss_summary <- data.frame(
     )
 )
 
-write.xlsx(miss_summary, "Encuestas/svy_reports/missingness_summary.xlsx")
-
 # ========== MULTIPLE IMPUTATION WITH BOOTSTRAPPING ==========
 
 # Number of bootstrap samples and imputations
@@ -460,19 +458,19 @@ create_diagnostic_plots <- function(original, imputed, var_name) {
 }
 
 # Create diagnostic plots for key variables
-key_vars_ie <- names(ie_clean)[1:min(5, ncol(ie_clean))] # First 5 variables as example
-key_vars_uv <- names(uv_clean)[1:min(5, ncol(uv_clean))]
+key_vars_ie <- names(ie_clean)[seq_len(min(5, ncol(ie_clean)))] # First 5 variables as example
+key_vars_uv <- names(uv_clean)[seq_len(min(5, ncol(uv_clean)))]
 
 for (var in key_vars_ie) {
     plots <- create_diagnostic_plots(ie_clean, final_IE, var)
-    pdf(paste0("Encuestas/IE_", var, "_diagnostic.pdf"), width = 10, height = 6)
+    pdf(paste0("Encuestas/diag_pdf/IE_", var, "_diagnostic.pdf"), width = 10, height = 6)
     grid.arrange(plots[[1]], plots[[2]], ncol = 2)
     dev.off()
 }
 
 for (var in key_vars_uv) {
     plots <- create_diagnostic_plots(uv_clean, final_UV, var)
-    pdf(paste0("Encuestas/UV_", var, "_diagnostic.pdf"), width = 10, height = 6)
+    pdf(paste0("Encuestas/diag_pdf/UV_", var, "_diagnostic.pdf"), width = 10, height = 6)
     grid.arrange(plots[[1]], plots[[2]], ncol = 2)
     dev.off()
 }
