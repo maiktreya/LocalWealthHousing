@@ -7,11 +7,11 @@ Este análisis evalúa la diferencia en el costo del alquiler mensual entre estu
 
 ### **2.1 Población y muestra**
 - **Población total:**
-  - IE University: 4.500 estudiantes
-  - UVA (campus Valladolid): 24.000 estudiantes
+  - IE University: 3.923 estudiantes
+  - UVA (campus Valladolid): 2.323 estudiantes
 - **Muestras analizadas:**
-  - IE University: 60 estudiantes (≈ 1,3% de la población)
-  - UVA: 620 estudiantes (≈ 2,6% de la población)
+  - IE University: 51 estudiantes (≈ 1,3% de la población)
+  - UVA: 61 estudiantes (≈ 2,6% de la población)
 
 ### **2.2 Pesos muestrales**
 Para corregir la diferencia en tasas de muestreo entre ambas universidades, se asignan pesos de muestreo como:
