@@ -61,7 +61,7 @@ dt[, TIPOHOG := fcase(
     MEMBERS == 2, 9,
     default = NA # Clear default case
 )][, TIPOHOG := as.factor(TIPOHOG)]
-svyby()
+
 # Define weights and create survey object
 dt_sv <- svydesign(
     ~1,
@@ -92,7 +92,7 @@ weight_difference <- sum(weights(dt_sv)) - sum(prop_hogs[, Total]) %>% print()
 
 
 
-tabla <- svyby(~TIPOHOG, ~REGVI, dt_sv, svytotal, keep.var = FALSE ) %>% prop.table() %>% data.table(
+tabla <- svyby(~TIPOHOG, ~REGVI, dt_sv, svytotal, keep.var = FALSE ) %>% prop.table() %>% data.table()
 
 
 
