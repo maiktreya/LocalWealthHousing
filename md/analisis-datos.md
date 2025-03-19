@@ -1,22 +1,39 @@
 # Anexo Metodológico
 
+El presente anexo pretende facilitar replicar en la medida de lo posible los datos obtenidos en este informe para otros municipios enfrentando un mercado del alquiler problemático. Dadas las limitaciones existentes en la disponibilidad de datos, para poder obtener toda la información a presentar es muy recomendable que el municipio a analizar tenga una población superior a los 50.000 habitantes o, idealmente, que se trate de una capital de provincia.
 
+Para facilitar este proceso se ha creado un repositorio público desde el que poder reproducir nuestros resultados o ampliarlos a otas unidades geográficas:
+
+https://github.com/maiktreya/LocalWealthHousing
+
+Existen dos importantes limitaciones en este proceso:
+- Heterogeneidad en la disponibilidad y acceso a fuentes primarias elaboradas por las administraciones local y autonómica.
+- Especificidad del caso de Segovia (tanto el importante foco en el sector turístico como la elaboración de las encuestas a estudiantes universitarios responde a las necesidades concretas de la ciudad de Segovia y con total seguridad son características innecesarias a la hora de analizar otras realidades municipales).
 ### TABLAS DEL INE
 ---
 **DATOS DEMOGRAFICOS**
->Censo de Población y Viviendas (2011, 2021)
->Encuesta Continua Características de los Hogares (2016)
+- Censo de Población y Viviendas (2011, 2021)
+- Encuesta Continua Características de los Hogares (2016)
+
+La práctica totalidad de los datos demográficos utilizados en este informe procede de estas dos encuestas proporcionadas por el INE. Para acceder a estos datos con mayor facilidad puede utilizarse la API provista a tal efecto. Una integración básica junto al listado exhaustivo de las tablas referenciadas para la elaboración de este informe puede encontrarse en el siguiente script de nuestro repositorio:
 
 **DATOS AFLUENCIA TURISTICA Y CAPACIDAD HOSTELERA**
->Encuesta de ocupación en Alojamientos Turísticos extra-hoteleros (2011-)
->Encuesta de Ocupación Hotelera (2004-)
->Estadística experimental. Ocupación en alojamientos turísticos (2018-)
->Estadística experimental. Medición del número de viviendas turísticas en  España y su capacidad. (2018-)
+- Encuesta de ocupación en Alojamientos Turísticos extra-hoteleros (2011-)
+- Encuesta de Ocupación Hotelera (2004-)
+- Estadística experimental. Ocupación en alojamientos turísticos (2018-)
+- Estadística experimental. Medición del número de viviendas turísticas en  España y su capacidad. (2018-)
 
 ### EXPLOTACIÓN MUESTRA IRPF AGENCIA TRIBUTARIA
 
 **CALIBRACIÓN Y REPRESENTATIVIDAD MUNICIPAL**
-    mediante censo INE 
+La muestra de IRPF facilitada por la AEAT garantiza la representatividad a nivel autonómico, pero no a la escala municipal. Para garantizar unos resultados robustos hemos sometido a la submuestra de hogares de Segovia un proceso de re-calibración de los pesos muestrales teniendo en cuenta los estratos originales utilizados y sus proporciones poblacionales a escala municipal obtenidos mediante los datos del Censo de Población y Viviendas (2011, 2021) o la Encuesta Continua de Hogares (2013-).
+
+No tiene sentido entrar en el detalle estadístico de este procedimiento, simplemente indicar que el proceso está detallado en su totalidad en el siguiente documento del repositorio base: 
+
+https://github.com/maiktreya/LocalWealthHousing/blob/main/md/analisis-datos.md
+
+Es importante tener en cuenta que la muestra de IRPF no se encuentra disponible públicamente sino que requiere de solicitud formal de los mismos a la AEAT.
+
 **CONSTRUCCIÓN DE VARIABLES SOBRE INGRESOS Y RENTISMO**
 
 ---
