@@ -96,12 +96,115 @@ Existen otras fuentes auxiliares de importancia también utilizadas en este trab
 
 ## Características básicas de la encuesta sobre el coste del alojamiento en estudiantes universitarios
 
-La encuesta se diseñó para capturar información sobre las condiciones de alojamiento de los estudiantes universitarios en Segovia, incluyendo:
-- Tipo de alojamiento (residencia, piso compartido, domicilio familiar, etc.)
-- Coste mensual del alojamiento
-- Características de la vivienda (tamaño, estado, equipamiento)
-- Satisfacción con el alojamiento actual
-- Dificultades encontradas en la búsqueda de vivienda
-- Impacto del coste del alojamiento en la economía personal o familiar
+Las encuesta recolectada entre los estudiantes de las dos universidades de Segovia (IE y UVA) 
+---
 
-La muestra incluyó estudiantes de los diferentes campus universitarios presentes en la ciudad (IE University y Universidad de Valladolid), estratificada por curso académico y titulación. El cuestionario completo y la metodología específica de muestreo pueden consultarse en el repositorio del proyecto.
+### A) Diseño Muestral de la Encuesta
+
+#### Poblaciones de Estudio
+
+Tu estudio se centra en dos poblaciones universitarias distintas:
+
+1. **IE (Instituto de Empresa)**
+   - Población total: 3.923 estudiantes
+   - Muestra obtenida: 51 estudiantes
+   - Tasa de muestreo: aproximadamente 1,3% de la población total
+
+2. **UVA (Universidad de Valladolid)**
+   - Población total: 2.323 estudiantes
+   - Muestra obtenida: 61 estudiantes
+   - Tasa de muestreo: aproximadamente 2,6% de la población total
+
+#### Tipo de Muestreo
+
+- El muestreo es aleatorio simple con universos independientes entre las dos universidades.
+- No se aplicó estratificación ni agrupamiento en el diseño muestral.
+- Pesos muestrales como inversa de la probabilidad de selección (constante).
+
+#### Sistema de Ponderación
+
+Para asegurar que la muestra represente adecuadamente a la población total, se aplicaron ponderaciones:
+
+- **Ponderación para IE**: total_pop_ie/nrow(dt_ie) = 3.923/51 ≈ 76,92
+- **Ponderación para UVA**: total_pop_uv/nrow(dt_uv) = 2.323/61 ≈ 38,08
+
+Estas ponderaciones se utilizaron en el análisis para "expandir" los resultados de la muestra a la población total, asegurando que las estimaciones sean representativas del conjunto de estudiantes.
+
+#### Variable de Interés
+
+La variable principal analizada fue:
+- `how_much_do_you_pay_monthly_in_your_rental_contract`: importe mensual que pagan los estudiantes por su contrato de alquiler
+
+#### Método de Recolección de Datos
+
+1. Encuestas estructuradas anonimizadas (mix de recolección en persona y mediante formulario web)
+2. Tratamiento de no respuesta mediante imputación multiple y bootstraping.
+3. Normalización de resultados para tratamiento estadístico (coerción a numérico o factor).
+4. Los datos se almacenaron en archivos Excel (con nombres "IE_final_imputed.xlsx" y "UVA_final_imputed.xlsx")
+
+#### Consideraciones sobre el Diseño Muestral
+
+1. **Representatividad**: El diseño utiliza ponderaciones para ajustar la representatividad de la muestra respecto a la población total.
+
+2. **Estimación de Parámetros**: El uso de la librería `survey` permite incorporar correctamente el diseño muestral en la estimación de medias y errores estándar.
+
+3. **Intervalos de Confianza**: Se calcularon intervalos de confianza al 95% para las estimaciones, lo que proporciona un rango plausible para los verdaderos valores poblacionales.
+
+4. **Tamaño Muestral**: Aunque las muestras (51 y 61 estudiantes) representan porcentajes relativamente pequeños de las poblaciones totales, el análisis de potencia indica que son más que suficientes dado el gran tamaño del efecto observado.
+
+Este diseño muestral, aunque simple, es apropiado para el objetivo de comparar los gastos de alquiler entre las dos poblaciones universitarias. La implementación correcta de ponderaciones y el uso de herramientas estadísticas adecuadas (como la librería `survey`) fortalecen la validez de las conclusiones obtenidas.
+
+
+### B) Resumen de los Resultados sobre la variable de referencia 
+
+Tu estudio comparó los gastos mensuales de alquiler entre estudiantes de dos universidades diferentes:
+
+1. **IE (Instituto de Empresa):**
+   - Gasto medio mensual: **1.098,80€**
+   - Intervalo de confianza (95%): 1.003,43€ - 1.194,17€
+
+2. **UVA (Universidad de Valladolid):**
+   - Gasto medio mensual: **375,72€**
+   - Intervalo de confianza (95%): 332,58€ - 418,85€
+
+### C) Interpretación Estadística
+
+#### Diferencia Significativa
+La diferencia entre los gastos de alquiler es estadísticamente significativa y muy grande. Los estudiantes del IE pagan aproximadamente 2,9 veces más que los estudiantes de la UVA.
+
+#### Tamaño del Efecto
+- **Cohen's d = 19,75**
+- Este es un tamaño de efecto extraordinariamente grande (los valores superiores a 0,8 ya se consideran "grandes").
+- Significa que la diferencia observada es casi 20 desviaciones estándar, lo que es enorme.
+
+#### Análisis de Potencia Estadística
+- **Potencia = 1,0 (100%)**
+- Esto significa que el estudio tiene un 100% de probabilidad de detectar la diferencia observada.
+- Con un efecto tan grande, es prácticamente imposible no detectar esta diferencia.
+
+#### Tamaño Muestral Adecuado
+- Tamaño muestral mínimo requerido para una potencia del 80%: solo 3 estudiantes por grupo.
+- Tamaños muestrales actuales (IE: 51, UVA: 61) son mucho mayores de lo necesario.
+- Las muestras son más que adecuadas para la inferencia estadística.
+
+### D) Explicación de por qué el Tamaño Muestral Mínimo es tan Pequeño
+
+Quizás te sorprenda que el tamaño muestral mínimo sea tan pequeño (solo 3 estudiantes por grupo), especialmente cuando las fórmulas tradicionales sugieren valores de 300-400 estudiantes. Esto se debe a:
+
+1. **La Magnitud de la Diferencia**
+   - La diferencia entre los dos grupos es tan grande (723,08€) que se puede detectar incluso con muestras muy pequeñas.
+   - Es como si estuviéramos comparando el peso de elefantes con el de ratones; no necesitaríamos muchos ejemplares para notar la diferencia.
+
+2. **Diferentes Propósitos Estadísticos**
+   - La fórmula tradicional (n = (Z²p(1-p))/E²) se usa para estimar una proporción con un margen de error específico.
+   - El análisis de potencia que has realizado se utiliza para detectar diferencias entre medias, basándose en el tamaño del efecto observado.
+
+3. **Fórmula para Comparación de Medias**
+   - Para comparar medias, el tamaño muestral depende del tamaño del efecto (d de Cohen).
+   - Con un efecto tan grande (d = 19,75), la fórmula da un resultado muy pequeño:
+     n = 2 × (1,96 + 0,84)² / 19,75² ≈ 3
+
+### E) Conclusiones: potencia estadística y representatividad.
+- Los resultados de la encuesta son estadísticamente válidos y robustos y los tamaños muestrales son más que suficientes para la inferencia estadística sobre el gasto medio en alquiler por estudiante, nuestra principal variable de interés.
+- Los resultados muestran una diferencia enorme y estadísticamente significativa en los gastos de alquiler entre los estudiantes de IE y UVA. 
+- La magnitud de la diferencia es tan grande que explica por qué el tamaño muestral mínimo calculado es sorprendentemente pequeño.
