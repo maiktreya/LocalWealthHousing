@@ -9,19 +9,36 @@ https://github.com/maiktreya/LocalWealthHousing
 Existen dos importantes limitaciones en este proceso:
 - Heterogeneidad en la disponibilidad y acceso a fuentes primarias elaboradas por las administraciones local y autonómica.
 - Especificidad del caso de Segovia (tanto el importante foco en el sector turístico como la elaboración de las encuestas a estudiantes universitarios responde a las necesidades concretas de la ciudad de Segovia y con total seguridad son características innecesarias a la hora de analizar otras realidades municipales).
-### TABLAS DEL INE
+
 ---
+---
+
+## Obtención de datos primaros
+
+---
+
+### TABLAS DEL INE
 **DATOS DEMOGRAFICOS**
 - Censo de Población y Viviendas (2011, 2021)
 - Encuesta Continua Características de los Hogares (2016)
 
 La práctica totalidad de los datos demográficos utilizados en este informe procede de estas dos encuestas proporcionadas por el INE. Para acceder a estos datos con mayor facilidad puede utilizarse la API provista a tal efecto. Una integración básica junto al listado exhaustivo de las tablas referenciadas para la elaboración de este informe puede encontrarse en el siguiente script de nuestro repositorio:
 
+https://github.com/maiktreya/LocalWealthHousing/blob/main/INE/src/tablas-INE.R
+
+En caso de querer analizar los datos a un nivel más granular, el INE pone a disposición pública los microdatos de los distintos releases de estas encuestas. Estas encuestas nos permiten obtener no solo la información demográfica referente a hogares sino también al número total de viviendas y su clasificación por tipo de uso.
+
 **DATOS AFLUENCIA TURISTICA Y CAPACIDAD HOSTELERA**
 - Encuesta de ocupación en Alojamientos Turísticos extra-hoteleros (2011-)
 - Encuesta de Ocupación Hotelera (2004-)
 - Estadística experimental. Ocupación en alojamientos turísticos (2018-)
 - Estadística experimental. Medición del número de viviendas turísticas en  España y su capacidad. (2018-)
+
+El análisis de la oferta hostelera y demanda turística descansa en dos encuestas analizando la capacidad y nivel de ocupación de los alojamientos hoteleros o de otro tipo respectivamente.
+
+Más allá de los datos de estas encuestas el INE, consciente de la necesidad de capturar alojamientos que muchas veces no figuran registrados propiamente según su tipología, problema especialmente notorio en el caso de las Viviendas de Uso Turístico. Para superar esta limitación el INE ha elaborado dos estadísticas de caracter experimental que beben de la explotación mediante técnicas de scrapping de las principales plataformas web anunciantes de este tipo de alojamientos.
+
+---
 
 ### EXPLOTACIÓN MUESTRA IRPF AGENCIA TRIBUTARIA
 
@@ -36,72 +53,40 @@ Es importante tener en cuenta que la muestra de IRPF no se encuentra disponible 
 
 **CONSTRUCCIÓN DE VARIABLES SOBRE INGRESOS Y RENTISMO**
 
+Para poder elaborar los datos económicos derivados de esta muestra, hemos definido las siguientes categorías de referencia:
+- HOGAR RENTISTA:
+- INGRESOS DEL HOGAR OBTENIDOS DEL ALQUILER DE VIVIENDAS:
+- NÚMERO DE PROPIEDADES EN ALQUILER:
+- HOGAR NO-PROPIETARIO: Aquel hogar 
+
 ---
 
 ### EXPLOTACIÓN DE INFORMACIÓN DE PLATAFORMAS PRIVADAS
+
 **OBTENCIÓN DE DATOS HISTÓRICOS**
-> ALQUILER & VENTA  -> https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/
-> ALQUILER -> INE (Índice Precios Vivienda en Alquiler)
+- ALQUILER & VENTA  -> https://www.idealista.com/sala-de-prensa/informes-precio-vivienda/
+- ALQUILER -> INE (Índice Precios Vivienda en Alquiler)
 
 Para obtener datos históricos sobre el precio medio del m2 tanto en el mercado de compra-venta como el del alquiler, podemos utilizar dos vías alternativas (para municipios capital de provincia)
 
 **SCRAPPING COMPLETO DEL MERCADO INMOBILIARIO**
-> REPOSITORIO AIRBNB & IDEALISTA -> https://github.com/maiktreya/rental-scrapers
+- REPOSITORIO AIRBNB & IDEALISTA -> https://github.com/maiktreya/rental-scrapers
 
-Para obtener información completa sobre el mercado de compra o alquiler (listado de propiedades, localización, precio...) podemos utilizar herramientas denominadas scrappers
-
-Airbnb (pisos turísticos)
-Idealista (mercados de compra y alquiler)
+Para obtener información completa sobre el mercado de compra o alquiler (listado de propiedades, localización, precio...) podemos utilizar herramientas denominadas scrappers.
+1) Obtener datos de los mercados de compra y alquiler para un municipio determinado explotando la web de Idealista.
+2) Obtener datos reales del número total de Viviendas de Uso Turístico ofertadas de manera efectiva explotando la web de AirBnB.
 
 ### OTROS
-  Viviendas alquiler social ayuntamiento y CCAA
-  Número de viviendas vendidas (ministerio sostenibilidad) -> https://apps.fomento.gob.es/BoletinOnline2/sedal/34010210.XLS
+Existen otras fuentes auxiliares de importancia también utilizadas por este trabajo. Podemos dividirlas en tres grandes grupos. En el primer grupo incluimos aquellas que pueden obtenerse de manera homogenea para cualquier municipio destacamos:
+- Número de viviendas vendidas (ministerio sostenibilidad) -> https://apps.fomento.gob.es/BoletinOnline2/sedal/34010210.XLS
+Por otro lado, el otro grupo esta constituido por indicadores que aún teniendo un rol central en la elaboración del informe, se obtienen de manera heterogénea o no esta garantizada su disponibilidad al depender su elaboración de administraciones regionales. Principalmente:  
+-Número de Viviendas en alquiler social. (Tanto a nivel municipal por parte del ayuntamiento, como autonómico por la CCAA correspondiente).
+Por último, el tercer grupo de fuentes primarias utilizadas incluye aquellas variables con seguridad no reproducibles elaboradas por distinitos agentes sobre la realidad particular segoviana. Entre otros:
+- Informes Observatorio Turístico (Empresa Municipal de Turismo. Ayto de Segovia)
+- Visitantes CRV (Empresa Municipal de Turismo. Ayto de Segovia)
+- Número de estudiantes IE/UVA (Junta de Castilla y León)
 
+---
+---
 
-
-● INE
-
-
-
-● UVA
-○ Informes sobre tendencias turísticas (2016, 2022)
-● Ayuntamiento Segovia
-○ Informes Observatorio Turístico (Empresa Municipal de Turismo)
-○ Visitantes CRV (Empresa Municipal de Turismo)
-● AEAT
-○ Panel de IRPF (2016, 2021)
-● JCyL
-○ Número de estudiantes IE/UVA (2011-2024)
-○ Número de viviendas en alquiler por parte de Junta/Diputación (2024)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Replicación de calculos para otros municipios
-
-- Limitaciones: tamaño del municipio
-- Elavoraciónes particulares: encuesta de estudiantes
-
-
-
-
-### HOGARES
-
-- Datos poblacionales
-
-
-- Datos económicos 
-
-
-### 
+## Caractéristicas básicas de la encuesta sobre el coste del alojamiento en estudiantes universitarios
