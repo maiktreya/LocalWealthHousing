@@ -94,9 +94,16 @@ Existen otras fuentes auxiliares de importancia también utilizadas en este trab
 ---
 ---
 
-## Características básicas de la encuesta sobre el coste del alojamiento en estudiantes universitarios
+## Encuesta sobre el coste del alojamiento en estudiantes universitarios en Segovia. 
 
-Las encuesta recolectada entre los estudiantes de las dos universidades de Segovia (IE y UVA) 
+El diseño de esta pequeña encuesta tiene por objetivo analizar la diferencia en el costo del alquiler mensual entre estudiantes de la Universidad IE y la Universidad de Valladolid (UVA). Para ello, se utilizan datos recopilados de encuestas en ambas universidades, aplicando técnicas de muestreo ponderado para garantizar representatividad.
+
+Nuestros resultados son fácilmente replicables usando nuestro repositorio base. Están disponibles tanto los microdatos recolectados ya normalizados como los dos scripts principales:
+
+[Proceso de imputación múltiple y bootstrap](https://github.com/maiktreya/LocalWealthHousing/blob/main/Encuestas/src/multiple_imp_bootstrap.R)
+
+[Análisis de potencia estadística y tamaño muestral](https://github.com/maiktreya/LocalWealthHousing/blob/main/Encuestas/src/sample_size_power.R)
+
 ---
 
 ### A) Diseño Muestral de la Encuesta
@@ -123,7 +130,15 @@ Tu estudio se centra en dos poblaciones universitarias distintas:
 
 #### Sistema de Ponderación
 
-Para asegurar que la muestra represente adecuadamente a la población total, se aplicaron ponderaciones:
+Para corregir la diferencia en tasas de muestreo entre ambas universidades, se asignan pesos de muestreo como:
+
+\[ w = \frac{N}{n} \]
+
+Donde:
+- \(N\) es la población total de la universidad correspondiente.
+- \(n\) es el tamaño muestral de la universidad correspondiente.
+
+Estos pesos se utilizan en los cálculos de estimación de medias y pruebas estadísticas.
 
 - **Ponderación para IE**: total_pop_ie/nrow(dt_ie) = 3.923/51 ≈ 76,92
 - **Ponderación para UVA**: total_pop_uv/nrow(dt_uv) = 2.323/61 ≈ 38,08
@@ -133,14 +148,13 @@ Estas ponderaciones se utilizaron en el análisis para "expandir" los resultados
 #### Variable de Interés
 
 La variable principal analizada fue:
-- `how_much_do_you_pay_monthly_in_your_rental_contract`: importe mensual que pagan los estudiantes por su contrato de alquiler
+- `how_much_do_you_pay_monthly_in_your_rental_contract`: importe mensual que pagan los estudiantes por su contrato de alquiler.
 
 #### Método de Recolección de Datos
 
 1. Encuestas estructuradas anonimizadas (mix de recolección en persona y mediante formulario web)
 2. Tratamiento de no respuesta mediante imputación multiple y bootstraping.
 3. Normalización de resultados para tratamiento estadístico (coerción a numérico o factor).
-4. Los datos se almacenaron en archivos Excel (con nombres "IE_final_imputed.xlsx" y "UVA_final_imputed.xlsx")
 
 #### Consideraciones sobre el Diseño Muestral
 
@@ -152,7 +166,7 @@ La variable principal analizada fue:
 
 4. **Tamaño Muestral**: Aunque las muestras (51 y 61 estudiantes) representan porcentajes relativamente pequeños de las poblaciones totales, el análisis de potencia indica que son más que suficientes dado el gran tamaño del efecto observado.
 
-Este diseño muestral, aunque simple, es apropiado para el objetivo de comparar los gastos de alquiler entre las dos poblaciones universitarias. La implementación correcta de ponderaciones y el uso de herramientas estadísticas adecuadas (como la librería `survey`) fortalecen la validez de las conclusiones obtenidas.
+Este diseño muestral, aunque simple, es apropiado para el objetivo de comparar los gastos de alquiler entre las dos poblaciones universitarias. La implementación correcta de ponderaciones y el uso de herramientas estadísticas adecuadas (como las librerias `survey` y `pwr`) fortalecen la validez de las conclusiones obtenidas.
 
 
 ### B) Resumen de los Resultados sobre la variable de referencia 
@@ -169,10 +183,19 @@ Tu estudio comparó los gastos mensuales de alquiler entre estudiantes de dos un
 
 ### C) Interpretación Estadística
 
-#### Diferencia Significativa
-La diferencia entre los gastos de alquiler es estadísticamente significativa y muy grande. Los estudiantes del IE pagan aproximadamente 2,9 veces más que los estudiantes de la UVA.
+#### Prueba de hipótesis: Comparación de medias
+Se evalúa si la diferencia en el costo del alquiler entre ambas universidades es estadísticamente significativa mediante una prueba *t* para muestras independientes, utilizando los pesos muestrales.
+
+Hipótesis:
+- \(H_0\): No hay diferencia en el gasto promedio de alquiler entre estudiantes de IE y UVA.
+- \(H_A\): El gasto promedio en alquiler es significativamente diferente entre ambas universidades.
 
 #### Tamaño del Efecto
+Para evaluar la magnitud de la diferencia, se calcula el tamaño del efecto de Cohen:
+
+\[ d = \frac{M_{IE} - M_{UVA}}{SD_{pooled}} \]
+
+Donde \(SD_{pooled}\) es la desviación estándar agrupada de ambas muestras. Se utiliza `SE(ie_mean)` y `SE(uv_mean)` para calcular este valor.
 - **Cohen's d = 19,75**
 - Este es un tamaño de efecto extraordinariamente grande (los valores superiores a 0,8 ya se consideran "grandes").
 - Significa que la diferencia observada es casi 20 desviaciones estándar, lo que es enorme.
@@ -183,9 +206,7 @@ La diferencia entre los gastos de alquiler es estadísticamente significativa y 
 - Con un efecto tan grande, es prácticamente imposible no detectar esta diferencia.
 
 #### Tamaño Muestral Adecuado
-- Tamaño muestral mínimo requerido para una potencia del 80%: solo 3 estudiantes por grupo.
-- Tamaños muestrales actuales (IE: 51, UVA: 61) son mucho mayores de lo necesario.
-- Las muestras son más que adecuadas para la inferencia estadística.
+Se determina el tamaño muestral requerido para detectar un efecto con una potencia del 80% mediante `pwr.t.test()`, con un tamaño del efecto basado en \(d = min(19,75, 5)\), limitando a 5 para evitar distorsiones extremas. El resultado indica que **incluso con muestras pequeñas (≈3 estudiantes por grupo), la diferencia sería estadísticamente detectable**.
 
 ### D) Explicación de por qué el Tamaño Muestral Mínimo es tan Pequeño
 
@@ -207,4 +228,4 @@ Quizás te sorprenda que el tamaño muestral mínimo sea tan pequeño (solo 3 es
 ### E) Conclusiones: potencia estadística y representatividad.
 - Los resultados de la encuesta son estadísticamente válidos y robustos y los tamaños muestrales son más que suficientes para la inferencia estadística sobre el gasto medio en alquiler por estudiante, nuestra principal variable de interés.
 - Los resultados muestran una diferencia enorme y estadísticamente significativa en los gastos de alquiler entre los estudiantes de IE y UVA. 
-- La magnitud de la diferencia es tan grande que explica por qué el tamaño muestral mínimo calculado es sorprendentemente pequeño.
+- La magnitud de la diferencia es tan grande que explica por si misma el sorprendentemente pequeño tamaño muestral mínimo asociado.
